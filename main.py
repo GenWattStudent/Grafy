@@ -1,20 +1,23 @@
 import customtkinter as ctk
-from src.GenerateGraph import Graph
+from src.Graph import Graph
 from src.ManageFiles import ManageFiles
 from src.ui.Menu import Menu
+from src.ui.GraphCanvas import GraphCanvas
+import src.State as State
 
 
 class App:
     def __init__(self):
-        self.probability = 0.5
-        self.number_of_nodes = 5
-        self.graph = Graph()
+        self.probability: float = 0.5
+        self.number_of_nodes: int = 5
+        self.graph: Graph = Graph()
+
         self.setup_window()
 
     def create_graph(self, number_of_nodes, probability):
         self.graph.set_number_of_nodes(number_of_nodes)
         self.graph.set_probability(probability)
-        self.graph.generate_graph()
+        State.state['graph'] = self.graph.generate_graph()
 
         self.save_graph()
 
@@ -23,16 +26,18 @@ class App:
         self.manage_files.save_graph_with_students_info(self.graph.get_graph())
 
     def on_number_of_node_change(self, value):
-        if value.get().isdigit() and int(value.get()) > 0 and int(value.get()) < 100:
-            self.number_of_nodes = int(value.get())
+        if value.isdigit() and int(value) > 0 and int(value) < 100:
+            self.number_of_nodes = int(value)
             self.create_graph(self.number_of_nodes, self.probability)
+            self.canvas.draw_graph()
 
     def on_probability_change(self, value):
         # check if value is float and if it is between 0 and 1
         try:
-            if float(value.get()) >= 0 and float(value.get()) <= 1:
-                self.probability = float(value.get())
+            if float(value) >= 0 and float(value) <= 1:
+                self.probability = float(value)
                 self.create_graph(self.number_of_nodes, self.probability)
+                self.canvas.draw_graph()
         except ValueError:
             pass
 
@@ -40,12 +45,19 @@ class App:
         self.root = ctk.CTk()
         self.root.title("Grafy lalala")
         self.root.geometry("800x800")
-        self.menu = Menu(self.root)
-
+        # create array of nodes
         self.create_graph(5, 0.5)
+        # create ui
+        self.menu = Menu(self.root, width=200)
+        self.canvas = GraphCanvas(self.root, self.graph)
+        self.canvas.draw_graph()
+        # bind events
         self.menu.on_number_of_nodes_change(self.on_number_of_node_change)
         self.menu.on_probability_change(self.on_probability_change)
-        self.menu.pack(anchor="nw", expand=True, fill="y")
+        # pack widgets
+        self.menu.pack(anchor="nw",  fill="y", side="left")
+        self.menu.pack_propagate(0)
+        self.canvas.pack(anchor="w", fill="both", expand=True, side="right")
         self.root.mainloop()
 
 

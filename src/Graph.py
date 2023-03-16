@@ -34,7 +34,3 @@ class Graph:
                     self.graph[j][i] = 1
 
         return self.graph
-
-    def draw(self, graph):
-        # print(self.graph)
-        pass

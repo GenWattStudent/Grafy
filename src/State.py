@@ -1,3 +1,0 @@
-state = {
-    'graph': None
-}

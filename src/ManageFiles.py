@@ -1,10 +1,9 @@
 import datetime
-import string
-from src.GraphHelper import GraphHelper
+from src.graph.GraphHelper import GraphHelper
 
 
 class ManageFiles:
-    def __init__(self, path: string = ".", filename: string = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")):
+    def __init__(self, path: str = ".", filename: str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")):
         self.path = path
         self.filename = filename
         self.rowToSkip: int = 3
@@ -15,7 +14,7 @@ class ManageFiles:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")
             txt_file.write("Grupa 2a, Informatyka dzienne" + "\n")
             txt_file.write("Macierz:" + "\n")
-            txt_file.write(GraphHelper.get_matrix_string(graph))
+            txt_file.write(str(graph))
 
     def load_graph_with_students_info(self):
         # load graph and students info from a file

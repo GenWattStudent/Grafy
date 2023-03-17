@@ -6,12 +6,14 @@ from src.ui.Typography import Typography
 class Input(ctk.CTkEntry):
     def __init__(self, master, label_text="", default_value="", rules={}, **kwargs):
         self.rules = rules
+
         self.text_var = ctk.StringVar()
         self.text_var.trace("w", lambda name, index, mode, sv=self.text_var: self.handle_change(sv))
 
         self.frame = ctk.CTkFrame(master, fg_color="transparent")
         self.frame.pack(fill="x")
-        super().__init__(master, textvariable=self.text_var,  **kwargs)
+
+        super().__init__(master=self.frame, textvariable=self.text_var,  **kwargs)
 
         self.change_event = Event()
 
@@ -19,6 +21,7 @@ class Input(ctk.CTkEntry):
         self.label.pack(anchor="w", padx=10, pady=5)
 
         self.insert(0, default_value)
+        self.pack(anchor="w", padx=10, fill="x")
 
         # self.set(default_value)
     def handle_change(self, value):

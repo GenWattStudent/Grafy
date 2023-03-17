@@ -1,4 +1,3 @@
-from ctypes import Union
 from enum import Enum
 import customtkinter as ctk
 

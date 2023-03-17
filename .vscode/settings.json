@@ -1,0 +1,8 @@
+{
+  "python.linting.banditEnabled": false,
+  "python.linting.enabled": true,
+  "python.linting.prospectorEnabled": false,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintCategorySeverity.convention": "Error",
+  "python.languageServer": "Pylance"
+}

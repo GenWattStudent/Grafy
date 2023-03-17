@@ -41,3 +41,6 @@ class Vector:
         self.x = random.uniform(min_x, max_x)
         self.y = random.uniform(min_y, max_y)
         return self
+
+    def length(self):
+        return abs(self)

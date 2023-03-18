@@ -4,13 +4,12 @@ from .Node import Node
 
 class GraphHelper:
     @staticmethod
-    def generateEmptyGraph(number_of_nodes):
-
+    def generateEmptyGraph(number_of_nodes: int) -> np.ndarray[int, np.dtype[np.int64]]:
         return np.arange(
-            number_of_nodes * number_of_nodes).reshape((number_of_nodes, number_of_nodes))
+            number_of_nodes * number_of_nodes).reshape(number_of_nodes, number_of_nodes)
 
     @staticmethod
-    def get_matrix_string(matrix):
+    def get_matrix_string(matrix: np.ndarray[int, np.dtype[np.int64]]):
         # save matrix in a file
         matrix_string = ""
         for row in matrix:

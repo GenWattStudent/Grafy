@@ -52,7 +52,7 @@ class App:
         graph_state.add_observer(self.graph_observer)
         # pack widgets
         self.menu.pack(anchor="nw",  fill="y", side="left")
-        self.menu.pack_propagate(0)
+        self.menu.pack_propagate(False)
         # create array of nodes and draw graph
         self.create_graph(self.number_of_nodes, self.probability)
         self.canvas.draw_graph()

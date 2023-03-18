@@ -1,4 +1,5 @@
 from src.graph.GraphHelper import GraphHelper
+import numpy as np
 
 
 class GraphMatrix:
@@ -9,14 +10,14 @@ class GraphMatrix:
     def get_matrix_string(self):
         return GraphHelper.get_matrix_string(self.matrix)
 
-    def set_number_of_nodes(self, number_of_nodes):
+    def set_number_of_nodes(self, number_of_nodes: int):
         self.number_of_nodes = number_of_nodes
         self.reset_matrix()
 
-    def get_matrix(self):
+    def get_matrix(self) -> np.ndarray[int, np.dtype[np.int64]]:
         return self.matrix
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.get_matrix_string()
 
     def reset_matrix(self):

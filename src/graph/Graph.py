@@ -11,11 +11,11 @@ class Graph:
     def get_graph(self) -> GraphMatrix:
         return self.graph
 
-    def set_number_of_nodes(self, number_of_nodes):
+    def set_number_of_nodes(self, number_of_nodes: int):
         self.number_of_nodes = number_of_nodes
         self.graph.set_number_of_nodes(number_of_nodes)
 
-    def set_probability(self, probability):
+    def set_probability(self, probability: float):
         self.probability = probability
 
     def reset_graph(self):
@@ -23,7 +23,7 @@ class Graph:
             for j in range(self.number_of_nodes):
                 self.graph[i][j] = 0
 
-    def generate_graph(self):
+    def generate_graph(self) -> GraphMatrix:
         self.reset_graph()
         for i in range(self.number_of_nodes - 1):
             for j in range(i + 1, self.number_of_nodes):

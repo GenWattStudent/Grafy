@@ -1,5 +1,6 @@
 import datetime
 from src.graph.GraphHelper import GraphHelper
+from src.graph.GraphMatrix import GraphMatrix
 
 
 class ManageFiles:
@@ -8,7 +9,7 @@ class ManageFiles:
         self.filename = filename
         self.rowToSkip: int = 3
 
-    def save_graph_with_students_info(self, graph):
+    def save_graph_with_students_info(self, graph: GraphMatrix):
         # save graph and students info in a file
         with open(self.path + "/" + self.filename, "w") as txt_file:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")

@@ -1,6 +1,6 @@
 import customtkinter as ctk
+from src.ui.Typography import Typography, TextType, TextVariant
 from src.utils.Event import Event
-from src.ui.Typography import Typography
 
 
 class Input(ctk.CTkEntry):
@@ -29,12 +29,12 @@ class Input(ctk.CTkEntry):
             self.change_event(value.get())
 
     def show_error(self, error_message):
-        self.error_label = Typography(self.frame, text=error_message, type="caption", variant="error")
+        self.error_label = Typography(self.frame, text=error_message, type=TextType.caption, variant=TextVariant.error)
         self.error_label.pack(anchor="w", padx=10, pady=5)
 
     def hide_error(self):
-        if hasattr(self, "error_label"):
-            self.error_label.destroy()
+        if hasattr(self, 'error_label') and self.error_label:
+            self.error_label = self.error_label.destroy()
 
     def validate(self, value):
         self.hide_error()

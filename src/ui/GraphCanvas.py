@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import src.constance as const
+from src.graph.GraphMatrix import GraphMatrix
 from src.Theme import theme
 from src.graph.Graph import Graph
 from src.utils.Vector import Vector
@@ -89,7 +90,7 @@ class GraphCanvas(ctk.CTkCanvas):
             self.nodes.append(node)
         return self.nodes
 
-    def generate_edges(self, nodes: list[Node], graph: list[list[int]], number_of_nodes: int) -> list[Edge]:
+    def generate_edges(self, nodes: list[Node], graph: GraphMatrix, number_of_nodes: int) -> list[Edge]:
         for i in range(number_of_nodes - 1):
             for j in range(i + 1, number_of_nodes):
                 if graph[i][j] == 1:

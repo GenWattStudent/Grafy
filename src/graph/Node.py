@@ -17,5 +17,8 @@ class Node:
     def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.index == other.index
+
+    def distance(self, other: "Node"):
+        return (self.position - other.position).length()

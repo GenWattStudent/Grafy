@@ -2,12 +2,11 @@ import customtkinter as ctk
 from src.utils.Event import Event
 from src.inputs.Input import Input
 from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
-from src.ui.Typography import Typography
-from src.graph.GraphHelper import GraphHelper
+from src.ui.Typography import Typography, TextType
 from src.observers.graph.GraphSensor import graph_state
 from src.observers.graph.GraphObserver import GraphObserver
 from src.graph.GraphMatrix import GraphMatrix
-from src.ui.Matrix import Matrix
+from src.ui.windows.MatrixWindow import MatrixWindow
 import src.constance as const
 
 
@@ -48,27 +47,37 @@ class Menu(ctk.CTkFrame):
     def off_probability_change(self, cb):
         self.probability_change_event -= cb
 
-    def create_matrix_wideget(self, matrix: GraphMatrix):
-        self.matrix_widget = Matrix(self, matrix)
-        self.matrix_widget.draw()
-        self.matrix_widget.pack(pady=10, padx=10)
+    def update_matrix_window(self, matrix: GraphMatrix):
+        if hasattr(self, "matrix_window") and self.matrix_window is not None:
+            return self.matrix_window.update_matrix(matrix)
 
-    def update_matrix_wideget(self, matrix: GraphMatrix):
-        if not hasattr(self, "matrix_widget"):
-            self.create_matrix_wideget(matrix)
-        self.matrix_widget.update_wideget(matrix)
+    def create_matrix(self, matrix: GraphMatrix | None):
+        if matrix is None:
+            return
+        # generate toplevel window
+        self.matrix_window = MatrixWindow(self, matrix=matrix)
+        # make window on top of all windows
+        self.matrix_window.attributes("-topmost", True)
+        # show window
+        self.matrix_window.mainloop()
+
+    def show_matrix(self):
+        self.create_matrix(graph_state.graph)
 
     def create_widgets(self):
-        self.graph_observer = GraphObserver(self.update_matrix_wideget)
+        self.graph_observer = GraphObserver(self.update_matrix_window)
         graph_state.add_observer(self.graph_observer)
 
-        self.label = Typography(self, text="Tools", type="h1")
+        self.label = Typography(self, text="Tools", type=TextType.h1)
         self.label.pack(side="top", pady=10, anchor="w", padx=10)
 
         self.number_of_nodes_entry = Input(
-            self, "Number of nodes", const.DEFAULT_NUMBER_OF_NODES, rules=number_of_nodes_rules)
+            self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
         self.number_of_nodes_entry.on_change(self.number_of_nodes_change_event)
 
-        self.probability_entry = Input(self, "Probability", const.DEFAULT_PROBABILITY, rules=probability_rules)
+        self.probability_entry = Input(self, "Probability", str(const.DEFAULT_PROBABILITY), rules=probability_rules)
         self.probability_entry.on_change(self.probability_change_event)
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
+
+        self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
+        self.button.pack(padx=10, pady=10, fill="x")

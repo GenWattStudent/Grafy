@@ -21,7 +21,7 @@ class ManageFiles:
         # load graph and students info from a file
         with open(self.path + "/" + self.filename, "r") as txt_file:
             lines = txt_file.readlines()
-            graph = GraphHelper().generateEmptyGraph(len(lines) - self.rowToSkip)
+            graph = GraphHelper().generate_empty_graph(len(lines) - self.rowToSkip)
 
             for i, line in enumerate(lines):
                 if i <= self.rowToSkip - 1:

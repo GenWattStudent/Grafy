@@ -30,6 +30,7 @@ class Menu(ctk.CTkFrame):
         ctk.CTkFrame.__init__(self, parent, **kwargs)
         self.number_of_nodes_change_event = Event()
         self.probability_change_event = Event()
+        self.search_path_event = Event()
         self.border_width = 2
         self.is_matrix_window_open = False
         self.create_widgets()
@@ -47,6 +48,12 @@ class Menu(ctk.CTkFrame):
 
     def off_probability_change(self, cb):
         self.probability_change_event -= cb
+
+    def on_search_path(self, cb):
+        self.search_path_event += cb
+
+    def off_search_path(self, cb):
+        self.search_path_event -= cb
 
     def update_matrix_window(self, matrix: GraphMatrix):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
@@ -80,6 +87,9 @@ class Menu(ctk.CTkFrame):
         super().pack(**kwargs)
         self.label.place(x=self._current_width - self.border_width, y=0)
 
+    def search_path(self):
+        self.search_path_event()
+
     def create_widgets(self):
         self.graph_observer = GraphObserver(self.update_matrix_window)
         graph_state.add_observer(self.graph_observer)
@@ -97,3 +107,6 @@ class Menu(ctk.CTkFrame):
 
         self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
         self.button.pack(padx=10, pady=10, fill="x")
+
+        self.search_path_button = ctk.CTkButton(self, text="Search path", command=self.search_path)
+        self.search_path_button.pack(padx=10, fill="x")

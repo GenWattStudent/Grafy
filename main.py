@@ -37,6 +37,9 @@ class App:
         self.create_graph(self.number_of_nodes, self.probability)
         self.canvas.draw_graph()
 
+    def on_search_path(self):
+        self.canvas.search_path()
+
     def setup_window(self):
         self.root = ctk.CTk()
         self.root.title("Grafy lalala")
@@ -47,6 +50,7 @@ class App:
         # bind events
         self.menu.on_number_of_nodes_change(self.on_number_of_node_change)
         self.menu.on_probability_change(self.on_probability_change)
+        self.menu.on_search_path(self.on_search_path)
         # add observers
         self.graph_observer = GraphObserver(self.save_graph)
         graph_state.add_observer(self.graph_observer)

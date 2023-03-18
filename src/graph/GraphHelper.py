@@ -5,12 +5,17 @@ import customtkinter as ctk
 
 class GraphHelper:
     @staticmethod
-    def generateEmptyGraph(number_of_nodes: int) -> np.ndarray[int, np.dtype[np.int64]]:
+    def generate_empty_graph(number_of_nodes: int):
         return np.arange(
-            number_of_nodes * number_of_nodes).reshape(number_of_nodes, number_of_nodes)
+            number_of_nodes * number_of_nodes, dtype=np.int8).reshape(number_of_nodes, number_of_nodes)
 
     @staticmethod
-    def get_matrix_string(matrix: np.ndarray[int, np.dtype[np.int64]]):
+    def generate_empty_wages(number_of_nodes: int):
+        return np.arange(
+            number_of_nodes * number_of_nodes, dtype=np.float32).reshape(number_of_nodes, number_of_nodes)
+
+    @staticmethod
+    def get_matrix_string(matrix):
         # save matrix in a file
         matrix_string = ""
         for row in matrix:
@@ -34,3 +39,29 @@ class GraphHelper:
     @staticmethod
     def is_circle_out_of_bounds(element: ctk.CTkCanvas, x: float, y: float, radius: int) -> bool:
         return x - radius < 0 or x + radius > element.winfo_width() or y - radius < 0 or y + radius > element.winfo_height()
+
+    @staticmethod
+    def get_matrix_as_dictionary(matrix) -> dict[int, list[float]]:
+        dictionary = {}
+        for i in range(len(matrix)):
+            dictionary[i] = []
+            for j in range(len(matrix[i])):
+                if matrix[i][j] == 1:
+                    dictionary[i].append(j)
+        return dictionary
+
+    @staticmethod
+    def get_wages(nodes: list[Node]):
+        wages = np.arange(len(nodes) * len(nodes)).reshape(len(nodes), len(nodes))
+        for i in range(len(nodes) - 1):
+            for j in range(i + 1, len(nodes)):
+                distance: float = nodes[i].distance(nodes[j])
+                wages[i][j] = distance
+                wages[j][i] = distance
+        return wages
+
+    @staticmethod
+    def fill_matrix_with_infinity(matrix):
+        for i in range(len(matrix)):
+            for j in range(len(matrix[i])):
+                matrix[i][j] = np.inf

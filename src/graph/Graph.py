@@ -6,6 +6,7 @@ class Graph:
     def __init__(self, number_of_nodes=5, probability=0.1):
         self.number_of_nodes = number_of_nodes
         self.probability = probability
+        self.wages = GraphMatrix(number_of_nodes, float_type=True)
         self.graph = GraphMatrix(number_of_nodes)
 
     def get_graph(self) -> GraphMatrix:
@@ -14,6 +15,7 @@ class Graph:
     def set_number_of_nodes(self, number_of_nodes: int):
         self.number_of_nodes = number_of_nodes
         self.graph.set_number_of_nodes(number_of_nodes)
+        self.wages.set_number_of_nodes(number_of_nodes)
 
     def set_probability(self, probability: float):
         self.probability = probability

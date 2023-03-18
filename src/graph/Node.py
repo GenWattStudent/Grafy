@@ -7,6 +7,7 @@ class Node:
         self.position: Vector = position
         self.radius: int = radius
         self.is_dragged: bool = False
+        self.is_selected: bool = False
 
     def is_under_cursor(self, cursor_position: Vector) -> bool:
         return (self.position - cursor_position).length() <= self.radius

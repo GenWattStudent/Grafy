@@ -21,6 +21,7 @@ class Input(ctk.CTkEntry):
         self.label.pack(anchor="w", padx=10, pady=5)
 
         self.insert(0, default_value)
+        self.bind("<FocusOut>", lambda event: self.hide_error())
         self.pack(anchor="w", padx=10, fill="x")
 
     def set_input_value(self, value: str):

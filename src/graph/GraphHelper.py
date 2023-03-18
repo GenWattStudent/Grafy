@@ -1,5 +1,6 @@
 import numpy as np
 from .Node import Node
+import customtkinter as ctk
 
 
 class GraphHelper:
@@ -29,3 +30,7 @@ class GraphHelper:
             if ((x - x0)**2 + (y - y0)**2)**0.5 <= radius + r0:
                 return True
         return False
+
+    @staticmethod
+    def is_circle_out_of_bounds(element: ctk.CTkCanvas, x: float, y: float, radius: int) -> bool:
+        return x - radius < 0 or x + radius > element.winfo_width() or y - radius < 0 or y + radius > element.winfo_height()

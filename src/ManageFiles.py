@@ -11,7 +11,7 @@ class ManageFiles:
 
     def save_graph_with_students_info(self, graph: GraphMatrix):
         # save graph and students info in a file
-        with open(self.path + "/" + self.filename, "w") as txt_file:
+        with open(self.path + "/" + self.filename, "w", encoding="utf-8") as txt_file:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")
             txt_file.write("Grupa 2a, Informatyka dzienne" + "\n")
             txt_file.write("Macierz:" + "\n")

@@ -44,9 +44,11 @@ class GraphCanvas(ctk.CTkCanvas):
 
     def drag(self, event):
         if self.draging_node:
-            self.draging_node.position.x = event.x
-            self.draging_node.position.y = event.y
-            self.draw_nodes_and_edges(self.nodes, self.edges)
+            # move node and edges only if mouse is inside canvas
+            if not GraphHelper.is_circle_out_of_bounds(self, event.x, event.y, self.draging_node.radius):
+                self.draging_node.position.x = event.x
+                self.draging_node.position.y = event.y
+                self.draw_nodes_and_edges(self.nodes, self.edges)
 
     def set_dragged_edges(self, node: Node, value: bool = True):
         for edge in self.edges:

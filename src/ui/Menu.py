@@ -13,13 +13,13 @@ import src.constance as const
 number_of_nodes_rules = {
     "is_positive": Is_positive(),
     "is_number": Is_number(),
-    "min": Min(0),
+    "min": Min(1),
     "max": Max(const.MAX_NODE_COUNT),
 }
 
 probability_rules = {
-    "is_positive": Is_positive(),
     "is_float": Is_float(),
+    "is_positive": Is_positive(),
     "min": Min(0),
     "max": Max(1),
 }
@@ -30,10 +30,11 @@ class Menu(ctk.CTkFrame):
         ctk.CTkFrame.__init__(self, parent, **kwargs)
         self.number_of_nodes_change_event = Event()
         self.probability_change_event = Event()
+        self.border_width = 2
+        self.is_matrix_window_open = False
         self.create_widgets()
 
-        self.label = ctk.CTkLabel(self, text="", width=2, height=const.SCREEN_HEIGHT, fg_color="white")
-        self.label.place(x=198, y=0)
+        self.label = ctk.CTkLabel(self, text="", width=self.border_width, height=const.SCREEN_HEIGHT, fg_color="white")
 
     def on_number_of_nodes_change(self, cb):
         self.number_of_nodes_change_event += cb
@@ -58,11 +59,26 @@ class Menu(ctk.CTkFrame):
         self.matrix_window = MatrixWindow(self, matrix=matrix)
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
+        # set on close event
+        self.matrix_window.protocol("WM_DELETE_WINDOW", lambda: self.hide_matrix())
         # show window
         self.matrix_window.mainloop()
 
+    def hide_matrix(self):
+        self.button.configure(state="normal")
+        if self.is_matrix_window_open:
+            self.matrix_window.destroy()
+            self.is_matrix_window_open = False
+
     def show_matrix(self):
-        self.create_matrix(graph_state.graph)
+        self.button.configure(state="disabled")
+        if not self.is_matrix_window_open:
+            self.is_matrix_window_open = True
+            self.create_matrix(graph_state.graph)
+
+    def pack(self, **kwargs):
+        super().pack(**kwargs)
+        self.label.place(x=self._current_width - self.border_width, y=0)
 
     def create_widgets(self):
         self.graph_observer = GraphObserver(self.update_matrix_window)

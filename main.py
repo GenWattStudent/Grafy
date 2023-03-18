@@ -40,17 +40,21 @@ class App:
     def on_search_path(self):
         self.canvas.search_path()
 
+    def on_toogle_intersection(self):
+        self.canvas.toggle_intersection()
+
     def setup_window(self):
         self.root = ctk.CTk()
         self.root.title("Grafy lalala")
-        self.root.geometry('%dx%d+%d+%d' % (const.SCREE_WIDTH, const.SCREEN_HEIGHT, 100, 100))
+        self.root.geometry('%dx%d+%d+%d' % (const.SCREE_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # create ui
-        self.menu = Menu(self.root, width=const.SCREE_WIDTH / 4)
+        self.menu = Menu(self.root, width=const.SCREE_WIDTH / 5)
         self.canvas = GraphCanvas(self.root, self.graph)
         # bind events
         self.menu.on_number_of_nodes_change(self.on_number_of_node_change)
         self.menu.on_probability_change(self.on_probability_change)
         self.menu.on_search_path(self.on_search_path)
+        self.menu.on_toogle_intersection(self.on_toogle_intersection)
         # add observers
         self.graph_observer = GraphObserver(self.save_graph)
         graph_state.add_observer(self.graph_observer)

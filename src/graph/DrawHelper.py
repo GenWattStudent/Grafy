@@ -5,6 +5,7 @@ from src.utils.Vector import Vector
 from src.graph.Graph import Graph
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
+from src.algorithms.Intersection import Intersection
 import math
 from enum import Enum
 
@@ -16,8 +17,16 @@ class SearchAlgorithmType(Enum):
 class DrawHelper:
     def __init__(self):
         self.search_algorithms = SearchAlgorithms()
+        self.intersection = Intersection()
         self.first_selected_node: Node | None = None
         self.second_selected_node: Node | None = None
+
+    def setup_graph(self, graph: Graph, radius: int,  edges: list[Edge],
+                    max_width: float, max_height: float) -> tuple[list[Node], list[Edge]]:
+        nodes = self.generate_nodes(graph, radius, max_width, max_height)
+        edges = self.generate_edges(nodes, graph)
+
+        return nodes, edges
 
     def unselect_nodes(self):
         if self.first_selected_node:

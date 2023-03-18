@@ -31,6 +31,7 @@ class Menu(ctk.CTkFrame):
         self.number_of_nodes_change_event = Event()
         self.probability_change_event = Event()
         self.search_path_event = Event()
+        self.toogle_intersection_event = Event()
         self.border_width = 2
         self.is_matrix_window_open = False
         self.create_widgets()
@@ -54,6 +55,12 @@ class Menu(ctk.CTkFrame):
 
     def off_search_path(self, cb):
         self.search_path_event -= cb
+
+    def on_toogle_intersection(self, cb):
+        self.toogle_intersection_event += cb
+
+    def off_toogle_intersection(self, cb):
+        self.toogle_intersection_event -= cb
 
     def update_matrix_window(self, matrix: GraphMatrix):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
@@ -90,6 +97,9 @@ class Menu(ctk.CTkFrame):
     def search_path(self):
         self.search_path_event()
 
+    def toogle_intersection(self):
+        self.toogle_intersection_event()
+
     def create_widgets(self):
         self.graph_observer = GraphObserver(self.update_matrix_window)
         graph_state.add_observer(self.graph_observer)
@@ -104,6 +114,9 @@ class Menu(ctk.CTkFrame):
         self.probability_entry = Input(self, "Probability", str(const.DEFAULT_PROBABILITY), rules=probability_rules)
         self.probability_entry.on_change(self.probability_change_event)
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
+
+        self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
+        self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
 
         self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
         self.button.pack(padx=10, pady=10, fill="x")

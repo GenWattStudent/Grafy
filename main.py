@@ -2,7 +2,7 @@ import customtkinter as ctk
 from src.graph.Graph import Graph
 from src.ManageFiles import ManageFiles
 from src.ui.Menu import Menu
-from src.ui.GraphCanvas import GraphCanvas
+from src.graph.DrawGraph import DrawGraph
 from src.state.GraphState import graph_state
 from src.state.GraphConfigState import graph_config_state, GraphConfig
 from src.graph.GraphMatrix import GraphMatrix
@@ -30,26 +30,21 @@ class App:
             return
 
         if self.is_state_value_changed(config, prev_config, "is_show_intersections"):
-            self.canvas.set_is_intersection(config.is_show_intersections)
-            self.canvas.draw_nodes_and_edges()
-            return
+            return self.canvas.update_intersections()
 
         if self.is_state_value_changed(config, prev_config, "probability"):
             self.setup_graph(config)
-            edges = self.canvas.draw_helper.generate_edges(self.canvas.nodes, self.graph)
-            self.canvas.set_edges(edges)
-            self.canvas.setup_intersections()
-            self.canvas.draw_nodes_and_edges()
-            return
+            return self.canvas.update_probability()
 
         if self.is_state_value_changed(config, prev_config, "number_of_nodes"):
-            self.create_graph(config)
+            self.setup_graph(config)
+            return self.canvas.update_number_of_nodes()
 
     def create_graph(self, config: GraphConfig):
         self.setup_graph(config)
         self.canvas.draw_graph()
 
-    def save_graph(self, matrix: GraphMatrix, prev_matrix: GraphMatrix | None = None):
+    def save_graph(self, matrix: GraphMatrix, _):
         ManageFiles(filename="graph.txt").save_graph_with_students_info(matrix)
 
     def on_search_path(self):
@@ -61,7 +56,7 @@ class App:
         self.root.geometry('%dx%d+%d+%d' % (const.SCREE_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # create ui
         self.menu = Menu(self.root, width=const.SCREE_WIDTH / 5)
-        self.canvas = GraphCanvas(self.root, self.graph)
+        self.canvas = DrawGraph(self.root, self.graph)
         # bind events
         self.menu.on_search_path(self.on_search_path)
         self.menu.on_generate_graph(self.create_graph)

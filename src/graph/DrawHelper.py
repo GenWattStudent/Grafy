@@ -12,6 +12,8 @@ from enum import Enum
 
 class SearchAlgorithmType(Enum):
     DIJKSTRA = "dijkstra"
+    BFS = "bfs"
+    A_STAR = "a_star"
 
 
 class DrawHelper:
@@ -37,17 +39,16 @@ class DrawHelper:
         self.second_selected_node = None
 
     def select_nodes(self, node: Node):
-        if self.first_selected_node and self.first_selected_node == node:
-            self.unselect_nodes()
-            return
-        if self.first_selected_node is None:
+        if not self.first_selected_node:
             self.first_selected_node = node
-        elif self.second_selected_node is None:
+            self.first_selected_node.is_selected = True
+        elif not self.second_selected_node:
             self.second_selected_node = node
-        else:
+            self.second_selected_node.is_selected = True
+        elif self.first_selected_node and self.second_selected_node:
             self.unselect_nodes()
-            node.is_selected = True
             self.first_selected_node = node
+            self.first_selected_node.is_selected = True
 
     def search_best_path(
             self, graph: Graph, nodes: list[Node],
@@ -56,10 +57,13 @@ class DrawHelper:
         lowest_distance: float = math.inf
 
         if algoritmType == SearchAlgorithmType.DIJKSTRA:
-
             wages = self.generate_wages(graph, nodes)
-
             distance, path = self.search_algorithms.dijkstra(wages, start_node, end_node)
+            best_path = path
+            lowest_distance = distance
+
+        elif algoritmType == SearchAlgorithmType.BFS:
+            distance, path = self.search_algorithms.bfs(graph.get_graph(), start_node, end_node)
             best_path = path
             lowest_distance = distance
 
@@ -92,8 +96,8 @@ class DrawHelper:
                 if graph.get_graph()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
-                    graph.wages[i][j] = math.floor(distance)
-                    graph.wages[j][i] = math.floor(distance)
+                    graph.wages[i][j] = distance
+                    graph.wages[j][i] = distance
                     edge = Edge(nodes[i], nodes[j], distance)
                     edges.append(edge)
 

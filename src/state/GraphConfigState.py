@@ -25,9 +25,6 @@ class GraphConfigState(State):
 
         self.notify_subscribers()
 
-    def notify_when_number_of_nodes_change(self, callback):
-        self._subscribers.add(callback)
-
     def get_number_of_nodes(self) -> int:
         return self._state.number_of_nodes
 

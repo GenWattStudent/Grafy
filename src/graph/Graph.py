@@ -1,9 +1,10 @@
 import random
 from src.graph.GraphMatrix import GraphMatrix
+import src.constance as const
 
 
 class Graph:
-    def __init__(self, number_of_nodes=5, probability=0.1):
+    def __init__(self, number_of_nodes=const.DEFAULT_NUMBER_OF_NODES, probability=const.DEFAULT_PROBABILITY):
         self.number_of_nodes = number_of_nodes
         self.probability = probability
         self.wages = GraphMatrix(number_of_nodes, float_type=True)

@@ -48,7 +48,7 @@ class Menu(ctk.CTkFrame):
     def off_generate_graph(self, cb):
         self.generate_graph_event -= cb
 
-    def update_matrix_window(self, matrix: GraphMatrix, prev_matrix: GraphMatrix):
+    def update_matrix_window(self, matrix: GraphMatrix, _):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
             return self.matrix_window.update_matrix(matrix)
 
@@ -66,7 +66,7 @@ class Menu(ctk.CTkFrame):
 
     def hide_matrix(self):
         self.button.configure(state="normal")
-        if self.is_matrix_window_open:
+        if self.is_matrix_window_open and self.matrix_window:
             self.matrix_window.destroy()
             self.matrix_window = None
             self.is_matrix_window_open = False

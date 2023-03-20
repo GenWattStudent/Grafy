@@ -50,6 +50,11 @@ class GraphCanvas(ctk.CTkCanvas):
     def set_nodes(self, nodes: list[Node]):
         self.nodes = nodes
 
+    def set_is_intersection(self, is_intersection: bool):
+        self.is_intersection = is_intersection
+        if self.is_intersection:
+            self.setup_intersections()
+
     def change_cursor(self, event):
         # change cursor when mouse if over node
         for node in self.nodes:
@@ -143,15 +148,8 @@ class GraphCanvas(ctk.CTkCanvas):
             x, y = intersection
             self.create_oval(x - 5, y - 5, x + 5, y + 5, fill="yellow")
 
-    def set_is_intersection(self, is_intersection: bool):
-        self.is_intersection = is_intersection
-        if self.is_intersection:
-            self.setup_intersections()
-
-    def setup_intersections(self,):
-        self.intersection_points.clear()
-        if self.is_intersection:
-            self.intersection_points = self.draw_helper.intersection.find_intersections(self.edges, self.nodes)
+    def setup_intersections(self):
+        self.intersection_points = self.draw_helper.intersection.find_intersections(self.edges, self.nodes)
 
     def draw_graph(self):
         self.pack_canvas()
@@ -163,6 +161,8 @@ class GraphCanvas(ctk.CTkCanvas):
         self.draw_nodes_and_edges()
 
     def show_intersections(self):
+        self.is_intersection = not self.is_intersection
+        self.setup_intersections()
         self.draw_intersections(self.intersection_points)
 
     def draw_nodes_and_edges(self):

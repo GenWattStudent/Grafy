@@ -3,8 +3,8 @@ from src.utils.Event import Event
 from src.inputs.Input import Input
 from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
 from src.ui.Typography import Typography, TextType
-from src.observers.graph.GraphSensor import graph_state
-from src.observers.graph.GraphObserver import GraphObserver
+from src.state.GraphConfigState import graph_config_state
+from src.state.GraphState import graph_state
 from src.graph.GraphMatrix import GraphMatrix
 from src.ui.windows.MatrixWindow import MatrixWindow
 import src.constance as const
@@ -28,27 +28,13 @@ probability_rules = {
 class Menu(ctk.CTkFrame):
     def __init__(self, parent, **kwargs):
         ctk.CTkFrame.__init__(self, parent, **kwargs)
-        self.number_of_nodes_change_event = Event()
-        self.probability_change_event = Event()
         self.search_path_event = Event()
-        self.toogle_intersection_event = Event()
+        self.generate_graph_event = Event()
         self.border_width = 2
         self.is_matrix_window_open = False
         self.create_widgets()
 
         self.label = ctk.CTkLabel(self, text="", width=self.border_width, height=const.SCREEN_HEIGHT, fg_color="white")
-
-    def on_number_of_nodes_change(self, cb):
-        self.number_of_nodes_change_event += cb
-
-    def off_number_of_nodes_change(self, cb):
-        self.number_of_nodes_change_event -= cb
-
-    def on_probability_change(self, cb):
-        self.probability_change_event += cb
-
-    def off_probability_change(self, cb):
-        self.probability_change_event -= cb
 
     def on_search_path(self, cb):
         self.search_path_event += cb
@@ -56,13 +42,13 @@ class Menu(ctk.CTkFrame):
     def off_search_path(self, cb):
         self.search_path_event -= cb
 
-    def on_toogle_intersection(self, cb):
-        self.toogle_intersection_event += cb
+    def on_generate_graph(self, cb):
+        self.generate_graph_event += cb
 
-    def off_toogle_intersection(self, cb):
-        self.toogle_intersection_event -= cb
+    def off_generate_graph(self, cb):
+        self.generate_graph_event -= cb
 
-    def update_matrix_window(self, matrix: GraphMatrix):
+    def update_matrix_window(self, matrix: GraphMatrix, prev_matrix: GraphMatrix):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
             return self.matrix_window.update_matrix(matrix)
 
@@ -82,13 +68,14 @@ class Menu(ctk.CTkFrame):
         self.button.configure(state="normal")
         if self.is_matrix_window_open:
             self.matrix_window.destroy()
+            self.matrix_window = None
             self.is_matrix_window_open = False
 
     def show_matrix(self):
         self.button.configure(state="disabled")
         if not self.is_matrix_window_open:
             self.is_matrix_window_open = True
-            self.create_matrix(graph_state.graph)
+            self.create_matrix(graph_state.get())
 
     def pack(self, **kwargs):
         super().pack(**kwargs)
@@ -98,21 +85,20 @@ class Menu(ctk.CTkFrame):
         self.search_path_event()
 
     def toogle_intersection(self):
-        self.toogle_intersection_event()
+        graph_config_state.set_is_show_intersections(not graph_config_state.get_is_show_intersections())
 
     def create_widgets(self):
-        self.graph_observer = GraphObserver(self.update_matrix_window)
-        graph_state.add_observer(self.graph_observer)
+        graph_state.subscribe(self.update_matrix_window)
 
         self.label = Typography(self, text="Tools", type=TextType.h1)
         self.label.pack(side="top", pady=10, anchor="w", padx=10)
 
         self.number_of_nodes_entry = Input(
             self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
-        self.number_of_nodes_entry.on_change(self.number_of_nodes_change_event)
+        self.number_of_nodes_entry.on_change(lambda e: graph_config_state.set_number_of_nodes(int(e)))
 
         self.probability_entry = Input(self, "Probability", str(const.DEFAULT_PROBABILITY), rules=probability_rules)
-        self.probability_entry.on_change(self.probability_change_event)
+        self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
 
         self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
@@ -123,3 +109,7 @@ class Menu(ctk.CTkFrame):
 
         self.search_path_button = ctk.CTkButton(self, text="Search path", command=self.search_path)
         self.search_path_button.pack(padx=10, fill="x")
+
+        self.generate_graph_button = ctk.CTkButton(
+            self, text="Generate graph", command=lambda e=graph_config_state.get(): self.generate_graph_event(e))
+        self.generate_graph_button.pack(padx=10, pady=10, fill="x")

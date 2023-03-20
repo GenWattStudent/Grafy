@@ -22,9 +22,14 @@ class MatrixWindow(TopLevelWindow):
                 width = self._min_width
             if height < self._min_height:
                 height = self._min_height
+            print(width, height, x, y)
             self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
     def update_matrix(self, matrix: GraphMatrix):
         self.update_window_size()
         self.matrix_widget.update_wideget(matrix)
         self.matrix_widget.draw()
+
+    def destroy(self):
+        self.matrix_widget.destroy()
+        super().destroy()

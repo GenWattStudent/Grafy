@@ -5,7 +5,7 @@ from src.graph.GraphMatrix import GraphMatrix
 class GraphSensor(Observable):
     def __init__(self):
         super().__init__()
-        self._graph: GraphMatrix = None
+        self._graph: GraphMatrix | None = None
 
     @property
     def graph(self):

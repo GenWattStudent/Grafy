@@ -68,7 +68,7 @@ class DrawHelper:
     def generate_random_node(self, node_id: int, radius: int, max_width: float, max_height: float) -> Node:
         max_x: float = max_width - radius
         max_y: float = max_height - radius
-        vector: Vector = Vector().random(radius, max_x, radius, max_y)
+        vector: Vector = Vector().random(radius, max_x, radius+80, max_y)
 
         return Node(vector, node_id, radius)
 

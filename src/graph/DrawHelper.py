@@ -22,6 +22,7 @@ class DrawHelper:
         self.intersection = Intersection()
         self.first_selected_node: Node | None = None
         self.second_selected_node: Node | None = None
+        self.y_margin: int = 60
 
     def setup_graph(self, graph: Graph, radius: int,  edges: list[Edge],
                     max_width: float, max_height: float) -> tuple[list[Node], list[Edge]]:
@@ -72,7 +73,7 @@ class DrawHelper:
     def generate_random_node(self, node_id: int, radius: int, max_width: float, max_height: float) -> Node:
         max_x: float = max_width - radius
         max_y: float = max_height - radius
-        vector: Vector = Vector().random(radius, max_x, radius+80, max_y)
+        vector: Vector = Vector().random(radius, max_x, radius+self.y_margin, max_y)
 
         return Node(vector, node_id, radius)
 

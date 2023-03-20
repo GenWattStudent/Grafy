@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import src.constance as const
 from src.Theme import theme
 from src.graph.Graph import Graph
 from src.utils.Vector import Vector
@@ -7,6 +6,7 @@ from src.graph.Node import Node
 from src.graph.Edge import Edge
 from src.graph.GraphHelper import GraphHelper
 from src.graph.DrawHelper import DrawHelper
+from src.graph.DrawGraphConfig import DrawGraphConfig
 import math as math
 import threading
 
@@ -15,6 +15,8 @@ class GraphCanvas(ctk.CTkCanvas):
     def __init__(self, master, graph: Graph, **kwargs):
         super().__init__(master, **kwargs)
         self.draw_helper = DrawHelper()
+        self.draw_config = DrawGraphConfig()
+
         self.is_paceked: bool = False
         self.is_intersection: bool = False
         self.draging_node = None
@@ -24,12 +26,6 @@ class GraphCanvas(ctk.CTkCanvas):
         self.edges: list[Edge] = []
         self.path: list[int] = []
         self.intersection_points: list[tuple[float, float]] = []
-        self.current_x: float = 0
-        self.current_y: float = 0
-
-        self.node_radius: int = 15
-        self.width = const.SCREE_WIDTH
-        self.height = const.SCREEN_HEIGHT
 
         self.bind('<Configure>', self.resize)
         self.bind("<B1-Motion>", self.drag)
@@ -41,8 +37,10 @@ class GraphCanvas(ctk.CTkCanvas):
 
     def toggle_intersection(self):
         self.is_intersection = not self.is_intersection
-        self.setup_intersections()
-        self.draw_nodes_and_edges()
+        if self.is_intersection:
+            self.show_intersections()
+        else:
+            self.delete("intersection")
 
     def set_edges(self, edges: list[Edge]):
         self.edges = edges
@@ -50,28 +48,24 @@ class GraphCanvas(ctk.CTkCanvas):
     def set_nodes(self, nodes: list[Node]):
         self.nodes = nodes
 
-    def set_is_intersection(self, is_intersection: bool):
-        self.is_intersection = is_intersection
-        if self.is_intersection:
-            self.setup_intersections()
-
     def change_cursor(self, event):
         # change cursor when mouse if over node
         for node in self.nodes:
             if node.is_under_cursor(Vector(event.x, event.y)):
-                self.configure(cursor='fleur')
-                return
+                return self.configure(cursor='fleur')
+
         self.configure(cursor='arrow')
 
     def resize(self, event):
-        self.width = event.width
-        self.height = event.height
+        self.draw_config.width = event.width
+        self.draw_config.height = event.height
         self.draw_graph()
 
     def drag(self, event):
         if self.draging_node:
             # move node and edges only if mouse is inside canvas
-            if not GraphHelper.is_circle_out_of_bounds(self, event.x, event.y, self.draging_node.radius):
+            if not GraphHelper.is_circle_out_of_bounds(
+                    self, event.x, event.y - self.draw_config.y_margin, self.draging_node.radius):
                 self.draging_node.position.x = event.x
                 self.draging_node.position.y = event.y
                 self.delete("all")
@@ -85,14 +79,14 @@ class GraphCanvas(ctk.CTkCanvas):
                 node.is_selected = True
                 self.draw_helper.select_nodes(node)
                 self.draging_node = node
-                self.draging_node.radius = 20
+                self.draging_node.radius = self.draw_config.dragged_node_radius
                 self.draw_helper.set_dragged_edges(self.edges, node)
                 break
 
     def end_drag(self, _):
         if self.draging_node:
             self.draging_node.is_dragged = False
-            self.draging_node.radius = self.node_radius
+            self.draging_node.radius = self.draw_config.node_radius
 
             self.draw_helper.set_dragged_edges(self.edges, self.draging_node, False)
             self.draging_node = None
@@ -139,14 +133,15 @@ class GraphCanvas(ctk.CTkCanvas):
             if distance == math.inf:
                 text = "No path found"
 
-            self.create_text(20, 20, text=text, fill="white", anchor="w")
+            self.create_text(20, 20, text=text, fill="white", anchor="w", tags="path")
             return distance, path
 
     def draw_intersections(self, intersections: list[tuple[float, float]]):
-        self.create_text(20, 40, text=f"Intersections: {len(intersections)}", fill="white", anchor="w")
+        self.create_text(20, 40, text=f"Intersections: {len(intersections)}",
+                         fill="white", anchor="w", tags="intersection")
         for intersection in intersections:
             x, y = intersection
-            self.create_oval(x - 5, y - 5, x + 5, y + 5, fill="yellow")
+            self.create_oval(x - 5, y - 5, x + 5, y + 5, fill="yellow", tags="intersection")
 
     def setup_intersections(self):
         self.intersection_points = self.draw_helper.intersection.find_intersections(self.edges, self.nodes)
@@ -156,26 +151,28 @@ class GraphCanvas(ctk.CTkCanvas):
         self.reset_graph()
 
         self.nodes, self.edges = self.draw_helper.setup_graph(
-            self.graph, self.node_radius, self.edges, self.winfo_width(), self.winfo_height())
-        self.setup_intersections()
+            self.graph, self.draw_config.node_radius, self.edges, self.winfo_width(), self.winfo_height())
+
         self.draw_nodes_and_edges()
 
     def show_intersections(self):
-        self.is_intersection = not self.is_intersection
-        self.setup_intersections()
-        self.draw_intersections(self.intersection_points)
+        if self.is_intersection:
+            self.setup_intersections()
+            thread = threading.Thread(target=self.draw_intersections, args=(self.intersection_points,))
+            thread.daemon = True
+            thread.start()
 
     def draw_nodes_and_edges(self):
         self.delete("all")
         self.draw_edges(self.edges)
         if self.is_intersection:
-            thread = threading.Thread(target=self.draw_intersections, args=(self.intersection_points,))
-            thread.daemon = True
-            thread.start()
+            self.show_intersections()
+            self.draw_intersections(self.intersection_points)
 
         self.draw_nodes(self.nodes)
 
     def draw_edges(self, edges: list[Edge]):
+        self.delete("edge")
         for edge in edges:
             self.draw_edge(edge)
 
@@ -186,9 +183,12 @@ class GraphCanvas(ctk.CTkCanvas):
     def draw_node(self, node: Node):
         x0, y0, x1, y1 = self.draw_helper.get_node_oval_position(node)
 
-        self.create_oval(x0, y0, x1, y1, fill=theme.get_node_color(node), outline="white", width=2)
-        self.create_text(node.position.x, node.position.y, text=str(node.index), fill="white")
+        self.create_oval(x0, y0, x1, y1, fill=theme.get_node_color(node), outline="white", width=2, tags="node")
+        self.create_text(node.position.x, node.position.y, text=str(node.index), fill="white", tags="node")
 
     def draw_edge(self, edge: Edge):
-        self.create_line(edge.node1.position.x, edge.node1.position.y, edge.node2.position.x,
-                         edge.node2.position.y, fill=theme.get_edge_color(edge), width=theme.get_edge_width(edge))
+        self.create_line(
+            edge.node1.position.x, edge.node1.position.y, edge.node2.position.x, edge.node2.position.y,
+            fill=theme.get_edge_color(edge),
+            width=theme.get_edge_width(edge),
+            tags="edge")

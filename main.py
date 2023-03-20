@@ -53,9 +53,9 @@ class App:
     def setup_window(self):
         self.root = ctk.CTk()
         self.root.title("Grafy lalala")
-        self.root.geometry('%dx%d+%d+%d' % (const.SCREE_WIDTH, const.SCREEN_HEIGHT, 0, 0))
+        self.root.geometry('%dx%d+%d+%d' % (const.SCREEN_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # create ui
-        self.menu = Menu(self.root, width=const.SCREE_WIDTH / 5)
+        self.menu = Menu(self.root, width=const.SCREEN_WIDTH / 5)
         self.canvas = DrawGraph(self.root, self.graph)
         # bind events
         self.menu.on_search_path(self.on_search_path)

@@ -4,7 +4,7 @@ from src.ui.Matrix import Matrix
 
 
 class MatrixWindow(TopLevelWindow):
-    def __init__(self, master, matrix: GraphMatrix, *args, **kwargs):
+    def __init__(self, master, matrix: GraphMatrix | None, *args, **kwargs):
         super().__init__(master, title="Matrix", *args, **kwargs)
         self._min_width = 300
         self._min_height = 300

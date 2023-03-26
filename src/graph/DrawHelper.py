@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from src.graph.Node import Node
 from src.graph.Edge import Edge
 from src.graph.GraphHelper import GraphHelper
 from src.utils.Vector import Vector
-from src.graph.Graph import Graph
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.graph.Graph import Graph
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import Intersection
@@ -17,7 +21,7 @@ class DrawHelper:
         self.selected_nodes: list[Node] = []
         self.y_margin: int = 60
 
-    def setup_graph(self, graph: Graph, radius: int,  edges: list[Edge],
+    def setup_graph(self, graph: Graph, radius: int,
                     max_width: float, max_height: float) -> tuple[list[Node], list[Edge]]:
         nodes = self.generate_nodes(graph, radius, max_width, max_height)
         edges = self.generate_edges(nodes, graph)
@@ -30,6 +34,7 @@ class DrawHelper:
         self.selected_nodes = []
 
     def select_nodes(self, node: Node):
+        print(len(self.selected_nodes))
         if len(self.selected_nodes) < 2:
             self.selected_nodes.append(node)
             node.is_selected = True
@@ -43,7 +48,7 @@ class DrawHelper:
             selected_nodes: list[Node], algoritmType=SearchAlgorithmType.DIJKSTRA) -> tuple[float | None, list[int] | dict[int, list[int]]]:
         results: list[int] | dict[int, list[int]] = []
         lowest_distance: float | None = None
-        print(algoritmType)
+
         if algoritmType == SearchAlgorithmType.DIJKSTRA:
             wages = self.generate_wages(graph, nodes)
             distance, path = self.search_algorithms.dijkstra(wages, selected_nodes[0], selected_nodes[1])
@@ -71,7 +76,7 @@ class DrawHelper:
 
     def generate_nodes(self, graph: Graph, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []
-        for i in range(graph.number_of_nodes):
+        for i in range(graph.config.number_of_nodes):
             node: Node = self.generate_random_node(i + 1, radius, max_width, max_height)
             j = 0
             while j < 100 and GraphHelper.check_circle_overlap(
@@ -85,8 +90,8 @@ class DrawHelper:
 
     def generate_edges(self, nodes: list[Node], graph: Graph) -> list[Edge]:
         edges: list[Edge] = []
-        for i in range(graph.number_of_nodes - 1):
-            for j in range(i + 1, graph.number_of_nodes):
+        for i in range(graph.config.number_of_nodes - 1):
+            for j in range(i + 1, graph.config.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
@@ -98,11 +103,11 @@ class DrawHelper:
         return edges
 
     def generate_wages(self, graph: Graph, nodes: list[Node]) -> GraphMatrix:
-        wages = GraphMatrix(graph.number_of_nodes, float_type=True)
+        wages = GraphMatrix(graph.config.number_of_nodes, float_type=True)
         GraphHelper.fill_matrix_with_infinity(wages)
 
-        for i in range(graph.number_of_nodes - 1):
-            for j in range(i + 1, graph.number_of_nodes):
+        for i in range(graph.config.number_of_nodes - 1):
+            for j in range(i + 1, graph.config.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)

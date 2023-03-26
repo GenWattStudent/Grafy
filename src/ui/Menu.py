@@ -50,13 +50,11 @@ class Menu(ctk.CTkFrame):
     def off_generate_graph(self, cb):
         self.generate_graph_event -= cb
 
-    def update_matrix_window(self, matrix: GraphMatrix, _):
+    def update_matrix_window(self, matrix: GraphMatrix):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
             return self.matrix_window.update_matrix(matrix)
 
     def create_matrix(self, matrix: GraphMatrix | None):
-        if matrix is None:
-            return
         # generate toplevel window
         self.matrix_window = MatrixWindow(self, matrix=matrix)
         # make window on top of all windows

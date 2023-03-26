@@ -1,59 +1,67 @@
-from .layout import Layout
+from __future__ import annotations
 import random
-import math
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.graph.Graph import Graph
+from src.utils.Vector import Vector
+from src.layout.layout import Layout
 
 
-class TarjanSCC(Layout):
-    def __init__(self, graph, width, height, k=1.0, iterations=50):
+class Kwaii(Layout):
+    def __init__(self, graph: Graph):
         self.graph = graph
-        self.width = width
-        self.height = height
-        self.k = k
-        self.iterations = iterations
-        self.nodes = {}
-        self.edges = []
+        self.repulsion_force_constant = 300
+        self.attraction_force_constant = 0.1
+        self.damping_constant = 0.5
+        self.time_step = 0.1
+        self.iterations = 200
 
-    def run(self):
-        # Initialize positions of nodes randomly
+    def layout(self) -> Graph:
         for node in self.graph.nodes:
-            x = random.uniform(0, self.width)
-            y = random.uniform(0, self.height)
-            self.nodes[node] = (x, y)
-
-        # Compute optimal node positions
+            node.position = Vector(random.uniform(0, 800), random.uniform(0, 600))
         for i in range(self.iterations):
-            dx = [0.0] * len(self.graph.nodes)
-            dy = [0.0] * len(self.graph.nodes)
+            self.update_positions()
+        return self.graph
 
-            # Compute repulsive forces between nodes
-            for n1, (x1, y1) in self.nodes.items():
-                for n2, (x2, y2) in self.nodes.items():
-                    if n1 != n2:
-                        d = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-                        f = self.k ** 2 / d
-                        dx[n1] += f * (x1 - x2) / d
-                        dy[n1] += f * (y1 - y2) / d
+    def update_positions(self) -> None:
+        # Update edge distances
+        for edge in self.graph.edges:
+            edge.distance = abs(edge.node1.position - edge.node2.position)
 
-            # Compute spring forces between connected nodes
-            for edge in self.graph.edges:
-                n1 = edge[0]
-                n2 = edge[1]
-                x1, y1 = self.nodes[n1]
-                x2, y2 = self.nodes[n2]
-                d = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-                f = self.k * d
-                dx[n1] -= f * (x1 - x2) / d
-                dy[n1] -= f * (y1 - y2) / d
-                dx[n2] += f * (x1 - x2) / d
-                dy[n2] += f * (y1 - y2) / d
+        # Calculate repulsive forces
+        repulsive_forces = [Vector() for _ in range(len(self.graph.nodes))]
+        for i, node1 in enumerate(self.graph.nodes):
+            for j, node2 in enumerate(self.graph.nodes[i + 1:], i + 1):
+                force = self.repulsive_force(node1.position, node2.position, node1.radius, node2.radius)
+                repulsive_forces[i] -= force
+                repulsive_forces[j] += force
 
-            # Limit maximum displacement
-            for n in self.nodes:
-                d = math.sqrt(dx[n] ** 2 + dy[n] ** 2)
-                if d > self.k:
-                    dx[n] *= self.k / d
-                    dy[n] *= self.k / d
+        # Calculate attractive forces
+        attractive_forces = [Vector() for _ in range(len(self.graph.nodes))]
+        for edge in self.graph.edges:
+            if edge.distance is None:
+                edge.distance = abs(edge.node1.position - edge.node2.position)
+            force = self.attraction_force(edge.node1.position, edge.node2.position, edge.distance)
+            attractive_forces[edge.node1.get_index()] += force
+            attractive_forces[edge.node2.get_index()] -= force
 
-            # Update node positions
-            for n, (x, y) in self.nodes.items():
-                self.nodes[n] = (x + dx[n], y + dy[n])
+        # Apply forces to nodes
+        for i, node in enumerate(self.graph.nodes):
+            net_force = repulsive_forces[i] + attractive_forces[i]
+            node.position += self.damping_constant * net_force * self.time_step
+
+    def repulsive_force(self, pos1: Vector, pos2: Vector, r1: int, r2: int) -> Vector:
+        delta = pos1 - pos2
+        distance = abs(delta)
+        if distance == 0:
+            return Vector()
+        direction = delta.normalized()
+        magnitude = self.repulsion_force_constant * r1 * r2 / (distance * distance)
+        return magnitude * direction
+
+    def attraction_force(self, pos1: Vector, pos2: Vector, length: float) -> Vector:
+        delta = pos2 - pos1
+        direction = delta.normalized()
+        distance = abs(delta)
+        magnitude = self.attraction_force_constant * (distance - length)
+        return magnitude * direction

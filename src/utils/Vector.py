@@ -3,7 +3,7 @@ import random
 
 
 class Vector:
-    def __init__(self, x:float=0, y: float=0):
+    def __init__(self, x: float = 0, y: float = 0):
         self.x = x
         self.y = y
 
@@ -15,6 +15,9 @@ class Vector:
 
     def __mul__(self, other):
         return Vector(self.x * other, self.y * other)
+
+    def __rmul__(self, scalar: float) -> "Vector":
+        return self * scalar
 
     def __truediv__(self, other):
         return Vector(self.x / other, self.y / other)
@@ -47,3 +50,10 @@ class Vector:
 
     def distance(self, other):
         return (self - other).length()
+
+    def normalized(self) -> "Vector":
+        length = abs(self)
+        if length > 0:
+            return self / length
+        else:
+            return Vector(0, 0)

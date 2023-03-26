@@ -20,7 +20,7 @@ class App:
         self.graph.set_number_of_nodes(config.number_of_nodes)
         self.graph.set_probability(config.probability)
         self.graph.generate_graph()
-        graph_state.set(self.graph.get_graph())
+        graph_state.set(self.graph.get_matrix())
 
     def is_state_value_changed(self, current_value: Any, prev_value: Any, value_prop_name: str) -> bool:
         return getattr(prev_value, value_prop_name) != getattr(current_value, value_prop_name)

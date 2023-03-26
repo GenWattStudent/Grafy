@@ -7,7 +7,9 @@ from src.graph.Edge import Edge
 from src.graph.GraphHelper import GraphHelper
 from src.graph.DrawHelper import DrawHelper
 from src.graph.DrawGraphConfig import DrawGraphConfig
+from src.state.AlgorithmState import algorithm_state
 import math as math
+from src.layout.Kwaii import TarjanSCC
 import threading
 
 
@@ -27,6 +29,8 @@ class GraphCanvas(ctk.CTkCanvas):
         self.path: list[int] = []
         self.intersection_points: list[tuple[float, float]] = []
 
+        self.layout = TarjanSCC(self, self.winfo_width(), self.winfo_height())
+        self.layout.run()
         self.bind('<Configure>', self.resize)
         self.bind("<B1-Motion>", self.drag)
         self.bind("<Motion>", self.change_cursor)
@@ -106,28 +110,37 @@ class GraphCanvas(ctk.CTkCanvas):
             self.pack(anchor="w", fill="both", expand=True, side="right")
             self.is_paceked = True
 
-    def draw_path(self, path: list[int]):
+    def draw_path(self, path: list[int] | dict[int, list[int]]):
         self.delete("all")
         self.draw_helper.reset_edges_path(self.edges)
+        # print(path)
         # set is_path to true for all edges in path
-        for i in range(len(path) - 1):
-            for edge in self.edges:
-                if edge.node1 == self.nodes[path[i]] and edge.node2 == self.nodes[path[i + 1]] or \
-                        edge.node2 == self.nodes[path[i]] and edge.node1 == self.nodes[path[i + 1]]:
-                    edge.is_path = True
-                    break
+        if isinstance(path, list):
+            for i in range(len(path) - 1):
+                for edge in self.edges:
+                    if edge.node1 == self.nodes[path[i]] and edge.node2 == self.nodes[path[i + 1]] or \
+                            edge.node2 == self.nodes[path[i]] and edge.node1 == self.nodes[path[i + 1]]:
+                        edge.is_path = True
+
+        elif isinstance(path, dict):
+            # draw path from dictionary
+            print(path)
+            for key, value in path.items():
+                for edge in self.edges:
+                    if edge.node1.get_index() == key and edge.node2.get_index() in value or \
+                            edge.node2.get_index() == key and edge.node1.get_index() in value:
+                        edge.is_path = True
 
         self.draw_nodes_and_edges()
 
-    def search_path(self) -> tuple[float, list[int]] | None:
-        first_selected_node = self.draw_helper.first_selected_node
-        second_selected_node = self.draw_helper.second_selected_node
-
-        if first_selected_node and second_selected_node:
+    def search_path(self) -> tuple[float | None, list[int] | dict[int, list[int]]] | None:
+        if algorithm_state.get_search_algorithm().min_selected_nodes == len(self.draw_helper.selected_nodes):
             distance, path = self.draw_helper.search_best_path(
-                self.graph, self.nodes, first_selected_node, second_selected_node)
+                self.graph, self.nodes, self.draw_helper.selected_nodes, algorithm_state.get_search_algorithm().algorithm_name)
 
             self.draw_path(path)
+            if distance is None:
+                return
             text = f"Distance: {distance}px"
             # check if distance is ininity
             if distance == math.inf:

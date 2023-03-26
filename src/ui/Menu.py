@@ -5,6 +5,7 @@ from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
 from src.ui.Typography import Typography, TextType
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
+from src.state.AlgorithmState import algorithm_state
 from src.graph.GraphMatrix import GraphMatrix
 from src.ui.windows.MatrixWindow import MatrixWindow
 import src.constance as const
@@ -28,6 +29,7 @@ probability_rules = {
 class Menu(ctk.CTkFrame):
     def __init__(self, parent, **kwargs):
         ctk.CTkFrame.__init__(self, parent, **kwargs)
+        self.root = parent
         self.search_path_event = Event()
         self.generate_graph_event = Event()
         self.border_width = 2
@@ -79,10 +81,15 @@ class Menu(ctk.CTkFrame):
 
     def pack(self, **kwargs):
         super().pack(**kwargs)
+        self.root.update()
+        self.option.configure(width=self.winfo_width())
         self.label.place(x=self._current_width - self.border_width, y=0)
 
     def search_path(self):
         self.search_path_event()
+
+    def algorithm_change(self, value):
+        algorithm_state.set_search_algorithm(value)
 
     def toogle_intersection(self):
         graph_config_state.set_is_show_intersections(not graph_config_state.get_is_show_intersections())
@@ -103,6 +110,9 @@ class Menu(ctk.CTkFrame):
 
         self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
+
+        self.option = ctk.CTkOptionMenu(self, values=["BFS", "Dijkstra", "DFS"], command=self.algorithm_change)
+        self.option.pack(anchor="w", padx=10, pady=10, fill="x")
 
         self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
         self.button.pack(padx=10, pady=10, fill="x")

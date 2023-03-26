@@ -2,8 +2,8 @@ from src.utils.Vector import Vector
 
 
 class Node:
-    def __init__(self, position: Vector, index: str | int = "", radius: int = 15):
-        self.index: str | int = index
+    def __init__(self, position: Vector, index: int, radius: int = 15):
+        self.index: int = index
         self.position: Vector = position
         self.radius: int = radius
         self.is_dragged: bool = False
@@ -11,6 +11,12 @@ class Node:
 
     def is_under_cursor(self, cursor_position: Vector) -> bool:
         return (self.position - cursor_position).length() <= self.radius
+
+    def get_index(self) -> str | int:
+        return self.index - 1
+
+    def __hash__(self):
+        return hash((self.position, self.index, self.radius))
 
     def __str__(self):
         return f"Node({self.index}, {self.position}, {self.radius})"

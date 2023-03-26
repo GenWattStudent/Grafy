@@ -1,6 +1,7 @@
 import datetime
 from src.graph.GraphHelper import GraphHelper
 from src.graph.GraphMatrix import GraphMatrix
+import json
 
 
 class ManageFiles:
@@ -16,6 +17,8 @@ class ManageFiles:
             txt_file.write("Grupa 2a, Informatyka dzienne" + "\n")
             txt_file.write("Macierz:" + "\n")
             txt_file.write(str(graph))
+
+            json.dump(graph.get_graph_dictionary(), txt_file, indent=4)
 
     def load_graph_with_students_info(self):
         # load graph and students info from a file

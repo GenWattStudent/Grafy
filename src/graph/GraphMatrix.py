@@ -10,6 +10,15 @@ class GraphMatrix:
     def get_matrix_string(self):
         return GraphHelper.get_matrix_string(self.matrix)
 
+    def get_graph_dictionary(self) -> dict[int, list[int]]:
+        dict = {}
+        for i in range(self.number_of_nodes):
+            dict[i] = []
+            for j in range(self.number_of_nodes):
+                if self.matrix[i][j] == 1:
+                    dict[i].append(j)
+        return dict
+
     def generate_matrix_depends_on_type(self):
         if self.float_type:
             return GraphHelper.generate_empty_wages(self.number_of_nodes)

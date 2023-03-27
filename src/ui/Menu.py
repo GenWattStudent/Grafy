@@ -64,6 +64,9 @@ class Menu(ctk.CTkFrame):
         # show window
         self.matrix_window.mainloop()
 
+    def get_node_count_message(self) -> str:
+        return f"Selected {algorithm_state.get_search_algorithm().min_selected_nodes} nodes to start search by clicking on nodes"
+
     def hide_matrix(self):
         self.button.configure(state="normal")
         if self.is_matrix_window_open and self.matrix_window:
@@ -88,6 +91,7 @@ class Menu(ctk.CTkFrame):
 
     def algorithm_change(self, value):
         algorithm_state.set_search_algorithm(value)
+        self.option_info.configure(text=self.get_node_count_message())
 
     def toogle_intersection(self):
         graph_config_state.set_is_show_intersections(not graph_config_state.get_is_show_intersections())
@@ -111,6 +115,9 @@ class Menu(ctk.CTkFrame):
 
         self.option = ctk.CTkOptionMenu(self, values=["BFS", "Dijkstra", "DFS"], command=self.algorithm_change)
         self.option.pack(anchor="w", padx=10, pady=10, fill="x")
+        self.option_info = Typography(self, text=self.get_node_count_message())
+        self.option_info.pack(anchor="w", padx=10)
+        self.option_info.pack_propagate(False)
 
         self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
         self.button.pack(padx=10, pady=10, fill="x")

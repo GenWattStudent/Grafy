@@ -1,4 +1,6 @@
 from src.graph.GraphHelper import GraphHelper
+from numpy import ndarray, float32, dtype
+from typing import Any
 
 
 class GraphMatrix:
@@ -9,6 +11,9 @@ class GraphMatrix:
 
     def get_matrix_string(self):
         return GraphHelper.get_matrix_string(self.matrix)
+
+    def set_matrix(self, matrix):
+        self.matrix = matrix
 
     def get_graph_dictionary(self) -> dict[int, list[int]]:
         dict = {}

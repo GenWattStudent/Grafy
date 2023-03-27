@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter as tk
 from src.Theme import theme
 from src.graph.Graph import Graph
 from src.utils.Vector import Vector
@@ -6,24 +7,25 @@ from src.graph.Node import Node
 from src.graph.Edge import Edge
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.state.AlgorithmState import algorithm_state
+from src.graph.drag.dragCanvas import DragCanvas
 import math as math
 import threading
 
 
-class GraphCanvas(ctk.CTkCanvas):
-    def __init__(self, master, graph: Graph, draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
+class GraphCanvas(tk.Canvas):
+    def __init__(self, master, graph: Graph, draw_config: DrawGraphConfig = DrawGraphConfig(),  **kwargs):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
 
         self.is_intersection: bool = False
         self.draging_node = None
+        self.canvas_elements = []
 
         self.graph: Graph = graph
+        self.drag = DragCanvas(self, self.draw_config, self.graph)
 
-        self.bind("<B1-Motion>", self.drag)
         self.bind("<Motion>", self.change_cursor)
-        self.bind("<ButtonRelease-1>", self.end_drag)
-        self.bind("<Button-1>", self.start_drag)
+
         self.configure(bg='#2b2b2b')
         self.configure(highlightthickness=0)
         self.config(scrollregion=self.bbox(ctk.ALL))
@@ -35,11 +37,6 @@ class GraphCanvas(ctk.CTkCanvas):
         else:
             self.delete("intersection")
 
-    def canvas_to_graph_coords(self, canvas_x, canvas_y):
-        screen_x = self.canvasx(0)
-        screen_y = self.canvasy(0)
-        return canvas_x + screen_x, canvas_y + screen_y
-
     def set_edges(self, edges: list[Edge]):
         self.graph.edges = edges
 
@@ -48,50 +45,12 @@ class GraphCanvas(ctk.CTkCanvas):
 
     def change_cursor(self, event):
         # change cursor when mouse if over node
-        x, y = self.canvas_to_graph_coords(event.x, event.y)
+        x, y = self.drag.canvas_to_graph_coords(event.x, event.y)
         for node in self.graph.nodes:
             if node.is_under_cursor(Vector(x, y)):
                 return self.configure(cursor='hand1')
 
         self.configure(cursor='fleur')
-
-    def drag(self, event):
-        if self.draging_node:
-            x, y = self.canvas_to_graph_coords(event.x, event.y)
-            self.draging_node.position.x = x
-            self.draging_node.position.y = y
-            self.delete("all")
-            self.draw_edges(self.graph.edges)
-            self.draw_nodes(self.graph.nodes)
-            return
-        self.scan_dragto(event.x, event.y, gain=1)
-
-    def start_drag(self, event):
-        self.focus_set()
-
-        x, y = self.canvas_to_graph_coords(event.x, event.y)
-        for node in self.graph.nodes:
-            if node.is_under_cursor(Vector(x, y)):
-                node.is_selected = True
-                self.graph.generator.select_nodes(node)
-                self.draging_node = node
-                self.draging_node.radius = self.draw_config.dragged_node_radius
-                self.graph.generator.set_dragged_edges(self.graph.edges, node)
-        if not self.draging_node:
-            self.scan_mark(event.x, event.y)
-
-    def end_drag(self, event):
-
-        if self.draging_node:
-            self.draging_node.is_dragged = False
-            self.draging_node.radius = self.draw_config.node_radius
-
-            self.graph.generator.set_dragged_edges(self.graph.edges, self.draging_node, False)
-            self.draging_node = None
-            self.draw_graph()
-            return
-
-        self.scan_dragto(event.x, event.y, gain=1)
 
     def reset_graph(self):
         self.graph.nodes.clear()
@@ -120,7 +79,6 @@ class GraphCanvas(ctk.CTkCanvas):
                             edge.node2.get_index() == key and edge.node1.get_index() in value:
                         edge.is_path = True
 
-        print(self.graph.edges)
         self.draw_nodes_and_edges()
 
     def search_path(self) -> tuple[float | None, list[int] | dict[int, list[int]]] | None:
@@ -136,12 +94,13 @@ class GraphCanvas(ctk.CTkCanvas):
             if distance == math.inf:
                 text = "No path found"
 
-            self.create_text(20, 20, text=text, fill="white", anchor="w", tags="path")
+            self.canvas_elements.append(self.create_text(20, 20, text=text, fill="white", anchor="w", tags="path"))
             return distance, path
 
     def draw_intersections(self, intersections: list[tuple[float, float]]):
-        self.create_text(20, 40, text=f"Intersections: {len(intersections)}",
-                         fill="white", anchor="w", tags="intersection")
+        x, y = self.drag.canvas_to_graph_coords(20, 40)
+        self.canvas_elements.append(self.create_text(x, y, text=f"Intersections: {len(intersections)}",
+                                                     fill="white", anchor="w", tags="intersection_text"))
         for intersection in intersections:
             x, y = intersection
             self.create_oval(x - 5, y - 5, x + 5, y + 5, fill="yellow", tags="intersection")

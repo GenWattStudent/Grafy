@@ -1,18 +1,17 @@
 import customtkinter as ctk
 from src.graph.Graph import Graph
-from src.ManageFiles import ManageFiles
+from src.GraphFile import GraphFile
 from src.ui.Menu import Menu
 from src.ui.GraphCanvas import GraphCanvas
 from src.state.GraphState import graph_state
 from src.state.GraphConfigState import graph_config_state, GraphConfig
-from src.graph.GraphMatrix import GraphMatrix
 from src.graph.DrawGraphConfig import DrawGraphConfig
 import src.constance as const
 
 
 class App:
     def __init__(self):
-        self.graph: Graph = Graph()
+        self.graph: Graph = Graph(file_manager=GraphFile(filename="graph.txt"))
         self.draw_graph_config: DrawGraphConfig = DrawGraphConfig()
 
         self.setup_window()
@@ -21,7 +20,7 @@ class App:
         matrix = self.graph.update(config, self.canvas)
         self.canvas.is_intersection = config.is_show_intersections
         self.canvas.draw_graph()
-        print(matrix)
+
         graph_state.set(matrix)
 
     def create_graph(self, config: GraphConfig):
@@ -30,9 +29,6 @@ class App:
         self.canvas.is_intersection = config.is_show_intersections
         self.canvas.draw_graph()
         graph_state.set(matrix)
-
-    def save_graph(self, matrix: GraphMatrix):
-        ManageFiles(filename="graph.txt").save_graph_with_students_info(matrix)
 
     def on_search_path(self):
         self.canvas.search_path()
@@ -48,7 +44,6 @@ class App:
         self.menu.on_search_path(self.on_search_path)
         self.menu.on_generate_graph(self.create_graph)
         # add observers
-        graph_state.subscribe(self.save_graph)
         graph_config_state.subscribe(self.update_graph)
         # pack widgets
         self.menu.pack(anchor="nw",  fill="y", side="left")

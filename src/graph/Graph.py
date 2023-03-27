@@ -1,16 +1,18 @@
 import random
 import customtkinter as ctk
+import tkinter as tk
 from copy import copy
 from src.graph.GraphMatrix import GraphMatrix
 from src.graph.Node import Node
 from src.graph.Edge import Edge
 from src.graph.DrawHelper import DrawHelper
 from src.graph.GraphConfig import GraphConfig
+from src.GraphFile import FileManager
 from src.layout.Kwaii import Kwaii
 
 
 class Graph:
-    def __init__(self, config: GraphConfig = GraphConfig()):
+    def __init__(self, file_manager: FileManager | None = None, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
         self.matrix = GraphMatrix(config.number_of_nodes)
         self.nodes: list[Node] = []
@@ -18,6 +20,7 @@ class Graph:
         self.path: list[int] = []
         self.intersections: list[tuple[float, float]] = []
         self.generator = DrawHelper()
+        self.file_manager = file_manager
         self.config = config
         self.prev_config: GraphConfig | None = None
         self.layout = Kwaii(self)
@@ -32,7 +35,11 @@ class Graph:
         self.matrix.set_number_of_nodes(number_of_nodes)
         self.wages.set_number_of_nodes(number_of_nodes)
 
-    def create(self, canvas: ctk.CTkCanvas) -> GraphMatrix:
+    def save_matrix(self):
+        if self.file_manager is not None:
+            self.file_manager.save(self.matrix)
+
+    def create(self, canvas: tk.Canvas) -> GraphMatrix:
         self.generate_graph_matrix()
         self.generator.selected_nodes.clear()
         self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
@@ -40,7 +47,7 @@ class Graph:
         self.layout.run()
         return self.matrix
 
-    def update(self, config: GraphConfig, canvas: ctk.CTkCanvas) -> GraphMatrix:
+    def update(self, config: GraphConfig, canvas: tk.Canvas) -> GraphMatrix:
         if self.prev_config is None or self.prev_config.number_of_nodes != config.number_of_nodes:
             self.set_number_of_nodes(config.number_of_nodes)
             self.create(canvas)
@@ -67,5 +74,5 @@ class Graph:
                 if random.random() < self.config.probability:
                     self.matrix[i][j] = 1
                     self.matrix[j][i] = 1
-
+        self.save_matrix()
         return self.matrix

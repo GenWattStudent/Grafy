@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import Intersection
-from src.state.AlgorithmState import SearchAlgorithmType
+from src.state.AlgorithmState import SearchAlgorithmType, algorithm_state
 import math
 
 
@@ -34,8 +34,7 @@ class DrawHelper:
         self.selected_nodes = []
 
     def select_nodes(self, node: Node):
-        print(len(self.selected_nodes))
-        if len(self.selected_nodes) < 2:
+        if len(self.selected_nodes) < algorithm_state.get_search_algorithm().min_selected_nodes:
             self.selected_nodes.append(node)
             node.is_selected = True
         else:
@@ -60,10 +59,8 @@ class DrawHelper:
             results = path
 
         elif algoritmType == SearchAlgorithmType.DFS:
-            print("dfs")
             path = self.search_algorithms.dfs(graph.get_graph_dictionary(), selected_nodes[0])
             results = path
-            print(results)
 
         return lowest_distance, results
 

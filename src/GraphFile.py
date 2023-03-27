@@ -1,16 +1,27 @@
 import datetime
 from src.graph.GraphHelper import GraphHelper
 from src.graph.GraphMatrix import GraphMatrix
+from abc import abstractmethod, ABC
 import json
 
 
-class ManageFiles:
+class FileManager(ABC):
+    @abstractmethod
+    def save(self, graph: GraphMatrix):
+        pass
+
+    @abstractmethod
+    def load(self) -> GraphMatrix:
+        pass
+
+
+class GraphFile(FileManager):
     def __init__(self, path: str = ".", filename: str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")):
         self.path = path
         self.filename = filename
         self.rowToSkip: int = 3
 
-    def save_graph_with_students_info(self, graph: GraphMatrix):
+    def save(self, graph: GraphMatrix):
         # save graph and students info in a file
         with open(self.path + "/" + self.filename, "w", encoding="utf-8") as txt_file:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")
@@ -20,7 +31,7 @@ class ManageFiles:
 
             json.dump(graph.get_graph_dictionary(), txt_file, indent=4)
 
-    def load_graph_with_students_info(self):
+    def load(self) -> GraphMatrix:
         # load graph and students info from a file
         with open(self.path + "/" + self.filename, "r") as txt_file:
             lines = txt_file.readlines()
@@ -36,4 +47,6 @@ class ManageFiles:
                         graph[i - self.rowToSkip][count] = int(number[1])
                         count += 1
 
-            return graph
+            matrix = GraphMatrix(len(lines) - self.rowToSkip)
+            matrix.set_matrix(graph)
+            return  matrix

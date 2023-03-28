@@ -29,12 +29,14 @@ class Input(ctk.CTkEntry):
         self.insert(0, value)
 
     def handle_change(self, value):
-        if not value.get():
+        value = value.get()
+        value = value.replace(",", ".")
+        if not value:
             return
 
-        if self.validate(value.get()):
-            self.last_correct_value = value.get()
-            return self.change_event(value.get())
+        if self.validate(value):
+            self.last_correct_value = value
+            return self.change_event(value)
 
         self.set_input_value(self.last_correct_value)
 
@@ -48,6 +50,7 @@ class Input(ctk.CTkEntry):
 
     def validate(self, value) -> bool:
         self.hide_error()
+
         error_message = ""
         for rule in self.rules:
             if not self.rules[rule](value):

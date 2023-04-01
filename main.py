@@ -17,18 +17,18 @@ class App:
         self.setup_window()
 
     def update_graph(self, config: GraphConfig):
-        matrix = self.graph.update(config, self.canvas)
+        self.graph.update(config, self.canvas)
         self.canvas.is_intersection = config.is_show_intersections
         self.canvas.draw_graph()
 
-        graph_state.set(matrix)
+        graph_state.set(self.graph)
 
     def create_graph(self, config: GraphConfig):
         self.graph.update(config, self.canvas)
-        matrix = self.graph.create(self.canvas)
+        self.graph.create(self.canvas)
         self.canvas.is_intersection = config.is_show_intersections
         self.canvas.draw_graph()
-        graph_state.set(matrix)
+        graph_state.set(self.graph)
 
     def on_search_path(self):
         self.canvas.search_path()
@@ -38,7 +38,7 @@ class App:
         self.root.title("Grafy lalala")
         self.root.geometry('%dx%d+%d+%d' % (const.SCREEN_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # create ui
-        self.menu = Menu(self.root, width=const.SCREEN_WIDTH / 5)
+        self.menu = Menu(self.root, width=const.SCREEN_WIDTH / 5, graph=self.graph)
         self.canvas = GraphCanvas(self.root, self.graph, self.draw_graph_config)
         # bind events
         self.menu.on_search_path(self.on_search_path)

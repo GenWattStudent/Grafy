@@ -1,6 +1,4 @@
 from src.graph.GraphHelper import GraphHelper
-from numpy import ndarray, float32, dtype
-from typing import Any
 
 
 class GraphMatrix:

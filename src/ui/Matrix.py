@@ -1,40 +1,83 @@
 import customtkinter as ctk
 from src.graph.GraphMatrix import GraphMatrix
+from abc import abstractmethod
 
 
-class Matrix(ctk.CTkCanvas):
-    def __init__(self, parent, matrix: GraphMatrix | None = None, *args, **kwargs):
+class GraphDetailsTab(ctk.CTkCanvas):
+    def __init__(self, parent, width, height, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-        self.matrix: GraphMatrix | None = matrix
-        self.square_size = 20
-        self.gap = 25
+        self.width = width
+        self.height = height
+
+    @abstractmethod
+    def draw(self):
+        pass
+
+    @abstractmethod
+    def update_wideget(self, matrix: GraphMatrix):
+        pass
+
+
+class CanvasMatrix(GraphDetailsTab):
+    def __init__(
+            self, parent, matrix: GraphMatrix, gap: int = 10, cell_height: int = 20,
+            *args, **kwargs):
+        self.matrix: GraphMatrix = matrix
+        self.font = ctk.CTkFont(size=16)
+        self.gap = gap
+        self.cell_height = cell_height
+        width, height = self.setup_matrix_size()
+        super().__init__(parent, width, height, *args, **kwargs)
         self.configure(bg='#2b2b2b')
         self.configure(highlightthickness=0)
 
+    def setup_matrix_size(self) -> tuple[int, int]:
+        self.longest_string = self.get_longest_string_from_matrix(self.matrix)
+        self.cell_width = self.font.measure(self.longest_string) + self.gap
+
+        self.width = self.matrix.number_of_nodes * self.cell_width
+        self.height = self.matrix.number_of_nodes * self.cell_height
+
+        return self.width, self.height
+
     def draw(self):
-        if self.matrix is None:
-            return
+        self.setup_matrix_size()
         self.delete("all")
-        self.draw_matrix()
+        self.draw_labels()
         self.draw_values()
 
-    def draw_matrix(self):
-        if self.matrix is None:
-            return
-        half_gap = self.gap / 2
-        matrix_size = self.matrix.number_of_nodes * self.square_size + half_gap
-        self.create_line(half_gap, half_gap, half_gap, matrix_size, fill="white", width=1)
-        self.create_line(matrix_size, half_gap, matrix_size, matrix_size, fill="white", width=1)
+    def get_longest_string_from_matrix(self, matrix: GraphMatrix):
+        longest_string = ''
+        for i in range(matrix.number_of_nodes):
+            for j in range(matrix.number_of_nodes):
+                if len(str(matrix.matrix[i][j])) > len(longest_string):
+                    longest_string = str(matrix.matrix[i][j])
+                if len(longest_string) < len(str(i)):
+                    longest_string = str(i)
+        return longest_string
+
+    def draw_labels(self):
+        for i in range(self.matrix.number_of_nodes):
+            x = (i + 1) * self.cell_width
+            self.create_text((x + (x + self.cell_width)) / 2, self.cell_height / 2,
+                             text=str(i), font=self.font, fill="yellow")
+
+            y = (i + 1) * self.cell_height
+            self.create_text(self.cell_width / 2, (y + (y + self.cell_height)) / 2,
+                             text=str(i), font=self.font, fill="yellow")
 
     def draw_values(self):
-        if self.matrix is None:
-            return
         for i in range(self.matrix.number_of_nodes):
             for j in range(self.matrix.number_of_nodes):
-                x = i * self.square_size + self.gap
-                y = j * self.square_size + self.gap
-                self.create_text(x, y, text=self.matrix[i][j], fill="white")
+                x1 = (j + 1) * self.cell_width
+                y1 = (i + 1) * self.cell_height
+                x2 = x1 + self.cell_width
+                y2 = y1 + self.cell_height
+
+                self.create_rectangle(x1, y1, x2, y2, fill="#2b2b2b", outline="white")
+                self.create_text(
+                    (x1 + x2) / 2, (y1 + y2) / 2, text=self.matrix.matrix[i][j],
+                    font=self.font, fill="white")
 
     def update_wideget(self, matrix: GraphMatrix):
         self.matrix = matrix
-        self.draw()

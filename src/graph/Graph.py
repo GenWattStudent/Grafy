@@ -1,5 +1,4 @@
 import random
-import customtkinter as ctk
 import tkinter as tk
 from copy import copy
 from src.graph.GraphMatrix import GraphMatrix
@@ -25,6 +24,9 @@ class Graph:
         self.prev_config: GraphConfig | None = None
         self.layout = Kwaii(self)
 
+    def get_wages(self) -> GraphMatrix:
+        return self.wages
+
     def get_matrix(self) -> GraphMatrix:
         return self.matrix
 
@@ -44,6 +46,7 @@ class Graph:
         self.generator.selected_nodes.clear()
         self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
         self.edges = self.generator.generate_edges(self.nodes, self)
+        self.wages = self.generator.generate_wages(self, self.nodes)
         self.layout.run()
         return self.matrix
 

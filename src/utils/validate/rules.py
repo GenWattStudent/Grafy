@@ -22,7 +22,7 @@ class Is_float:
         self.error_message = error_message
 
     def __call__(self, value):
-        return value.replace(".", "").isnumeric()
+        return (value.replace(".", "").isnumeric() or value.replace(",", "").isnumeric()) and value.count(".") <= 1 and value.count(",") <= 1
 
 
 class Is_number:

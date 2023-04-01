@@ -7,7 +7,8 @@ from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
 from src.state.AlgorithmState import algorithm_state
 from src.graph.GraphMatrix import GraphMatrix
-from src.ui.windows.MatrixWindow import MatrixWindow
+from src.ui.windows.GraphDetails import GraphDeatails
+from src.graph.Graph import Graph
 import src.constance as const
 
 
@@ -27,9 +28,10 @@ probability_rules = {
 
 
 class Menu(ctk.CTkFrame):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, graph: Graph, **kwargs):
         ctk.CTkFrame.__init__(self, parent, **kwargs)
         self.root = parent
+        self.graph = graph
         self.search_path_event = Event()
         self.generate_graph_event = Event()
         self.border_width = 2
@@ -50,13 +52,13 @@ class Menu(ctk.CTkFrame):
     def off_generate_graph(self, cb):
         self.generate_graph_event -= cb
 
-    def update_matrix_window(self, matrix: GraphMatrix):
+    def update_matrix_window(self, graph: Graph):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
-            return self.matrix_window.update_matrix(matrix)
+            return self.matrix_window.update_graph(graph)
 
-    def create_matrix(self, matrix: GraphMatrix | None):
+    def create_matrix(self, graph: Graph):
         # generate toplevel window
-        self.matrix_window = MatrixWindow(self, matrix=matrix)
+        self.matrix_window = GraphDeatails(self, graph=graph)
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
         # set on close event
@@ -78,7 +80,7 @@ class Menu(ctk.CTkFrame):
         self.button.configure(state="disabled")
         if not self.is_matrix_window_open:
             self.is_matrix_window_open = True
-            self.create_matrix(graph_state.get())
+            self.create_matrix(self.graph)
 
     def pack(self, **kwargs):
         super().pack(**kwargs)
@@ -96,6 +98,9 @@ class Menu(ctk.CTkFrame):
     def toogle_intersection(self):
         graph_config_state.set_is_show_intersections(not graph_config_state.get_is_show_intersections())
 
+    def probability_filtr(self, value: str) -> str:
+        return value.replace(",", ".")
+
     def create_widgets(self):
         graph_state.subscribe(self.update_matrix_window)
 
@@ -106,7 +111,9 @@ class Menu(ctk.CTkFrame):
             self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
         self.number_of_nodes_entry.on_change(lambda e: graph_config_state.set_number_of_nodes(int(e)))
 
-        self.probability_entry = Input(self, "Probability", str(const.DEFAULT_PROBABILITY), rules=probability_rules)
+        self.probability_entry = Input(
+            self, "Probability", str(const.DEFAULT_PROBABILITY),
+            rules=probability_rules, filtr=self.probability_filtr)
         self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
 
@@ -115,11 +122,11 @@ class Menu(ctk.CTkFrame):
 
         self.option = ctk.CTkOptionMenu(self, values=["BFS", "Dijkstra", "DFS"], command=self.algorithm_change)
         self.option.pack(anchor="w", padx=10, pady=10, fill="x")
+
         self.option_info = Typography(self, text=self.get_node_count_message())
         self.option_info.pack(anchor="w", padx=10)
-        self.option_info.pack_propagate(False)
 
-        self.button = ctk.CTkButton(self, text="Show Matrix", command=self.show_matrix)
+        self.button = ctk.CTkButton(self, text="Show Graph Details", command=self.show_matrix)
         self.button.pack(padx=10, pady=10, fill="x")
 
         self.search_path_button = ctk.CTkButton(self, text="Search path", command=self.search_path)

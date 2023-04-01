@@ -4,9 +4,10 @@ from src.utils.Event import Event
 
 
 class Input(ctk.CTkEntry):
-    def __init__(self, master, label_text="", default_value="", rules={}, **kwargs):
+    def __init__(self, master, label_text="", default_value="", rules={}, filtr=None, **kwargs):
         self.rules = rules
         self.last_correct_value = default_value
+        self.filtr = filtr
         self.text_var = ctk.StringVar()
         self.text_var.trace("w", lambda name, index, mode, sv=self.text_var: self.handle_change(sv))
 
@@ -30,7 +31,10 @@ class Input(ctk.CTkEntry):
 
     def handle_change(self, value):
         value = value.get()
-        value = value.replace(",", ".")
+
+        if self.filtr:
+            value = self.filtr(value)
+
         if not value:
             return
 

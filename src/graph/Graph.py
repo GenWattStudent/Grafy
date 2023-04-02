@@ -1,4 +1,3 @@
-import random
 import tkinter as tk
 from copy import copy
 from src.graph.GraphMatrix import GraphMatrix
@@ -8,6 +7,7 @@ from src.graph.DrawHelper import DrawHelper
 from src.graph.GraphConfig import GraphConfig
 from src.GraphFile import FileManager
 from src.layout.Kwaii import Kwaii
+import random
 
 
 class Graph:

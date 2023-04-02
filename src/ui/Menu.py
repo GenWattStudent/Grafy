@@ -6,7 +6,6 @@ from src.ui.Typography import Typography, TextType
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
 from src.state.AlgorithmState import algorithm_state
-from src.graph.GraphMatrix import GraphMatrix
 from src.ui.windows.GraphDetails import GraphDeatails
 from src.graph.Graph import Graph
 import src.constance as const

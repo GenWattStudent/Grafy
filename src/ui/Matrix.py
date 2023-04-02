@@ -25,7 +25,10 @@ class CanvasMatrix(GraphDetailsTab):
         self.matrix: GraphMatrix = matrix
         self.font = ctk.CTkFont(size=16)
         self.gap = gap
-        self.cell_height = cell_height
+        self.cell_height = cell_height + gap
+        self.label_start_cell = 1
+        self.tab_cell_height = 1
+        self.gap_cell = 1
         width, height = self.setup_matrix_size()
         super().__init__(parent, width, height, *args, **kwargs)
         self.configure(bg='#2b2b2b')
@@ -35,8 +38,8 @@ class CanvasMatrix(GraphDetailsTab):
         self.longest_string = self.get_longest_string_from_matrix(self.matrix)
         self.cell_width = self.font.measure(self.longest_string) + self.gap
 
-        self.width = self.matrix.number_of_nodes * self.cell_width
-        self.height = self.matrix.number_of_nodes * self.cell_height
+        self.width = (self.matrix.number_of_nodes + self.label_start_cell +  self.gap_cell) * self.cell_width
+        self.height = (self.matrix.number_of_nodes + self.label_start_cell + self.tab_cell_height +  self.gap_cell) * self.cell_height
 
         return self.width, self.height
 
@@ -58,19 +61,19 @@ class CanvasMatrix(GraphDetailsTab):
 
     def draw_labels(self):
         for i in range(self.matrix.number_of_nodes):
-            x = (i + 1) * self.cell_width
+            x = (i + self.label_start_cell) * self.cell_width
             self.create_text((x + (x + self.cell_width)) / 2, self.cell_height / 2,
                              text=str(i), font=self.font, fill="yellow")
 
-            y = (i + 1) * self.cell_height
+            y = (i + self.label_start_cell) * self.cell_height
             self.create_text(self.cell_width / 2, (y + (y + self.cell_height)) / 2,
                              text=str(i), font=self.font, fill="yellow")
 
     def draw_values(self):
         for i in range(self.matrix.number_of_nodes):
             for j in range(self.matrix.number_of_nodes):
-                x1 = (j + 1) * self.cell_width
-                y1 = (i + 1) * self.cell_height
+                x1 = (j + self.label_start_cell) * self.cell_width
+                y1 = (i + self.label_start_cell) * self.cell_height
                 x2 = x1 + self.cell_width
                 y2 = y1 + self.cell_height
 

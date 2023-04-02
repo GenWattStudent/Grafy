@@ -11,7 +11,6 @@ class GraphDeatails(TopLevelWindow):
         super().__init__(master, title="Graph Details", *args, **kwargs)
         self._min_width = 300
         self._min_height = 300
-        self.timer_id = None
         self.graph = graph
         self.tab_change_event = Event()
         self.tab_view = ctk.CTkTabview(self)
@@ -35,7 +34,8 @@ class GraphDeatails(TopLevelWindow):
             parent=self.tab_view.tab('Dictionary'), matrix=graph.get_matrix())
         self.dictionary_widget.pack(fill='both', expand=True)
         self.tab_view.pack(fill='both', expand=True, anchor='w')
-        self.on_tab_change_event(None)
+        self.tab_view.configure(command=self.on_tab_change_event)
+        self.on_tab_change_event()
 
     def on_tab_change(self, cb):
         self.tab_change_event += cb
@@ -55,46 +55,32 @@ class GraphDeatails(TopLevelWindow):
         self.dictionary_widget.update_wideget(self.graph.get_matrix())
         self.dictionary_widget.draw()
 
-    def stop_timer(self):
-        if self.timer_id is not None:
-            self.after_cancel(self.timer_id)
-
-    def on_tab_change_event(self, event):
-        self.stop_timer()
-
+    def on_tab_change_event(self):
         current_active_tab: str = self.tab_view.get()
-        current_widget: GraphDetailsTab | None = None
 
         if current_active_tab == 'Matrix':
             self.update_matrix_widegt()
-            current_widget = self.matrix_widget
         elif current_active_tab == 'Wages Matrix':
             self.update_wages_matrix_widegt()
-            current_widget = self.wages_matrix_widget
         elif current_active_tab == 'Dictionary':
             self.update_dictionary_widegt()
-            current_widget = self.dictionary_widget
 
-        if current_widget is not None:
-            self.update_window_size(current_widget)
-        self.timer_id = self.after(1000, lambda: self.on_tab_change_event(None))
+        self.update_window_size()
 
-    def update_window_size(self, current_widget: GraphDetailsTab):
-        if current_widget is not None:
-            width = max(self.matrix_widget.width, self.wages_matrix_widget.width, self.dictionary_widget.width)
-            height = max(self.matrix_widget.height, self.wages_matrix_widget.height, self.dictionary_widget.height)
+    def update_window_size(self):
+        width = max(self.matrix_widget.width, self.wages_matrix_widget.width, self.dictionary_widget.width)
+        height = max(self.matrix_widget.height, self.wages_matrix_widget.height, self.dictionary_widget.height)
 
-            if width < self._min_width:
-                width = self._min_width
-            if height < self._min_height:
-                height = self._min_height
+        if width < self._min_width:
+            width = self._min_width
+        if height < self._min_height:
+            height = self._min_height
 
-            self.geometry('%dx%d+%d+%d' % (width, height, self.winfo_x(), self.winfo_y()))
+        self.geometry('%dx%d+%d+%d' % (width, height, self.winfo_x(), self.winfo_y()))
 
     def update_graph(self, graph: Graph):
         self.graph = graph
-        self.on_tab_change_event(None)
+        self.on_tab_change_event()
 
     def destroy(self):
-        self.stop_timer()
         super().destroy()

@@ -11,7 +11,6 @@ from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import Intersection
 from src.state.AlgorithmState import SearchAlgorithmType, algorithm_state
-import math
 
 
 class DrawHelper:
@@ -108,8 +107,8 @@ class DrawHelper:
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
-                    wages[i][j] = math.floor(distance)
-                    wages[j][i] = math.floor(distance)
+                    wages[i][j] = round(distance, 1)
+                    wages[j][i] = round(distance, 1)
         return wages
 
     def get_node_oval_position(self, node: Node) -> tuple[float, float, float, float]:

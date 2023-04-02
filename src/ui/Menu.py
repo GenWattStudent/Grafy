@@ -59,6 +59,8 @@ class Menu(ctk.CTkFrame):
     def create_matrix(self, graph: Graph):
         # generate toplevel window
         self.matrix_window = GraphDeatails(self, graph=graph)
+        # dont allow to resize window
+        self.matrix_window.resizable(False, False)
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
         # set on close event

@@ -38,8 +38,9 @@ class CanvasMatrix(GraphDetailsTab):
         self.longest_string = self.get_longest_string_from_matrix(self.matrix)
         self.cell_width = self.font.measure(self.longest_string) + self.gap
 
-        self.width = (self.matrix.number_of_nodes + self.label_start_cell +  self.gap_cell) * self.cell_width
-        self.height = (self.matrix.number_of_nodes + self.label_start_cell + self.tab_cell_height +  self.gap_cell) * self.cell_height
+        self.width = (self.matrix.number_of_nodes + self.label_start_cell + self.gap_cell) * self.cell_width
+        self.height = (
+            self.matrix.number_of_nodes + self.label_start_cell + self.tab_cell_height + self.gap_cell) * self.cell_height
 
         return self.width, self.height
 

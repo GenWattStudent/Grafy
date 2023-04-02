@@ -102,8 +102,12 @@ class Menu(ctk.CTkFrame):
     def probability_filtr(self, value: str) -> str:
         return value.replace(",", ".")
 
+    def update_graph_info(self, graph: Graph):
+        self.density_label.configure(text=f"Density: {round(graph.density, 2)}")
+
     def create_widgets(self):
         graph_state.subscribe(self.update_matrix_window)
+        graph_state.subscribe(self.update_graph_info)
 
         self.label = Typography(self, text="Tools", type=TextType.h1)
         self.label.pack(side="top", pady=10, anchor="w", padx=10)
@@ -117,6 +121,9 @@ class Menu(ctk.CTkFrame):
             rules=probability_rules, filtr=self.probability_filtr)
         self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
+
+        self.density_label = Typography(self, text=f"Density: {round(self.graph.density, 2)}")
+        self.density_label.pack(anchor="w", padx=10, pady=10)
 
         self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)

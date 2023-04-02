@@ -48,8 +48,7 @@ class DrawHelper:
         lowest_distance: float | None = None
 
         if algoritmType == SearchAlgorithmType.DIJKSTRA:
-            wages = self.generate_wages(graph, nodes)
-            distance, path = self.search_algorithms.dijkstra(wages, selected_nodes[0], selected_nodes[1])
+            distance, path = self.search_algorithms.dijkstra(graph.wages, selected_nodes[0], selected_nodes[1])
             results = path
             lowest_distance = distance
 

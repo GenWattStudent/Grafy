@@ -7,6 +7,7 @@ from src.graph.DrawHelper import DrawHelper
 from src.graph.GraphConfig import GraphConfig
 from src.GraphFile import FileManager
 from src.layout.Kwaii import Kwaii
+from src.utils.Event import Event
 import random
 
 
@@ -19,10 +20,19 @@ class Graph:
         self.path: list[int] = []
         self.intersections: list[tuple[float, float]] = []
         self.generator = DrawHelper()
+        self.density = 0
         self.file_manager = file_manager
         self.config = config
         self.prev_config: GraphConfig | None = None
         self.layout = Kwaii(self)
+
+        self.graph_change_event = Event()
+
+    def on_change(self, callback):
+        self.graph_change_event += callback
+
+    def off_change(self, callback):
+        self.graph_change_event -= callback
 
     def get_wages(self) -> GraphMatrix:
         return self.wages
@@ -32,6 +42,9 @@ class Graph:
 
     def get_graph_dictionary(self) -> dict[int, list[int]]:
         return self.matrix.get_graph_dictionary()
+
+    def calculate_density(self) -> float:
+        return 2 * len(self.edges) / (self.config.number_of_nodes * (self.config.number_of_nodes - 1))
 
     def set_number_of_nodes(self, number_of_nodes: int):
         self.matrix.set_number_of_nodes(number_of_nodes)
@@ -47,6 +60,7 @@ class Graph:
         self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
         self.edges = self.generator.generate_edges(self.nodes, self)
         self.wages = self.generator.generate_wages(self, self.nodes)
+        self.density = self.calculate_density()
         self.layout.run()
         return self.matrix
 
@@ -57,7 +71,9 @@ class Graph:
         if self.prev_config is None or self.prev_config.probability != config.probability:
             self.generate_graph_matrix()
             self.edges = self.generator.generate_edges(self.nodes, self)
+            self.density = self.calculate_density()
 
+        self.graph_change_event(self)
         self.prev_config = copy(self.config)
         self.config = config
         return self.matrix

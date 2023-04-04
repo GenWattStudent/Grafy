@@ -44,7 +44,10 @@ class Graph:
         return self.matrix.get_graph_dictionary()
 
     def calculate_density(self) -> float:
-        return 2 * len(self.edges) / (self.config.number_of_nodes * (self.config.number_of_nodes - 1))
+        if self.config.number_of_nodes > 1:
+            return 2 * len(self.edges) / (self.config.number_of_nodes * (self.config.number_of_nodes - 1))
+        else:
+            return 0
 
     def set_number_of_nodes(self, number_of_nodes: int):
         self.matrix.set_number_of_nodes(number_of_nodes)

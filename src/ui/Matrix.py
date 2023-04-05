@@ -4,10 +4,22 @@ from abc import abstractmethod
 
 
 class GraphDetailsTab(ctk.CTkCanvas):
-    def __init__(self, parent, width, height, *args, **kwargs):
+    def __init__(self, parent, width=500, height=500, scrollable=True, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.width = width
         self.height = height
+        self.scrollable = scrollable
+        if scrollable:
+            self.scrollbar_y = ctk.CTkScrollbar(self, orientation='vertical')
+            self.scrollbar_y.pack(side='right', fill='y')
+            self.scrollbar_y.configure(command=self.yview)
+
+            # Add horizontal scrollbar
+            self.scrollbar_x = ctk.CTkScrollbar(self, orientation='horizontal')
+            self.scrollbar_x.pack(side='bottom', fill='x')
+            self.scrollbar_x.configure(command=self.xview)
+
+            self.configure(yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
 
     @abstractmethod
     def draw(self):
@@ -20,7 +32,7 @@ class GraphDetailsTab(ctk.CTkCanvas):
 
 class CanvasMatrix(GraphDetailsTab):
     def __init__(
-            self, parent, matrix: GraphMatrix, gap: int = 10, cell_height: int = 20,
+            self, parent, matrix: GraphMatrix, gap: int = 10, cell_height: int = 20, scrollable=True,
             *args, **kwargs):
         self.matrix: GraphMatrix = matrix
         self.font = ctk.CTkFont(size=16)
@@ -30,7 +42,8 @@ class CanvasMatrix(GraphDetailsTab):
         self.tab_cell_height = 1
         self.gap_cell = 1
         width, height = self.setup_matrix_size()
-        super().__init__(parent, width, height, *args, **kwargs)
+        super().__init__(parent, scrollable=scrollable, *args, **kwargs)
+
         self.configure(bg='#2b2b2b')
         self.configure(highlightthickness=0)
 
@@ -42,13 +55,21 @@ class CanvasMatrix(GraphDetailsTab):
         self.height = (
             self.matrix.number_of_nodes + self.label_start_cell + self.tab_cell_height + self.gap_cell) * self.cell_height
 
+        self.width = self.width + 16
+        self.height = self.height + 16
+
         return self.width, self.height
 
     def draw(self):
-        self.setup_matrix_size()
+        width, height = self.setup_matrix_size()
         self.delete("all")
         self.draw_labels()
         self.draw_values()
+        if hasattr(self, "padding_rect") and self.padding_rect:
+            self.delete(self.padding_rect)
+
+        self.padding_rect = self.create_rectangle(0, 0, width, height, fill="")
+        self.configure(scrollregion=self.bbox("all"))
 
     def get_longest_string_from_matrix(self, matrix: GraphMatrix):
         longest_string = ''

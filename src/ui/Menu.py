@@ -35,9 +35,13 @@ class Menu(ctk.CTkFrame):
         self.generate_graph_event = Event()
         self.border_width = 2
         self.is_matrix_window_open = False
+        self.bind("<Configure>", self.on_resize)
         self.create_widgets()
 
         self.label = ctk.CTkLabel(self, text="", width=self.border_width, height=const.SCREEN_HEIGHT, fg_color="white")
+
+    def on_resize(self, event):
+        self.label.configure(height=event.height)
 
     def on_search_path(self, cb):
         self.search_path_event += cb
@@ -58,8 +62,6 @@ class Menu(ctk.CTkFrame):
     def create_matrix(self, graph: Graph):
         # generate toplevel window
         self.matrix_window = GraphDeatails(self, graph=graph)
-        # dont allow to resize window
-        self.matrix_window.resizable(False, False)
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
         # set on close event
@@ -68,7 +70,7 @@ class Menu(ctk.CTkFrame):
         self.matrix_window.mainloop()
 
     def get_node_count_message(self) -> str:
-        return f"Selected {algorithm_state.get_search_algorithm().min_selected_nodes} nodes to start search by clicking on nodes"
+        return f"Select {algorithm_state.get_search_algorithm().min_selected_nodes} nodes by clicking on them to start search"
 
     def hide_matrix(self):
         self.button.configure(state="normal")

@@ -19,7 +19,6 @@ class CanvasDictionary(GraphDetailsTab):
         self.longest_string = self.get_longest_string(dict)
         self.width = self.font.measure(self.longest_string)
         self.height = (self.font.metrics('linespace') + self.font.metrics('descent')) * len(dict) + self.tab_margin
-        print(len(dict), self.height)
         return self.width, self.height
 
     def update_wideget(self, matrix: GraphMatrix):

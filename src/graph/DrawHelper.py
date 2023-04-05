@@ -50,11 +50,12 @@ class DrawHelper:
         if algoritmType == SearchAlgorithmType.DIJKSTRA:
             distance, path = self.search_algorithms.dijkstra(graph.wages, selected_nodes[0], selected_nodes[1])
             results = path
-            lowest_distance = distance
+            lowest_distance = round(distance, 2)
 
         elif algoritmType == SearchAlgorithmType.BFS:
             path = self.search_algorithms.bfs(graph.get_graph_dictionary(), selected_nodes[0])
             results = path
+            print(path)
 
         elif algoritmType == SearchAlgorithmType.DFS:
             path = self.search_algorithms.dfs(graph.get_graph_dictionary(), selected_nodes[0])

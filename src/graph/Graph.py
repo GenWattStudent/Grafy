@@ -55,7 +55,7 @@ class Graph:
 
     def save_matrix(self):
         if self.file_manager is not None:
-            self.file_manager.save(self.matrix)
+            self.file_manager.save(self)
 
     def create(self, canvas: tk.Canvas) -> GraphMatrix:
         self.generate_graph_matrix()

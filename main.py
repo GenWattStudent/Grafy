@@ -32,6 +32,8 @@ class App:
 
     def on_search_path(self):
         self.canvas.search_path()
+        if self.graph.file_manager:
+            self.graph.file_manager.save(self.graph)
 
     def setup_window(self):
         self.root = ctk.CTk()

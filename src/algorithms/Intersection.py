@@ -1,20 +1,22 @@
-from src.graph.Edge import Edge
-from src.graph.Node import Node
+from src.graph.elements.Edge import Edge
+from src.graph.elements.Intersection import Intersection
+from src.utils.Vector import Vector
+from src.Theme import Theme
 
 
-class Intersection:
+class FindIntersection:
 
-    def get_edge_node_positions(self, edge: Edge):
+    def get_edge_node_positions(self, edge: Edge) -> tuple[float, float, float, float]:
         return edge.node1.position.x, edge.node1.position.y, edge.node2.position.x, edge.node2.position.y
 
-    def intersection(self, edge1: Edge, edge2: Edge):
+    def intersection(self, edge1: Edge, edge2: Edge) -> Intersection:
         x1, y1, x2, y2 = self.get_edge_node_positions(edge1)
         x3, y3, x4, y4 = self.get_edge_node_positions(edge2)
 
         x = ((x1*y2 - y1*x2)*(x3-x4) - (x1-x2)*(x3*y4 - y3*x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
         y = ((x1*y2 - y1*x2)*(y3-y4) - (y1-y2)*(x3*y4 - y3*x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
 
-        return (x, y)
+        return Intersection(Vector(x, y), Theme.get("intersection_color"))
 
     def intersect(self, edge1: Edge, edge2: Edge, threshold: float = 1e-6) -> bool:
         x1, y1, x2, y2 = self.get_edge_node_positions(edge1)
@@ -46,8 +48,9 @@ class Intersection:
 
         return True
 
-    def find_intersections(self, edges: list[Edge], nodes: list[Node]) -> list[tuple]:
-        intersections = []
+    def find_intersections(self, edges: list[Edge]) -> list[Intersection]:
+        intersections: list[Intersection] = []
+
         for i in range(len(edges)):
             for j in range(i + 1, len(edges)):
                 # if intersection is

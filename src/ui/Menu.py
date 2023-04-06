@@ -8,6 +8,7 @@ from src.state.GraphState import graph_state
 from src.state.AlgorithmState import algorithm_state
 from src.ui.windows.GraphDetails import GraphDeatails
 from src.graph.Graph import Graph
+from src.Theme import Theme
 import src.constance as const
 
 
@@ -38,10 +39,11 @@ class Menu(ctk.CTkFrame):
         self.bind("<Configure>", self.on_resize)
         self.create_widgets()
 
-        self.label = ctk.CTkLabel(self, text="", width=self.border_width, height=const.SCREEN_HEIGHT, fg_color="white")
+        self.border = ctk.CTkLabel(self, text="", width=self.border_width,
+                                   height=const.SCREEN_HEIGHT, fg_color=Theme.get("text_color"))
 
     def on_resize(self, event):
-        self.label.configure(height=event.height)
+        self.border.configure(height=event.height)
 
     def on_search_path(self, cb):
         self.search_path_event += cb
@@ -89,7 +91,7 @@ class Menu(ctk.CTkFrame):
         super().pack(**kwargs)
         self.root.update()
         self.option.configure(width=self.winfo_width())
-        self.label.place(x=self._current_width - self.border_width, y=0)
+        self.border.place(x=self._current_width - self.border_width, y=0)
 
     def search_path(self):
         self.search_path_event()

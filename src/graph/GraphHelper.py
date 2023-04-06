@@ -1,5 +1,5 @@
 import numpy as np
-from .Node import Node
+from src.graph.elements.Node import Node
 import customtkinter as ctk
 
 

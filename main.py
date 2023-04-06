@@ -54,7 +54,6 @@ class App:
         self.root.update()
         # create array of nodes and draw graph
         self.create_graph(graph_config_state.get())
-
         self.root.mainloop()
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import heapq
 from src.graph.GraphMatrix import GraphMatrix
-from src.graph.Node import Node
+from src.graph.elements.Node import Node
 
 
 class SearchAlgorithms:

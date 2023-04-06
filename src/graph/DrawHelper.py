@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from src.graph.Node import Node
-from src.graph.Edge import Edge
+from src.graph.elements.Node import Node
+from src.graph.elements.Edge import Edge
 from src.graph.GraphHelper import GraphHelper
 from src.utils.Vector import Vector
 from typing import TYPE_CHECKING
@@ -9,14 +9,16 @@ if TYPE_CHECKING:
     from src.graph.Graph import Graph
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
-from src.algorithms.Intersection import Intersection
+from src.algorithms.Intersection import FindIntersection
 from src.state.AlgorithmState import SearchAlgorithmType, algorithm_state
+import customtkinter as ctk
+from src.Theme import Theme
 
 
 class DrawHelper:
     def __init__(self):
         self.search_algorithms = SearchAlgorithms()
-        self.intersection = Intersection()
+        self.intersection = FindIntersection()
         self.selected_nodes: list[Node] = []
         self.y_margin: int = 60
 
@@ -68,7 +70,7 @@ class DrawHelper:
         max_y: float = max_height - radius
         vector: Vector = Vector().random(radius, max_x, radius+self.y_margin, max_y)
 
-        return Node(vector, node_id, radius)
+        return Node(vector, node_id, radius, Theme.get("node_color"), Theme.get("secondary_color"), Theme.get("text_color"))
 
     def generate_nodes(self, graph: Graph, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []
@@ -93,7 +95,7 @@ class DrawHelper:
                     distance: float = nodes[i].position.distance(nodes[j].position)
                     graph.wages[i][j] = distance
                     graph.wages[j][i] = distance
-                    edge = Edge(nodes[i], nodes[j], distance)
+                    edge = Edge(nodes[i], nodes[j], distance, Theme.get("edge_color"))
                     edges.append(edge)
 
         return edges

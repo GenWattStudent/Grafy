@@ -1,13 +1,13 @@
-import customtkinter as ctk
 import tkinter as tk
-from src.Theme import theme
 from src.graph.Graph import Graph
 from src.utils.Vector import Vector
-from src.graph.Node import Node
-from src.graph.Edge import Edge
+from src.graph.elements.Node import Node
+from src.graph.elements.Edge import Edge
+from src.graph.elements.Intersection import Intersection
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.state.AlgorithmState import algorithm_state
 from src.graph.drag.dragCanvas import DragCanvas
+from src.Theme import Theme
 import math as math
 import threading
 
@@ -26,9 +26,9 @@ class GraphCanvas(tk.Canvas):
 
         self.bind("<Motion>", self.change_cursor)
 
-        self.configure(bg='#2b2b2b')
+        self.configure(bg=Theme.get("canvas_bg_color"))
         self.configure(highlightthickness=0)
-        self.config(scrollregion=self.bbox(ctk.ALL))
+        self.config(scrollregion=self.bbox(tk.ALL))
 
     def toggle_intersection(self):
         self.is_intersection = not self.is_intersection
@@ -55,7 +55,6 @@ class GraphCanvas(tk.Canvas):
     def reset_graph(self):
         self.graph.nodes.clear()
         self.graph.edges.clear()
-        self.graph.path.clear()
         self.graph.intersections.clear()
         self.graph.generator.reset_edges_path(self.graph.edges)
         self.delete("all")
@@ -94,24 +93,25 @@ class GraphCanvas(tk.Canvas):
             if distance == math.inf:
                 text = "No path found"
 
-            self.canvas_elements.append(self.create_text(20, 20, text=text, fill="white", anchor="w", tags="path"))
+            self.canvas_elements.append(self.create_text(
+                20, 20, text=text, fill=Theme.get("text_color"),
+                anchor="w", tags="path"))
             return distance, path
 
-    def draw_intersections(self, intersections: list[tuple[float, float]]):
+    def draw_intersections(self, intersections: list[Intersection]):
         x, y = self.drag.canvas_to_graph_coords(20, 40)
-        self.canvas_elements.append(self.create_text(x, y, text=f"Intersections: {len(intersections)}",
-                                                     fill="white", anchor="w", tags="intersection_text"))
+        self.canvas_elements.append(
+            self.create_text(
+                x, y, text=f"Intersections: {len(intersections)}", fill=Theme.get("text_color"),
+                anchor="w", tags="intersection_text"))
         for intersection in intersections:
-            x, y = intersection
-            self.create_oval(x - 5, y - 5, x + 5, y + 5, fill="yellow", tags="intersection")
+            intersection.draw(self)
 
     def setup_intersections(self):
-        self.graph.intersections = self.graph.generator.intersection.find_intersections(
-            self.graph.edges, self.graph.nodes)
+        self.graph.intersections = self.graph.generator.intersection.find_intersections(self.graph.edges)
 
     def draw_graph(self):
         self.delete("all")
-
         self.draw_nodes_and_edges()
         self.show_intersections()
 
@@ -129,23 +129,9 @@ class GraphCanvas(tk.Canvas):
     def draw_edges(self, edges: list[Edge]):
         self.delete("edge")
         for edge in edges:
-            self.draw_edge(edge)
+            edge.draw(self)
 
     def draw_nodes(self, nodes: list[Node]):
+        self.delete("node")
         for node in nodes:
-            self.draw_node(node)
-
-    def draw_node(self, node: Node):
-        x0, y0, x1, y1 = self.graph.generator.get_node_oval_position(node)
-
-        node.canvas_element = self.create_oval(
-            x0, y0, x1, y1, fill=theme.get_node_color(node),
-            outline="white", width=2, tags="node")
-        self.create_text(node.position.x, node.position.y, text=str(node.index), fill="white", tags="node")
-
-    def draw_edge(self, edge: Edge):
-        self.create_line(
-            edge.node1.position.x, edge.node1.position.y, edge.node2.position.x, edge.node2.position.y,
-            fill=theme.get_edge_color(edge),
-            width=theme.get_edge_width(edge),
-            tags="edge")
+            node.draw(self)

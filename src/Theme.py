@@ -1,39 +1,34 @@
-from src.graph.Node import Node
-from src.graph.Edge import Edge
+import customtkinter as ctk
+
+variable_theme = {
+    "dark": {
+        "node_color": "red",
+        "edge_color": "white",
+        "node_dragged_color": "green",
+        "edge_dragged_color": "yellow",
+        "node_selected_color": "blue",
+        "edge_path_color": "red",
+        "canvas_bg_color": "#2b2b2b",
+        "text_color": "#dbdbdb",
+        "intersection_color": "yellow",
+        "secondary_color": "#3b8ed0"
+    },
+    "light": {
+        "node_color": "grey",
+        "edge_color": "black",
+        "node_dragged_color": "green",
+        "edge_dragged_color": "yellow",
+        "node_selected_color": "blue",
+        "edge_path_color": "red",
+        "intersection_color": "yellow",
+        "canvas_bg_color": "#dbdbdb",
+        "text_color": "#2b2b2b",
+        "secondary_color": "#3b8ed0"
+    }
+}
 
 
 class Theme:
-    def __init__(
-            self, node_color: str, edge_color: str, node_dragged_color: str, edge_dragged_color: str,
-            node_selected_color: str, edge_path_color: str):
-        self.node_color = node_color
-        self.node_dragged_color = node_dragged_color
-        self.node_selected_color = node_selected_color
-        self.edge_color = edge_color
-        self.edge_dragged_color = edge_dragged_color
-        self.edge_path_color = edge_path_color
-
-    def get_node_color(self, node: Node):
-        if node.is_dragged:
-            return self.node_dragged_color
-        elif node.is_selected:
-            return self.node_selected_color
-        else:
-            return self.node_color
-
-    def get_edge_color(self, edge: Edge):
-        if edge.is_dragged:
-            return self.edge_dragged_color
-        elif edge.is_path:
-            return self.edge_path_color
-        else:
-            return self.edge_color
-
-    def get_edge_width(self, edge: Edge):
-        if edge.is_path:
-            return 5
-        else:
-            return 1
-
-
-theme = Theme("red", "white", "green", "yellow", "blue", "red")
+    @staticmethod
+    def get(prop_name: str, theme_name: str = ctk.get_appearance_mode()) -> str:
+        return variable_theme[theme_name.lower()][prop_name]

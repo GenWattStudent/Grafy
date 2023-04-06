@@ -1,13 +1,14 @@
 import tkinter as tk
 from copy import copy
 from src.graph.GraphMatrix import GraphMatrix
-from src.graph.Node import Node
-from src.graph.Edge import Edge
+from src.graph.elements.Node import Node
+from src.graph.elements.Edge import Edge
 from src.graph.DrawHelper import DrawHelper
 from src.graph.GraphConfig import GraphConfig
 from src.GraphFile import FileManager
 from src.layout.Kwaii import Kwaii
 from src.utils.Event import Event
+from src.graph.elements.Intersection import Intersection
 import random
 
 
@@ -18,7 +19,7 @@ class Graph:
         self.nodes: list[Node] = []
         self.edges: list[Edge] = []
         self.path: list[int] = []
-        self.intersections: list[tuple[float, float]] = []
+        self.intersections: list[Intersection] = []
         self.generator = DrawHelper()
         self.density = 0
         self.file_manager = file_manager

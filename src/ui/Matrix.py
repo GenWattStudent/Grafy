@@ -41,7 +41,7 @@ class CanvasMatrix(GraphDetailsTab):
         self.label_start_cell = 1
         self.tab_cell_height = 1
         self.gap_cell = 1
-        width, height = self.setup_matrix_size()
+        self.setup_matrix_size()
         super().__init__(parent, scrollable=scrollable, *args, **kwargs)
 
         self.configure(bg='#2b2b2b')

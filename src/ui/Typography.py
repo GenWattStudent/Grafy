@@ -1,5 +1,6 @@
 from enum import Enum
 import customtkinter as ctk
+from src.Theme import Theme
 
 
 class TextType(Enum):
@@ -37,7 +38,8 @@ class Typography(ctk.CTkLabel):
 
     def set_variant(self, variant: TextVariant):
         if variant == TextVariant.normal:
-            self.configure(text_color="white")
+            print(Theme.get("canvas_bg_color"))
+            self.configure(text_color=Theme.get("text_color"))
         elif variant == TextVariant.error:
             self.configure(text_color="red")
         elif variant == TextVariant.success:

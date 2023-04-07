@@ -40,7 +40,7 @@ class Menu(ctk.CTkFrame):
         self.create_widgets()
 
         self.border = ctk.CTkLabel(self, text="", width=self.border_width,
-                                   height=const.SCREEN_HEIGHT, fg_color=Theme.get("text_color"))
+                                   height=self.winfo_height(), fg_color=Theme.get("text_color"))
 
     def on_resize(self, event):
         self.border.configure(height=event.height)

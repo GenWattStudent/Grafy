@@ -57,7 +57,6 @@ class DrawHelper:
         elif algoritmType == SearchAlgorithmType.BFS:
             path = self.search_algorithms.bfs(graph.get_graph_dictionary(), selected_nodes[0])
             results = path
-            print(path)
 
         elif algoritmType == SearchAlgorithmType.DFS:
             path = self.search_algorithms.dfs(graph.get_graph_dictionary(), selected_nodes[0])
@@ -70,7 +69,10 @@ class DrawHelper:
         max_y: float = max_height - radius
         vector: Vector = Vector().random(radius, max_x, radius+self.y_margin, max_y)
 
-        return Node(vector, node_id, radius, Theme.get("node_color"), Theme.get("secondary_color"), Theme.get("text_color"))
+        return Node(
+            vector, node_id, radius, Theme.get("node_color"),
+            Theme.get("secondary_color"),
+            Theme.get("text_color"))
 
     def generate_nodes(self, graph: Graph, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []
@@ -88,8 +90,8 @@ class DrawHelper:
 
     def generate_edges(self, nodes: list[Node], graph: Graph) -> list[Edge]:
         edges: list[Edge] = []
-        for i in range(graph.config.number_of_nodes - 1):
-            for j in range(i + 1, graph.config.number_of_nodes):
+        for i in range(graph.matrix.number_of_nodes - 1):
+            for j in range(i + 1, graph.matrix.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)

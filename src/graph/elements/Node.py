@@ -1,5 +1,6 @@
 from src.utils.Vector import Vector
 import tkinter as tk
+from src.Theme import Theme
 
 
 class Node:
@@ -14,7 +15,14 @@ class Node:
         self.color: str = color
         self.selected_color: str = selected_color
         self.border_color: str = border_color
+        self.dragged_color: str = Theme.get("node_dragged_color")
         self.canvas_id: tk._CanvasItemId | None = None
+        self.text: tk._CanvasItemId | None = None
+
+    def delete(self, canvas: tk.Canvas):
+        if self.canvas_id and self.text:
+            canvas.delete(self.canvas_id)
+            canvas.delete(self.text)
 
     def is_under_cursor(self, cursor_position: Vector) -> bool:
         return (self.position - cursor_position).length() <= self.radius
@@ -22,19 +30,24 @@ class Node:
     def get_color(self) -> str:
         if self.is_selected:
             return self.selected_color
+        elif self.is_dragged:
+            return self.color
         else:
             return self.color
 
     def draw(self, canvas: tk.Canvas):
+        print(self.is_selected)
         color = self.get_color()
 
-        if self.canvas_id:
+        if self.canvas_id and self.text:
             canvas.delete(self.canvas_id)
-
+            canvas.delete(self.text)
+        print(color)
         self.canvas_id = canvas.create_oval(
             self.position.x - self.radius, self.position.y - self.radius, self.position.x + self.radius, self.position.y +
             self.radius, fill=color, outline=self.border_color, width=2, tags=("node", str(self.index)))
-        canvas.create_text(self.position.x, self.position.y, text=str(self.index), fill="white", tags="node")
+        self.text = canvas.create_text(
+            self.position.x, self.position.y, text=str(self.index), fill="white", tags="node")
 
     def get_index(self) -> int:
         return self.index - 1

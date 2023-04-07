@@ -6,6 +6,7 @@ from src.ui.GraphCanvas import GraphCanvas
 from src.state.GraphState import graph_state
 from src.state.GraphConfigState import graph_config_state, GraphConfig
 from src.graph.DrawGraphConfig import DrawGraphConfig
+from src.ui.Toolbar import ToolBar
 import src.constance as const
 
 
@@ -41,7 +42,15 @@ class App:
         self.root.geometry('%dx%d+%d+%d' % (const.SCREEN_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # create ui
         self.menu = Menu(self.root, width=const.SCREEN_WIDTH / 5, graph=self.graph)
-        self.canvas = GraphCanvas(self.root, self.graph, self.draw_graph_config)
+        self.frame = ctk.CTkFrame(self.root)
+        self.frame.pack(anchor="nw", fill="both", expand=True, side="right")
+
+        self.toolbar = ToolBar(self.frame)
+        self.toolbar.pack(anchor="n", side="top", fill="x")
+
+        self.graph.toolbar = self.toolbar
+
+        self.canvas = GraphCanvas(self.frame, self.graph, self.draw_graph_config)
         # bind events
         self.menu.on_search_path(self.on_search_path)
         self.menu.on_generate_graph(self.create_graph)

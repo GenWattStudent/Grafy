@@ -13,7 +13,7 @@ import threading
 
 
 class GraphCanvas(tk.Canvas):
-    def __init__(self, master, graph: Graph, draw_config: DrawGraphConfig = DrawGraphConfig(),  **kwargs):
+    def __init__(self, master, graph: Graph, draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
 
@@ -23,8 +23,6 @@ class GraphCanvas(tk.Canvas):
 
         self.graph: Graph = graph
         self.drag = DragCanvas(self, self.draw_config, self.graph)
-
-        self.bind("<Motion>", self.change_cursor)
 
         self.configure(bg=Theme.get("canvas_bg_color"))
         self.configure(highlightthickness=0)

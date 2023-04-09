@@ -1,6 +1,7 @@
 from src.graph.elements.Node import Node
 import tkinter as tk
 from src.Theme import Theme
+from src.utils.Vector import Vector
 
 
 class Edge:
@@ -9,17 +10,35 @@ class Edge:
         self.node2 = node2
         self.is_dragged: bool = False
         self.is_path: bool = False
+        self.is_selected: bool = False
         self.distance = distance
         self.color = color
         self.path_color = Theme.get("edge_path_color")
         self.dragged_color = Theme.get("edge_dragged_color")
+        self.selected_color = Theme.get("edge_selected_color")
         self.canvas_id: tk._CanvasItemId | None = None
+        self.id = f"{node1.id}-{node2.id}"
+
+    def delete(self, canvas: tk.Canvas):
+        if self.canvas_id:
+            canvas.delete(self.canvas_id)
+
+    def is_under_cursor(self, cursor_position: Vector, threshold: float = 5) -> bool:
+        x1, y1 = self.node1.position.x, self.node1.position.y
+        x2, y2 = self.node2.position.x, self.node2.position.y
+        cursor_x, cursor_y = cursor_position.x, cursor_position.y
+
+        distance = abs((y2 - y1) * cursor_x - (x2 - x1) * cursor_y + x2 * y1 - y2 * x1) / ((y2 - y1)
+                                                                                           ** 2 + (x2 - x1) ** 2) ** 0.5 + 0.001
+        return distance <= threshold
 
     def get_color(self) -> str:
         if self.is_path:
             return self.path_color
         elif self.is_dragged:
             return self.dragged_color
+        elif self.is_selected:
+            return self.selected_color
         else:
             return self.color
 
@@ -32,5 +51,5 @@ class Edge:
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Edge):
-            return self.node1 == __value.node1 and self.node2 == __value.node2
+            return self.id == __value.id
         return False

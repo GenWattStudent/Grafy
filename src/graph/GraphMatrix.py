@@ -12,6 +12,10 @@ class GraphMatrix:
         self.number_of_nodes = self.number_of_nodes + 1
         self.new_matrix = self.generate_matrix_depends_on_type(self.number_of_nodes)
 
+        for i in range(self.number_of_nodes):
+            for j in range(self.number_of_nodes):
+                self.new_matrix[i][j] = 0
+
         for i in range(self.number_of_nodes - 1):
             for j in range(self.number_of_nodes - 1):
                 self.new_matrix[i][j] = self.matrix[i][j]
@@ -21,6 +25,27 @@ class GraphMatrix:
     def add_edge(self, edge: Edge):
         self.matrix[edge.node1.index - 1][edge.node2.index - 1] = 1
         self.matrix[edge.node2.index - 1][edge.node1.index - 1] = 1
+
+    def delete_node(self, node_index: int):
+        self.number_of_nodes = self.number_of_nodes - 1
+        self.new_matrix = self.generate_matrix_depends_on_type(self.number_of_nodes)
+
+        for i in range(self.number_of_nodes):
+            for j in range(self.number_of_nodes):
+                if i < node_index and j < node_index:
+                    self.new_matrix[i][j] = self.matrix[i][j]
+                elif i < node_index and j >= node_index:
+                    self.new_matrix[i][j] = self.matrix[i][j + 1]
+                elif i >= node_index and j < node_index:
+                    self.new_matrix[i][j] = self.matrix[i + 1][j]
+                elif i >= node_index and j >= node_index:
+                    self.new_matrix[i][j] = self.matrix[i + 1][j + 1]
+
+        self.matrix = self.new_matrix
+
+    def delete_edge(self, edge: Edge):
+        self.matrix[edge.node1.index - 1][edge.node2.index - 1] = 0
+        self.matrix[edge.node2.index - 1][edge.node1.index - 1] = 0
 
     def get_matrix_string(self):
         return GraphHelper.get_matrix_string(self.matrix)

@@ -1,6 +1,14 @@
+from __future__ import annotations
 import customtkinter as ctk
 from src.Theme import Theme
+from src.state.State import State
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.graph.Graph import Graph
+from src.graph.elements.Node import Node
+from src.graph.elements.Edge import Edge
 from enum import Enum
+from src.utils.Event import Event
 
 
 class Tools(Enum):
@@ -8,6 +16,7 @@ class Tools(Enum):
     SELECT = "SELECT"
     ADD_NODE = "ADD_NODE"
     ADD_EDGE = "ADD_EDGE"
+    DELETE = "DELETE"
 
 
 class SwitchButton(ctk.CTkButton):
@@ -37,15 +46,24 @@ class SwitchButton(ctk.CTkButton):
             self.select()
 
 
+class ToolState(State):
+    def __init__(self, initial_state: Tools = Tools.EMPTY):
+        super().__init__(initial_state=initial_state)
+
+
 class ToolBar(ctk.CTkFrame):
-    def __init__(self, master, **kw):
+    def __init__(self, master, graph: Graph, **kw):
         super().__init__(master, **kw)
         self.master = master
+        self.graph = graph
         self.border_width = 2
 
-        self.selected_tool: Tools = Tools.EMPTY
-        self.prev_tool: Tools = Tools.EMPTY
+        self.selected_tool: State = ToolState()
+        self.prev_tool: State = ToolState()
         self.is_cleaned = False
+        self.selected_elements = []
+
+        self.delete_event = Event()
 
         self.border = ctk.CTkLabel(self, text="", fg_color=Theme.get("text_color"))
 
@@ -53,39 +71,87 @@ class ToolBar(ctk.CTkFrame):
         self.select_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_node_button = SwitchButton(self, text="Add Node")
         self.add_node_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.delete_button = SwitchButton(self, text="Delete")
+        self.delete_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_edge_button = SwitchButton(self, text="Add Edge")
         self.add_edge_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
+        self.delete_button.configure(command=self.delete_tool)
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
 
         self.bind("<Configure>", self.on_resize)
+
+    def get_selected_nodes(self) -> list[Node]:
+        return [element for element in self.selected_elements if isinstance(element, Node)]
+
+    def get_selected_edges(self) -> list[Edge]:
+        return [element for element in self.selected_elements if isinstance(element, Edge)]
+
+    def on_delete(self, cb):
+        self.delete_event += cb
+
+    def off_delete(self, cb):
+        self.delete_event -= cb
+
+    def delete_tool(self):
+        # get node and edges to delete
+        nodes_to_delete = self.get_selected_nodes()
+        edges_to_delete = self.get_selected_edges()
+
+        # add to delete also edges connected to nodes to delete
+        for edge in self.graph.edges:
+            if edge.node1 in nodes_to_delete or edge.node2 in nodes_to_delete:
+                edges_to_delete.append(edge)
+
+        self.graph.delete_edges(edges_to_delete)
+        self.graph.delete_nodes(nodes_to_delete)
+        self.delete_event(nodes_to_delete + edges_to_delete)
+        self.change_tool(Tools.DELETE)
 
     def deselect_all(self):
         self.select_button.deselect()
         self.add_node_button.deselect()
         self.add_edge_button.deselect()
 
-    def change_tool(self, tool: Tools, element: SwitchButton):
+    def select_tool(self, element):
+        if element.is_selected:
+            element.is_selected = False
+            self.selected_elements.remove(element)
+            return
+        element.is_selected = True
+        self.selected_elements.append(element)
+
+    def deselect_tool(self, element):
+        element.is_selected = False
+        self.selected_elements.remove(element)
+
+    def deselect_all_tool(self):
+        for element in self.selected_elements:
+            element.is_selected = False
+        self.selected_elements = []
+
+    def change_tool(self, tool: Tools, element: SwitchButton | None = None):
         self.deselect_all()
-        element.toogle()
+        if element is not None:
+            element.toogle()
         self.is_cleaned = False
-        if self.selected_tool == tool:
-            self.prev_tool = self.selected_tool
-            self.selected_tool = Tools.EMPTY
+        if self.selected_tool.get() == tool and element is not None:
+            self.prev_tool.set(self.selected_tool.get())
+            self.selected_tool.set(Tools.EMPTY)
             element.deselect()
             return
 
-        self.prev_tool = self.selected_tool
-        self.selected_tool = tool
+        self.prev_tool.set(self.selected_tool.get())
+        self.selected_tool.set(tool)
 
     def on_resize(self, event):
         self.border.configure(width=event.width)
         self.border.place(x=0, y=self.winfo_height() - self.border_width)
 
     def get_selected_tool(self) -> Tools:
-        return self.selected_tool
+        return self.selected_tool.get()
 
     def get_prev_tool(self) -> Tools:
-        return self.prev_tool
+        return self.prev_tool.get()

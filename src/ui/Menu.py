@@ -29,7 +29,7 @@ probability_rules = {
 
 class Menu(ctk.CTkFrame):
     def __init__(self, parent, graph: Graph, **kwargs):
-        ctk.CTkFrame.__init__(self, parent, **kwargs)
+        super().__init__(parent, **kwargs)
         self.root = parent
         self.graph = graph
         self.search_path_event = Event()
@@ -39,8 +39,7 @@ class Menu(ctk.CTkFrame):
         self.bind("<Configure>", self.on_resize)
         self.create_widgets()
 
-        self.border = ctk.CTkLabel(self, text="", width=self.border_width,
-                                   height=self.winfo_height(), fg_color=Theme.get("text_color"))
+        self.border = ctk.CTkLabel(self, text="", width=self.border_width, height=self.winfo_height(), fg_color=Theme.get("text_color"))
 
     def on_resize(self, event):
         self.border.configure(height=event.height)
@@ -108,6 +107,15 @@ class Menu(ctk.CTkFrame):
 
     def update_graph_info(self, graph: Graph):
         self.density_label.configure(text=f"Density: {round(graph.density, 2)}")
+        if self.graph.config.is_show_intersections:
+            self.intersection_label.configure(text=f"Inersections: {len(graph.intersections)}")
+        else:
+            self.intersection_label.configure(text=f"Inersections: off")
+
+        if self.graph.path_distance is not None:
+            self.path_distance_label.configure(text=f"Path distance: {self.graph.path_distance}px")
+        else:
+            self.path_distance_label.configure(text=f"Path distance: None")
 
     def create_widgets(self):
         graph_state.subscribe(self.update_matrix_window)
@@ -131,6 +139,12 @@ class Menu(ctk.CTkFrame):
 
         self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
+
+        self.intersection_label = Typography(self)
+        self.intersection_label.pack(anchor="w", padx=10)
+
+        self.path_distance_label = Typography(self)
+        self.path_distance_label.pack(anchor="w", padx=10)
 
         self.option = ctk.CTkOptionMenu(self, values=["BFS", "Dijkstra", "DFS"], command=self.algorithm_change)
         self.option.pack(anchor="w", padx=10, pady=10, fill="x")

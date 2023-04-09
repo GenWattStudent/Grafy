@@ -71,7 +71,7 @@ class DrawHelper:
 
         return Node(
             vector, node_id, radius, Theme.get("node_color"),
-            Theme.get("secondary_color"),
+            Theme.get("node_selected_color"),
             Theme.get("text_color"))
 
     def generate_nodes(self, graph: Graph, radius: int, max_width: float, max_height: float) -> list[Node]:
@@ -103,11 +103,11 @@ class DrawHelper:
         return edges
 
     def generate_wages(self, graph: Graph, nodes: list[Node]) -> GraphMatrix:
-        wages = GraphMatrix(graph.config.number_of_nodes, float_type=True)
+        wages = GraphMatrix(graph.matrix.number_of_nodes, float_type=True)
         GraphHelper.fill_matrix_with_infinity(wages)
 
-        for i in range(graph.config.number_of_nodes - 1):
-            for j in range(i + 1, graph.config.number_of_nodes):
+        for i in range(graph.matrix.number_of_nodes - 1):
+            for j in range(i + 1, graph.matrix.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)

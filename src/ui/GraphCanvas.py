@@ -6,6 +6,7 @@ from src.graph.elements.Edge import Edge
 from src.graph.elements.Intersection import Intersection
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.state.AlgorithmState import algorithm_state
+from src.state.GraphState import graph_state
 from src.graph.drag.dragCanvas import DragCanvas
 from src.Theme import Theme
 import math as math
@@ -44,8 +45,8 @@ class GraphCanvas(tk.Canvas):
     def change_cursor(self, event):
         # change cursor when mouse if over node
         x, y = self.drag.canvas_to_graph_coords(event.x, event.y)
-        for node in self.graph.nodes:
-            if node.is_under_cursor(Vector(x, y)):
+        for element in self.graph.get_graph_elements():
+            if element.is_under_cursor(Vector(x, y)):
                 return self.configure(cursor='hand1')
 
         self.configure(cursor='fleur')
@@ -79,29 +80,17 @@ class GraphCanvas(tk.Canvas):
         self.draw_nodes_and_edges()
 
     def search_path(self) -> tuple[float | None, list[int] | dict[int, list[int]]] | None:
-        if algorithm_state.get_search_algorithm().min_selected_nodes == len(self.graph.generator.selected_nodes):
+        selected_nodes = self.graph.get_nodes_from_list(self.graph.selected_elements)
+        if algorithm_state.get_search_algorithm().min_selected_nodes == len(selected_nodes):
             distance, path = self.graph.generator.search_best_path(
-                self.graph, self.graph.nodes, self.graph.generator.selected_nodes, algorithm_state.get_search_algorithm().algorithm_name)
+                self.graph, self.graph.nodes, selected_nodes, algorithm_state.get_search_algorithm().algorithm_name)
 
             self.draw_path(path)
-            if distance is None:
-                return
-            text = f"Distance: {distance}px"
-            # check if distance is ininity
-            if distance == math.inf:
-                text = "No path found"
-
-            self.canvas_elements.append(self.create_text(
-                20, 20, text=text, fill=Theme.get("text_color"),
-                anchor="w", tags="path"))
+            self.graph.path_distance = distance
+            graph_state.set(self.graph)
             return distance, path
 
     def draw_intersections(self, intersections: list[Intersection]):
-        x, y = self.drag.canvas_to_graph_coords(20, 40)
-        self.canvas_elements.append(
-            self.create_text(
-                x, y, text=f"Intersections: {len(intersections)}", fill=Theme.get("text_color"),
-                anchor="w", tags="intersection_text"))
         for intersection in intersections:
             intersection.draw(self)
 
@@ -133,3 +122,8 @@ class GraphCanvas(tk.Canvas):
         self.delete("node")
         for node in nodes:
             node.draw(self)
+
+    def canvas_to_graph_coords(self, canvas_x, canvas_y):
+        screen_x = self.canvasx(0)
+        screen_y = self.canvasy(0)
+        return canvas_x + screen_x, canvas_y + screen_y

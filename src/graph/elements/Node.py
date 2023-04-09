@@ -1,6 +1,7 @@
 from src.utils.Vector import Vector
 import tkinter as tk
 from src.Theme import Theme
+import uuid   
 
 
 class Node:
@@ -18,6 +19,7 @@ class Node:
         self.dragged_color: str = Theme.get("node_dragged_color")
         self.canvas_id: tk._CanvasItemId | None = None
         self.text: tk._CanvasItemId | None = None
+        self.id = uuid.uuid4()
 
     def delete(self, canvas: tk.Canvas):
         if self.canvas_id and self.text:
@@ -31,18 +33,17 @@ class Node:
         if self.is_selected:
             return self.selected_color
         elif self.is_dragged:
-            return self.color
+            return self.dragged_color
         else:
             return self.color
 
     def draw(self, canvas: tk.Canvas):
-        print(self.is_selected)
         color = self.get_color()
 
-        if self.canvas_id and self.text:
-            canvas.delete(self.canvas_id)
-            canvas.delete(self.text)
-        print(color)
+        # if self.canvas_id and self.text:
+        #     canvas.delete(self.canvas_id)
+        #     canvas.delete(self.text)
+
         self.canvas_id = canvas.create_oval(
             self.position.x - self.radius, self.position.y - self.radius, self.position.x + self.radius, self.position.y +
             self.radius, fill=color, outline=self.border_color, width=2, tags=("node", str(self.index)))
@@ -61,8 +62,8 @@ class Node:
     def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other) -> bool:
-        return self.index == other.index
+    def __eq__(self, other: "Node") -> bool:
+        return self.id == other.id
 
     def distance(self, other: "Node"):
         return (self.position - other.position).length()

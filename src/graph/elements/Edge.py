@@ -2,26 +2,20 @@ from src.graph.elements.Node import Node
 import tkinter as tk
 from src.Theme import Theme
 from src.utils.Vector import Vector
+from src.graph.elements.CanvasElement import CanvasElement
 
 
-class Edge:
+class Edge(CanvasElement):
     def __init__(self, node1: Node, node2: Node, distance: float | None = None, color: str = 'white'):
+        super().__init__(color)
         self.node1 = node1
         self.node2 = node2
-        self.is_dragged: bool = False
         self.is_path: bool = False
-        self.is_selected: bool = False
         self.distance = distance
-        self.color = color
         self.path_color = Theme.get("edge_path_color")
         self.dragged_color = Theme.get("edge_dragged_color")
         self.selected_color = Theme.get("edge_selected_color")
-        self.canvas_id: tk._CanvasItemId | None = None
         self.id = f"{node1.id}-{node2.id}"
-
-    def delete(self, canvas: tk.Canvas):
-        if self.canvas_id:
-            canvas.delete(self.canvas_id)
 
     def is_under_cursor(self, cursor_position: Vector, threshold: float = 5) -> bool:
         x1, y1 = self.node1.position.x, self.node1.position.y

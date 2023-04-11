@@ -33,7 +33,10 @@
     "reportInvalidStringEscapeSequence": "warning"
   },
   "python.languageServer": "Pylance",
-  "python.formatting.provider": "autopep8",
+  "python.formatting.provider": "none",
   "editor.formatOnSave": true,
-  "sqltools.connections": []
+  "sqltools.connections": [],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }

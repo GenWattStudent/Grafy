@@ -40,13 +40,15 @@ class GraphFile(FileManager):
             dict = graph.get_graph_dictionary()
             self.write_dict(txt_file, dict)
             txt_file.write("\n")
-            if len(
-                    graph.generator.selected_nodes) > 0 and len(
-                    graph.generator.selected_nodes) == algorithm_state.get_search_algorithm().min_selected_nodes:
-
+            selected_nodes = graph.get_nodes_from_list(graph.selected_elements)
+            if len(selected_nodes) > 0 and len(selected_nodes) == algorithm_state.get_search_algorithm().min_selected_nodes:
                 txt_file.write("BFS: " + "\n\n")
-                bfs_dict = SearchAlgorithms().bfs(dict, graph.generator.selected_nodes[0])
-                self.write_dict(txt_file, bfs_dict)
+                search_algorithms = SearchAlgorithms()
+                bfs_dict = search_algorithms.bfs(dict, selected_nodes[0])
+                bfs_layers = search_algorithms.get_layers_from_bfs_output(bfs_dict, selected_nodes[0].index - 1)
+                for layer, vertices in bfs_layers:
+                     txt_file.write("Layer {}: {}".format(layer + 1, vertices) + "\n")
+                
 
     def write_dict(self, txt_file: TextIOWrapper, dict:  dict[int, list[int]]):
         dict_array = str(dict).replace("{", "").replace("}", "").split("],")

@@ -2,11 +2,10 @@ from __future__ import annotations
 import customtkinter as ctk
 from src.Theme import Theme
 from src.state.State import State
+from src.ui.SwitchButton import SwitchButton
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.graph.Graph import Graph
-from src.graph.elements.Node import Node
-from src.graph.elements.Edge import Edge
 from enum import Enum
 from src.utils.Event import Event
 
@@ -17,34 +16,6 @@ class Tools(Enum):
     ADD_NODE = "ADD_NODE"
     ADD_EDGE = "ADD_EDGE"
     DELETE = "DELETE"
-
-
-class SwitchButton(ctk.CTkButton):
-    def __init__(self, master, **kw):
-        super().__init__(master, **kw)
-        self.master = master
-        self.selected = False
-        self.configure(
-            fg_color=Theme.get("canvas_bg_color"),
-            border_spacing=0, corner_radius=0)
-
-    def select(self):
-        self.selected = True
-        self.configure(fg_color=Theme.get("secondary_color"))
-
-    def deselect(self):
-        self.selected = False
-        self.configure(fg_color=Theme.get("canvas_bg_color"))
-
-    def is_selected(self) -> bool:
-        return self.selected
-
-    def toogle(self):
-        if self.selected:
-            self.deselect()
-        else:
-            self.select()
-
 
 class ToolState(State):
     def __init__(self, initial_state: Tools = Tools.EMPTY):
@@ -61,9 +32,9 @@ class ToolBar(ctk.CTkFrame):
         self.selected_tool: State = ToolState()
         self.prev_tool: State = ToolState()
         self.is_cleaned = False
-        self.selected_elements = []
 
         self.delete_event = Event()
+        self.undo_event = Event()
 
         self.border = ctk.CTkLabel(self, text="", fg_color=Theme.get("text_color"))
 
@@ -71,23 +42,24 @@ class ToolBar(ctk.CTkFrame):
         self.select_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_node_button = SwitchButton(self, text="Add Node")
         self.add_node_button.pack(anchor="w", side="left", padx=10, pady=10)
-        self.delete_button = SwitchButton(self, text="Delete")
+        self.delete_button = SwitchButton(self, text="Delete", fg_color=Theme.get("error_color"), hover_color=Theme.get("error_hover_color"), state="disabled")
         self.delete_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_edge_button = SwitchButton(self, text="Add Edge")
         self.add_edge_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.undo_button = SwitchButton(self, text="Undo")
+        self.undo_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
         self.delete_button.configure(command=self.delete_tool)
+        self.undo_button.configure(command=self.undo)
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
 
         self.bind("<Configure>", self.on_resize)
+        self.bind("<Delete>", self.delete_tool)
 
-    def get_selected_nodes(self) -> list[Node]:
-        return [element for element in self.selected_elements if isinstance(element, Node)]
-
-    def get_selected_edges(self) -> list[Edge]:
-        return [element for element in self.selected_elements if isinstance(element, Edge)]
+    def undo(self):
+        self.undo_event()
 
     def on_delete(self, cb):
         self.delete_event += cb
@@ -95,10 +67,22 @@ class ToolBar(ctk.CTkFrame):
     def off_delete(self, cb):
         self.delete_event -= cb
 
+    def on_undo(self, cb):
+        self.undo_event += cb
+    
+    def off_undo(self, cb):
+        self.undo_event -= cb
+
+    def change_delete_button_style(self, selected_elements: int):
+        if selected_elements == 0:
+            self.delete_button.configure(state = "disabled")
+        else:
+            self.delete_button.configure(state = "normal")
+
     def delete_tool(self):
         # get node and edges to delete
-        nodes_to_delete = self.get_selected_nodes()
-        edges_to_delete = self.get_selected_edges()
+        nodes_to_delete = self.graph.get_nodes_from_list(self.graph.selected_elements)
+        edges_to_delete = self.graph.get_edges_from_list(self.graph.selected_elements)
 
         # add to delete also edges connected to nodes to delete
         for edge in self.graph.edges:
@@ -115,22 +99,25 @@ class ToolBar(ctk.CTkFrame):
         self.add_node_button.deselect()
         self.add_edge_button.deselect()
 
-    def select_tool(self, element):
+    def select(self, element):
         if element.is_selected:
             element.is_selected = False
-            self.selected_elements.remove(element)
+            self.graph.selected_elements.remove(element)
             return
         element.is_selected = True
-        self.selected_elements.append(element)
+        self.graph.selected_elements.append(element)
+        self.change_delete_button_style(len(self.graph.selected_elements))
 
-    def deselect_tool(self, element):
+    def deselect(self, element):
         element.is_selected = False
-        self.selected_elements.remove(element)
+        self.graph.selected_elements.remove(element)
+        self.change_delete_button_style(len(self.graph.selected_elements))
 
     def deselect_all_tool(self):
-        for element in self.selected_elements:
+        for element in self.graph.selected_elements:
             element.is_selected = False
-        self.selected_elements = []
+        self.graph.selected_elements = []
+        self.change_delete_button_style(len(self.graph.selected_elements))
 
     def change_tool(self, tool: Tools, element: SwitchButton | None = None):
         self.deselect_all()

@@ -8,6 +8,8 @@ text_color_dark = "#dbdbdb"
 bg_color_light = "#dbdbdb"
 bg_color_dark = "#2b2b2b"
 distinction_color = "#144870"
+error_color = "#960e0c"
+error_hover_color = "#c0654f"
 
 
 variable_theme = {
@@ -22,7 +24,10 @@ variable_theme = {
         "edge_selected_color": distinction_color,
         "text_color": text_color_dark,
         "intersection_color": "yellow",
-        "secondary_color": secondary_color_dark
+        "secondary_color": secondary_color_dark,
+        "error_color": error_color,
+        "error_hover_color": error_hover_color,
+        "distinction_color": distinction_color,
     },
     "light": {
         "node_color": secondary_color_light,
@@ -35,7 +40,10 @@ variable_theme = {
         "intersection_color": "yellow",
         "canvas_bg_color": bg_color_light,
         "text_color": text_color_light,
-        "secondary_color": secondary_color_light
+        "secondary_color": secondary_color_light,
+        "error_color": error_color,
+        "error_hover_color": error_hover_color,
+        "distinction_color": distinction_color,
     }
 }
 

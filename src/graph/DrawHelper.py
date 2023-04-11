@@ -11,7 +11,6 @@ from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import FindIntersection
 from src.state.AlgorithmState import SearchAlgorithmType, algorithm_state
-import customtkinter as ctk
 from src.Theme import Theme
 
 

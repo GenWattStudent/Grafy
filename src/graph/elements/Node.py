@@ -1,27 +1,25 @@
 from src.utils.Vector import Vector
 import tkinter as tk
 from src.Theme import Theme
-import uuid   
+from src.graph.elements.CanvasElement import CanvasElement 
 
 
-class Node:
+class Node(CanvasElement):
     def __init__(
             self, position: Vector, index: int, radius: int = 15, color: str = 'red', selected_color: str = 'blue',
             border_color: str = 'white'):
+        super().__init__(color)
         self.index: int = index
         self.position: Vector = position
         self.radius: int = radius
-        self.is_dragged: bool = False
-        self.is_selected: bool = False
-        self.color: str = color
         self.selected_color: str = selected_color
         self.border_color: str = border_color
         self.dragged_color: str = Theme.get("node_dragged_color")
-        self.canvas_id: tk._CanvasItemId | None = None
         self.text: tk._CanvasItemId | None = None
-        self.id = uuid.uuid4()
 
     def delete(self, canvas: tk.Canvas):
+        self.is_dragged = False
+        self.is_selected = False
         if self.canvas_id and self.text:
             canvas.delete(self.canvas_id)
             canvas.delete(self.text)
@@ -39,10 +37,6 @@ class Node:
 
     def draw(self, canvas: tk.Canvas):
         color = self.get_color()
-
-        # if self.canvas_id and self.text:
-        #     canvas.delete(self.canvas_id)
-        #     canvas.delete(self.text)
 
         self.canvas_id = canvas.create_oval(
             self.position.x - self.radius, self.position.y - self.radius, self.position.x + self.radius, self.position.y +

@@ -9,14 +9,11 @@ from src.GraphFile import FileManager
 from src.layout.Kwaii import Kwaii
 from src.utils.Event import Event
 from src.graph.elements.Intersection import Intersection
-from src.ui.Toolbar import ToolBar
 import random
 
 
 class Graph:
-    def __init__(
-            self, file_manager: FileManager | None = None, config: GraphConfig = GraphConfig(),
-            toolbar: ToolBar | None = None,):
+    def __init__(self, file_manager: FileManager | None = None, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
         self.matrix = GraphMatrix(config.number_of_nodes)
         self.nodes: list[Node] = []
@@ -25,7 +22,6 @@ class Graph:
         self.intersections: list[Intersection] = []
         self.selected_elements: list[Node | Edge | Intersection] = []
         self.generator = DrawHelper()
-        self.toolbar = toolbar
         self.density = 0
         self.file_manager = file_manager
         self.config = config
@@ -43,22 +39,6 @@ class Graph:
             if element.canvas_id is not None and element.canvas_id == canvas_id:
                 return element
         return None
-
-    def select(self, element: Node | Edge | Intersection):
-        if element not in self.selected_elements:
-            element.is_selected = True
-            self.selected_elements.append(element)
-            self.graph_change_event()
-        else:
-            element.is_selected = False
-            self.selected_elements.remove(element)
-            self.graph_change_event()
-
-    def deselect(self):
-        for element in self.selected_elements:
-            element.is_selected = False
-        self.selected_elements.clear()
-        self.graph_change_event()
 
     def get_nodes_from_list(self, elements: list[Node | Edge | Intersection]) -> list[Node]:
         return [element for element in elements if isinstance(element, Node)]
@@ -81,13 +61,17 @@ class Graph:
         self.delete_edges(edges)
         self.delete_nodes(nodes)
 
-    def delete_selected(self):
-        self.delete(self.selected_elements)
-        self.selected_elements.clear()
-        self.graph_change_event()
+    def delete_element(self, element: Node | Edge | Intersection):
+        if isinstance(element, Node):
+            self.delete_node(element)
+        elif isinstance(element, Edge):
+            self.delete_edge(element)
 
-    def is_toolbar(self):
-        return self.toolbar is not None
+    def add_element(self, element: Node | Edge | Intersection):
+        if isinstance(element, Node):
+            self.add_node(element)
+        elif isinstance(element, Edge):
+            self.add_edge(element)
 
     def on_change(self, callback):
         self.graph_change_event += callback
@@ -105,10 +89,7 @@ class Graph:
         return self.matrix.get_graph_dictionary()
 
     def calculate_density(self) -> float:
-        if self.config.number_of_nodes > 1:
-            return 2 * len(self.edges) / (self.config.number_of_nodes * (self.config.number_of_nodes - 1))
-        else:
-            return 0
+        return 2 * len(self.edges) / (self.config.number_of_nodes * (self.config.number_of_nodes - 1)) + 0.0001
 
     def set_number_of_nodes(self, number_of_nodes: int):
         self.matrix.set_number_of_nodes(number_of_nodes)
@@ -162,7 +143,7 @@ class Graph:
         return self.matrix
 
     def update(self, config: GraphConfig, canvas: tk.Canvas) -> GraphMatrix:
-        if self.prev_config is None or self.prev_config.number_of_nodes != config.number_of_nodes:
+        if self.prev_config is None or self.matrix.number_of_nodes != config.number_of_nodes:
             self.set_number_of_nodes(config.number_of_nodes)
             self.create(canvas)
         if self.prev_config is None or self.prev_config.probability != config.probability:
@@ -191,5 +172,5 @@ class Graph:
                 if random.random() < self.config.probability:
                     self.matrix[i][j] = 1
                     self.matrix[j][i] = 1
-        self.save_matrix()
+
         return self.matrix

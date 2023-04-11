@@ -2,6 +2,7 @@ import numpy as np
 import heapq
 from src.graph.GraphMatrix import GraphMatrix
 from src.graph.elements.Node import Node
+from collections import defaultdict
 
 
 class SearchAlgorithms:
@@ -25,7 +26,25 @@ class SearchAlgorithms:
                     tree[node].append(neighbor)
                     tree[neighbor].append(node)
 
-        return tree
+        return tree 
+
+   
+    def get_layers_from_bfs_output(self, bfs_output, starting_vertex: int):
+        layers = defaultdict(list)
+        layers[0] = [starting_vertex]
+        visited = set([starting_vertex]) # Keep track of visited vertices
+        queue: list[tuple[int, int]] = [(starting_vertex, 0)] 
+
+        while queue:
+            vertex, layer = queue.pop(0)
+            adjacent_vertices = bfs_output[vertex]
+            for adjacent_vertex in adjacent_vertices:
+                if adjacent_vertex not in visited:
+                    visited.add(adjacent_vertex)
+                    queue.append((adjacent_vertex, layer + 1))
+                    layers[layer + 1].append(adjacent_vertex)
+
+        return sorted(layers.items())
 
     def dfs(self, matrix: dict[int, list[int]], start: Node) -> dict[int, list[int]]:
         node_id = int(start.index) - 1  # indeks wierzchołka startowego

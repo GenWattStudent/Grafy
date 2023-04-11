@@ -38,10 +38,9 @@ class Typography(ctk.CTkLabel):
 
     def set_variant(self, variant: TextVariant):
         if variant == TextVariant.normal:
-            print(Theme.get("canvas_bg_color"))
             self.configure(text_color=Theme.get("text_color"))
         elif variant == TextVariant.error:
-            self.configure(text_color="red")
+            self.configure(text_color=Theme.get("error_hover_color"))
         elif variant == TextVariant.success:
             self.configure(text_color="green")
         elif variant == TextVariant.warning:

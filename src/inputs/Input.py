@@ -12,7 +12,9 @@ class Input(ctk.CTkEntry):
         self.text_var.trace("w", lambda name, index, mode, sv=self.text_var: self.handle_change(sv))
 
         self.frame = ctk.CTkFrame(master, fg_color="transparent")
-        self.frame.pack(fill="x")
+        self.frame.pack(fill="x", anchor="w")
+
+        self.error_labels: list[ctk.CTkLabel] = []
 
         super().__init__(master=self.frame, textvariable=self.text_var,  **kwargs)
 
@@ -44,25 +46,23 @@ class Input(ctk.CTkEntry):
 
         self.set_input_value(self.last_correct_value)
 
-    def show_error(self, error_message):
-        self.error_label = Typography(self.frame, text=error_message, type=TextType.caption, variant=TextVariant.error)
-        self.error_label.pack(anchor="w", padx=10, pady=5)
-
     def hide_error(self):
-        if hasattr(self, 'error_label') and self.error_label:
-            self.error_label = self.error_label.destroy()
+        error_labels_copy = list(self.error_labels)
+        for label in error_labels_copy:
+            self.error_labels.remove(label)
+            label.destroy()
 
     def validate(self, value) -> bool:
         self.hide_error()
 
-        error_message = ""
         for rule in self.rules:
             if not self.rules[rule](value):
-                error_message += self.rules[rule].error_message + ", \n"
+                label = Typography(self.frame, text=self.rules[rule].error_message + ",", type=TextType.body, variant=TextVariant.error)
+                label.pack(anchor="w", padx=10)
+                self.error_labels.append(label)
 
-        if error_message:
-            error_message = error_message[:-3] + "."
-            self.show_error(error_message)
+        if len(self.error_labels) > 0:
+            self.error_labels[-1].configure(text=self.error_labels[-1].cget("text")[:-1] + ".")
             return False
         return True
 

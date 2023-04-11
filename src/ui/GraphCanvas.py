@@ -7,7 +7,7 @@ from src.graph.elements.Intersection import Intersection
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.state.AlgorithmState import algorithm_state
 from src.state.GraphState import graph_state
-from src.graph.drag.dragCanvas import DragCanvas
+from src.graph.helpers.CanvasHelper import CanvasHelper
 from src.Theme import Theme
 import math as math
 import threading
@@ -23,7 +23,7 @@ class GraphCanvas(tk.Canvas):
         self.canvas_elements = []
 
         self.graph: Graph = graph
-        self.drag = DragCanvas(self, self.draw_config, self.graph)
+        self.canvas_helper = CanvasHelper(self)
 
         self.configure(bg=Theme.get("canvas_bg_color"))
         self.configure(highlightthickness=0)
@@ -44,7 +44,7 @@ class GraphCanvas(tk.Canvas):
 
     def change_cursor(self, event):
         # change cursor when mouse if over node
-        x, y = self.drag.canvas_to_graph_coords(event.x, event.y)
+        x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
         for element in self.graph.get_graph_elements():
             if element.is_under_cursor(Vector(x, y)):
                 return self.configure(cursor='hand1')
@@ -122,8 +122,3 @@ class GraphCanvas(tk.Canvas):
         self.delete("node")
         for node in nodes:
             node.draw(self)
-
-    def canvas_to_graph_coords(self, canvas_x, canvas_y):
-        screen_x = self.canvasx(0)
-        screen_y = self.canvasy(0)
-        return canvas_x + screen_x, canvas_y + screen_y

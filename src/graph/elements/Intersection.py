@@ -1,20 +1,12 @@
 from src.utils.Vector import Vector
+from src.graph.elements.CanvasElement import CanvasElement
 import tkinter as tk
-import uuid
 
-
-class Intersection:
+class Intersection(CanvasElement):
     def __init__(self, position: Vector, color: str = 'yellow', radius: int = 4):
+        super().__init__(color)
         self.position = position
-        self.color = color
-        self.canvas_id: tk._CanvasItemId | None = None
         self.radius = radius
-        self.id = uuid.uuid4()
-        self.is_selected = False
-
-    def delete(self, canvas: tk.Canvas):
-        if self.canvas_id:
-            canvas.delete(self.canvas_id)
 
     def draw(self, canvas: tk.Canvas):
         if self.canvas_id:

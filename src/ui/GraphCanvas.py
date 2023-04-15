@@ -1,5 +1,5 @@
 import tkinter as tk
-from src.graph.Graph import Graph
+from src.graph.GraphModel import GraphModel
 from src.utils.Vector import Vector
 from src.graph.elements.Node import Node
 from src.graph.elements.Edge import Edge
@@ -14,15 +14,14 @@ import threading
 
 
 class GraphCanvas(tk.Canvas):
-    def __init__(self, master, graph: Graph, draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
+    def __init__(self, master, graph: GraphModel, draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
-
         self.is_intersection: bool = False
         self.draging_node = None
         self.canvas_elements = []
 
-        self.graph: Graph = graph
+        self.graph: GraphModel = graph
         self.canvas_helper = CanvasHelper(self)
 
         self.configure(bg=Theme.get("canvas_bg_color"))
@@ -122,3 +121,8 @@ class GraphCanvas(tk.Canvas):
         self.delete("node")
         for node in nodes:
             node.draw(self)
+
+    def draw_edge_preview(self, event, node: Node):
+        self.delete("edge_preview")
+        x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
+        return self.create_line(node.position.x, node.position.y, x, y, fill=Theme.get("edge_color"), width=2, tags="edge_preview")

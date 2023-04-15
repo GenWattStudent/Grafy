@@ -1,16 +1,15 @@
 import customtkinter as ctk
-from src.utils.Event import Event
-from src.inputs.Input import Input
-from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
-from src.ui.Typography import Typography, TextType
+import src.constance as const
+from src.Theme import Theme
+from src.state.AlgorithmState import algorithm_state
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
-from src.state.AlgorithmState import algorithm_state
+from src.graph.GraphModel import GraphModel
+from src.ui.Menu.Menu import Menu
+from src.ui.Typography import Typography
 from src.ui.windows.GraphDetails import GraphDeatails
-from src.graph.Graph import Graph
-from src.Theme import Theme
-import src.constance as const
-
+from src.inputs.Input import Input
+from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
 
 number_of_nodes_rules = {
     "is_positive": Is_positive(),
@@ -27,40 +26,18 @@ probability_rules = {
 }
 
 
-class Menu(ctk.CTkFrame):
-    def __init__(self, parent, graph: Graph, **kwargs):
-        super().__init__(parent, **kwargs)
-        self.root = parent
-        self.graph = graph
-        self.search_path_event = Event()
-        self.generate_graph_event = Event()
-        self.border_width = 2
+class GraphMenu(Menu):
+    def __init__(self, parent, graph_model: GraphModel, border_width = 2,**kwargs):
+        super().__init__(parent, graph_model, **kwargs)
         self.is_matrix_window_open = False
-        self.bind("<Configure>", self.on_resize)
+        self.border_width = border_width
         self.create_widgets()
 
-        self.border = ctk.CTkLabel(self, text="", width=self.border_width, height=self.winfo_height(), fg_color=Theme.get("text_color"))
-
-    def on_resize(self, event):
-        self.border.configure(height=event.height)
-
-    def on_search_path(self, cb):
-        self.search_path_event += cb
-
-    def off_search_path(self, cb):
-        self.search_path_event -= cb
-
-    def on_generate_graph(self, cb):
-        self.generate_graph_event += cb
-
-    def off_generate_graph(self, cb):
-        self.generate_graph_event -= cb
-
-    def update_matrix_window(self, graph: Graph):
+    def update_matrix_window(self, graph: GraphModel):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
             return self.matrix_window.update_graph(graph)
 
-    def create_matrix(self, graph: Graph):
+    def create_matrix(self, graph: GraphModel):
         # generate toplevel window
         self.matrix_window = GraphDeatails(self, graph=graph)
         # make window on top of all windows
@@ -84,13 +61,11 @@ class Menu(ctk.CTkFrame):
         self.button.configure(state="disabled")
         if not self.is_matrix_window_open:
             self.is_matrix_window_open = True
-            self.create_matrix(self.graph)
+            self.create_matrix(self.graph_model)
 
     def pack(self, **kwargs):
         super().pack(**kwargs)
         self.root.update()
-        self.option.configure(width=self.winfo_width())
-        self.border.place(x=self._current_width - self.border_width, y=0)
 
     def search_path(self):
         self.search_path_event()
@@ -105,25 +80,26 @@ class Menu(ctk.CTkFrame):
     def probability_filtr(self, value: str) -> str:
         return value.replace(",", ".")
 
-    def update_graph_info(self, graph: Graph):
-        self.density_label.configure(text=f"Density: {round(graph.density, 2)}")
-        if self.graph.config.is_show_intersections:
-            self.intersection_label.configure(text=f"Inersections: {len(graph.intersections)}")
+    def update_graph_info(self, graph_model: GraphModel):
+        self.density_label.configure(text=f"Density: {round(graph_model.graph.density, 2)}")
+        if self.graph_model.config.is_show_intersections:
+            self.intersection_label.configure(text=f"Inersections: {len(graph_model.intersections)}")
         else:
             self.intersection_label.configure(text=f"Inersections: off")
 
-        if self.graph.path_distance is not None:
-            self.path_distance_label.configure(text=f"Path distance: {self.graph.path_distance}px")
+        if self.graph_model.path_distance is not None:
+            self.path_distance_label.configure(text=f"Path distance: {self.graph_model.path_distance}px")
         else:
             self.path_distance_label.configure(text=f"Path distance: None")
 
+    def destroy(self):
+        self.hide_matrix()
+        self.density_label.destroy()
+        self.intersection_label.destroy()
+        self.path_distance_label.destroy()
+        super().destroy()
+
     def create_widgets(self):
-        graph_state.subscribe(self.update_matrix_window)
-        graph_state.subscribe(self.update_graph_info)
-
-        self.label = Typography(self, text="Tools", type=TextType.h1)
-        self.label.pack(side="top", pady=10, anchor="w", padx=10)
-
         self.number_of_nodes_entry = Input(
             self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
         self.number_of_nodes_entry.on_change(lambda e: graph_config_state.set_number_of_nodes(int(e)))
@@ -134,17 +110,20 @@ class Menu(ctk.CTkFrame):
         self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
 
-        self.density_label = Typography(self, text=f"Density: {round(self.graph.density, 2)}")
-        self.density_label.pack(anchor="w", padx=10, pady=10)
-
         self.intersection_checkbox = ctk.CTkCheckBox(self, text="Intersection", command=self.toogle_intersection)
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
 
-        self.intersection_label = Typography(self)
-        self.intersection_label.pack(anchor="w", padx=10)
+        self.info_frame = ctk.CTkFrame(self)
+        self.info_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
-        self.path_distance_label = Typography(self)
-        self.path_distance_label.pack(anchor="w", padx=10)
+        self.density_label = Typography(self.info_frame, text=f"Density: {round(self.graph_model.graph.density, 2)}")
+        self.density_label.pack(anchor="w")
+
+        self.intersection_label = Typography(self.info_frame, text=f"Inersections: {len(self.graph_model.intersections)}")
+        self.intersection_label.pack(anchor="w")
+
+        self.path_distance_label = Typography(self.info_frame)
+        self.path_distance_label.pack(anchor="w")
 
         self.option = ctk.CTkOptionMenu(self, values=["BFS", "Dijkstra", "DFS"], command=self.algorithm_change)
         self.option.pack(anchor="w", padx=10, pady=10, fill="x")
@@ -161,3 +140,6 @@ class Menu(ctk.CTkFrame):
         self.generate_graph_button = ctk.CTkButton(
             self, text="Generate graph", command=lambda e=graph_config_state.get(): self.generate_graph_event(e))
         self.generate_graph_button.pack(padx=10, pady=10, fill="x")
+
+        graph_state.subscribe(self.update_matrix_window)
+        graph_state.subscribe(self.update_graph_info)

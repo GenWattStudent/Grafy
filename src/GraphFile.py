@@ -6,7 +6,7 @@ from src.graph.GraphHelper import GraphHelper
 from src.graph.GraphMatrix import GraphMatrix
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.graph.Graph import Graph
+    from src.graph.GraphModel import GraphModel
 from abc import abstractmethod, ABC
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.state.AlgorithmState import algorithm_state
@@ -14,7 +14,7 @@ from src.state.AlgorithmState import algorithm_state
 
 class FileManager(ABC):
     @abstractmethod
-    def save(self, graph: Graph):
+    def save(self, graph: GraphModel):
         pass
 
     @abstractmethod
@@ -28,7 +28,7 @@ class GraphFile(FileManager):
         self.filename = filename
         self.rowToSkip: int = 3
 
-    def save(self, graph: Graph):
+    def save(self, graph: GraphModel):
         # save graph and students info in a file
         with open(self.path + "/" + self.filename, "w", encoding="utf-8") as txt_file:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")

@@ -1,30 +1,27 @@
 from __future__ import annotations
-import random
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.graph.Graph import Graph
+    from src.graph.GraphModel import GraphModel
 from src.utils.Vector import Vector
 from src.layout.layout import Layout
 
 
 class Kwaii(Layout):
-    def __init__(self, graph: Graph):
+    def __init__(self, graph: GraphModel):
         self.graph = graph
-        self.repulsion_force_constant = 300
-        self.attraction_force_constant = 0.1
-        self.damping_constant = 0.5
+        self.repulsion_force_constant = 9000
+        self.attraction_force_constant = 0.3
+        self.damping_constant = 0.1
         self.time_step = 0.1
         self.iterations = 200
 
-    def layout(self) -> Graph:
-        for node in self.graph.nodes:
-            node.position = Vector(random.uniform(0, 800), random.uniform(0, 600))
+    def layout(self) -> GraphModel:
         for i in range(self.iterations):
             self.update_positions()
         return self.graph
 
     def update_positions(self) -> None:
-        # Update edge distances
+    # Update edge distances
         for edge in self.graph.edges:
             edge.distance = abs(edge.node1.position - edge.node2.position)
 

@@ -1,4 +1,4 @@
-from src.graph.Graph import Graph
+from src.graph.GraphModel import GraphModel
 from src.ui.GraphCanvas import GraphCanvas
 from src.GraphFile import GraphFile
 from src.graph.DrawGraphConfig import DrawGraphConfig
@@ -16,7 +16,7 @@ from src.graph.GraphConfig import GraphConfig
 
 
 class GraphController:
-    def __init__(self, model: Graph, view: GraphCanvas, toolbar: ToolBar, file_manager: GraphFile):
+    def __init__(self, model: GraphModel, view: GraphCanvas, toolbar: ToolBar, file_manager: GraphFile, current_mode: str):
         self.model = model
         self.view = view
         self.toolbar = toolbar
@@ -26,6 +26,7 @@ class GraphController:
         self.canvas_helper = CanvasHelper(view)
         self.toolbar_helper = ToolbarHelper(toolbar, model, view, self.draw_config)
         self.history: list[Command] = []
+        self.mode = current_mode
 
         self.toolbar.on_delete(self.delete)
         self.toolbar.on_undo(self.undo)
@@ -43,27 +44,31 @@ class GraphController:
             self.history.append(add_node_command)
             self.toolbar_helper.node_preview.delete(self.view)
             self.toolbar_helper.node_preview = None
+            graph_state.set(self.model)   
             self.view.draw_graph()
 
     def add_edge(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_EDGE:
             x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
-            if self.toolbar.get_selected_tool() == Tools.ADD_EDGE:
-                for node in self.model.nodes:
-                    if node.is_under_cursor(Vector(x, y)):
-                        if len(self.model.selected_elements) == 0:
+            for node in self.model.nodes:
+                if node.is_under_cursor(Vector(x, y)):
+                    if len(self.model.selected_elements) == 0:
+                        self.toolbar.select(node)
+                    else:
+                        node2 = self.model.selected_elements[0]
+                        if isinstance(node2, Node) and node != node2:
+                            # if edge already exists, do nothing
+                            if any(edge for edge in self.model.edges if (edge.node1 == node2 and edge.node2 == node) or (edge.node1 == node and edge.node2 == node2)):
+                                return
+                            add_edge_command = AddEdgeCommand(self.model, Edge(node2, node))
+                            add_edge_command.execute()
+                            self.history.append(add_edge_command)
+                            self.toolbar.deselect(node2)
                             self.toolbar.select(node)
-                        else:
-                            node2 = self.model.selected_elements[0]
-                            if isinstance(node2, Node):
-                                add_edge_command = AddEdgeCommand(self.model, Edge(node2, node))
-                                add_edge_command.execute()
-                                self.history.append(add_edge_command)
-                                self.toolbar.deselect_all_tool()
-                                self.view.draw_nodes_and_edges()
-                                break
+                            self.view.draw_nodes_and_edges()
+                            break
+            graph_state.set(self.model)            
             self.view.draw_graph()
-            graph_state.set(self.model)
 
     def select(self, event):
         if self.toolbar.get_selected_tool() == Tools.SELECT:
@@ -89,13 +94,18 @@ class GraphController:
     def undo(self):
         if len(self.history) > 0:
             self.history.pop().undo()
+            graph_state.set(self.model)
             self.view.draw_graph()
 
     def on_click(self, event):
+        self.toolbar.focus_set()
         self.drag.click(event)
         self.add_node(event)
         self.add_edge(event)
-        self.select(event)  
+        self.select(event) 
+
+    def change_mode(self, mode: str):
+        self.mode = mode
 
     def on_drag(self, event):
         self.drag.drag(event)
@@ -106,16 +116,21 @@ class GraphController:
     def motion(self, event):
         self.view.change_cursor(event)
         self.toolbar_helper.show_node_preview(event)
+        self.toolbar_helper.show_edge_preview(event)
 
     def create(self, config: GraphConfig):
-        self.model.update(config, self.view)
-        self.model.create(self.view)
+        if self.mode == "Graph":
+            self.model.graph.update(self.view, config)
+            self.model.graph.create(self.view)
+        elif self.mode == "Tree":
+            # self.model.tree.update(self.view, config)
+            self.model.tree.create(self.view)
         self.view.is_intersection = config.is_show_intersections
-        graph_state.set(self.model)
         self.view.draw_graph()
+        graph_state.set(self.model)
 
     def update(self, config: GraphConfig):
-        self.model.update(config, self.view)
         self.view.is_intersection = config.is_show_intersections
-        graph_state.set(self.model)
+        self.model.update(config, self.view)
         self.view.draw_graph()
+        graph_state.set(self.model)

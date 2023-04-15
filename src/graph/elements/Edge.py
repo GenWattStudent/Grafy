@@ -27,12 +27,12 @@ class Edge(CanvasElement):
         return distance <= threshold
 
     def get_color(self) -> str:
-        if self.is_path:
+        if self.is_selected:
+            return self.selected_color
+        elif self.is_path:
             return self.path_color
         elif self.is_dragged:
             return self.dragged_color
-        elif self.is_selected:
-            return self.selected_color
         else:
             return self.color
 

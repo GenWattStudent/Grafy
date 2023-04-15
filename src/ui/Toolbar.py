@@ -5,7 +5,7 @@ from src.state.State import State
 from src.ui.SwitchButton import SwitchButton
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.graph.Graph import Graph
+    from src.graph.GraphModel import GraphModel
 from enum import Enum
 from src.utils.Event import Event
 
@@ -23,7 +23,7 @@ class ToolState(State):
 
 
 class ToolBar(ctk.CTkFrame):
-    def __init__(self, master, graph: Graph, **kw):
+    def __init__(self, master: ctk.CTkFrame, graph: GraphModel, **kw):
         super().__init__(master, **kw)
         self.master = master
         self.graph = graph
@@ -56,7 +56,7 @@ class ToolBar(ctk.CTkFrame):
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
 
         self.bind("<Configure>", self.on_resize)
-        self.bind("<Delete>", self.delete_tool)
+        self.bind("<Delete>", lambda event: self.delete_tool())
 
     def undo(self):
         self.undo_event()
@@ -80,6 +80,9 @@ class ToolBar(ctk.CTkFrame):
             self.delete_button.configure(state = "normal")
 
     def delete_tool(self):
+        if len(self.graph.selected_elements) == 0:
+            return
+
         # get node and edges to delete
         nodes_to_delete = self.graph.get_nodes_from_list(self.graph.selected_elements)
         edges_to_delete = self.graph.get_edges_from_list(self.graph.selected_elements)
@@ -88,6 +91,7 @@ class ToolBar(ctk.CTkFrame):
         for edge in self.graph.edges:
             if edge.node1 in nodes_to_delete or edge.node2 in nodes_to_delete:
                 edges_to_delete.append(edge)
+
 
         self.graph.delete_edges(edges_to_delete)
         self.graph.delete_nodes(nodes_to_delete)
@@ -116,7 +120,7 @@ class ToolBar(ctk.CTkFrame):
     def deselect_all_tool(self):
         for element in self.graph.selected_elements:
             element.is_selected = False
-        self.graph.selected_elements = []
+        self.graph.selected_elements.clear()
         self.change_delete_button_style(len(self.graph.selected_elements))
 
     def change_tool(self, tool: Tools, element: SwitchButton | None = None):

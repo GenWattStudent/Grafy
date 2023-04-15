@@ -6,7 +6,7 @@ from src.graph.GraphHelper import GraphHelper
 from src.utils.Vector import Vector
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.graph.Graph import Graph
+    from src.graph.GraphModel import GraphModel
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import FindIntersection
@@ -21,7 +21,7 @@ class DrawHelper:
         self.selected_nodes: list[Node] = []
         self.y_margin: int = 60
 
-    def setup_graph(self, graph: Graph, radius: int,
+    def setup_graph(self, graph: GraphModel, radius: int,
                     max_width: float, max_height: float) -> tuple[list[Node], list[Edge]]:
         nodes = self.generate_nodes(graph, radius, max_width, max_height)
         edges = self.generate_edges(nodes, graph)
@@ -43,7 +43,7 @@ class DrawHelper:
             node.is_selected = True
 
     def search_best_path(
-            self, graph: Graph, nodes: list[Node],
+            self, graph: GraphModel, nodes: list[Node],
             selected_nodes: list[Node], algoritmType=SearchAlgorithmType.DIJKSTRA) -> tuple[float | None, list[int] | dict[int, list[int]]]:
         results: list[int] | dict[int, list[int]] = []
         lowest_distance: float | None = None
@@ -66,16 +66,18 @@ class DrawHelper:
     def generate_random_node(self, node_id: int, radius: int, max_width: float, max_height: float) -> Node:
         max_x: float = max_width - radius
         max_y: float = max_height - radius
-        vector: Vector = Vector().random(radius, max_x, radius+self.y_margin, max_y)
+        min_x: float = radius
+        min_y: float = radius
+        vector: Vector = Vector().random(min_x, max_x, min_y+self.y_margin, max_y)
 
         return Node(
             vector, node_id, radius, Theme.get("node_color"),
             Theme.get("node_selected_color"),
             Theme.get("text_color"))
 
-    def generate_nodes(self, graph: Graph, radius: int, max_width: float, max_height: float) -> list[Node]:
+    def generate_nodes(self, graph: GraphModel, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []
-        for i in range(graph.config.number_of_nodes):
+        for i in range(graph.matrix.number_of_nodes):
             node: Node = self.generate_random_node(i + 1, radius, max_width, max_height)
             j = 0
             while j < 100 and GraphHelper.check_circle_overlap(
@@ -87,7 +89,7 @@ class DrawHelper:
 
         return nodes
 
-    def generate_edges(self, nodes: list[Node], graph: Graph) -> list[Edge]:
+    def generate_edges(self, nodes: list[Node], graph: GraphModel) -> list[Edge]:
         edges: list[Edge] = []
         for i in range(graph.matrix.number_of_nodes - 1):
             for j in range(i + 1, graph.matrix.number_of_nodes):
@@ -101,7 +103,7 @@ class DrawHelper:
 
         return edges
 
-    def generate_wages(self, graph: Graph, nodes: list[Node]) -> GraphMatrix:
+    def generate_wages(self, graph: GraphModel, nodes: list[Node]) -> GraphMatrix:
         wages = GraphMatrix(graph.matrix.number_of_nodes, float_type=True)
         GraphHelper.fill_matrix_with_infinity(wages)
 

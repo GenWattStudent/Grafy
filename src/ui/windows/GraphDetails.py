@@ -1,5 +1,5 @@
 from src.ui.windows.TopLevelWindow import TopLevelWindow
-from src.graph.Graph import Graph
+from src.graph.GraphModel import GraphModel
 from src.ui.Matrix import CanvasMatrix, GraphDetailsTab
 from src.ui.CanvasDictionary import CanvasDictionary
 from src.utils.Event import Event
@@ -7,7 +7,7 @@ import customtkinter as ctk
 
 
 class GraphDeatails(TopLevelWindow):
-    def __init__(self, master, graph: Graph, start_tab: str = "Matrix", width: float = 500, height: float = 500, *args, **kwargs):
+    def __init__(self, master, graph: GraphModel, start_tab: str = "Matrix", width: float = 500, height: float = 500, *args, **kwargs):
         super().__init__(master, title="Graph Details", *args, **kwargs)
         self.root = master
         self.width = width
@@ -22,16 +22,16 @@ class GraphDeatails(TopLevelWindow):
         self.tab_view.set(self.start_tab)
 
         # Graph matrix
-        self.matrix_widget: GraphDetailsTab = CanvasMatrix(self.tab_view.tab('Matrix'), matrix=graph.get_matrix())
+        self.matrix_widget: GraphModelDetailsTab = CanvasMatrix(self.tab_view.tab('Matrix'), matrix=graph.get_matrix())
         self.matrix_widget.pack(fill='both', expand=True)
         self.matrix_widget.draw()
         # Wages matrix
-        self.wages_matrix_widget: GraphDetailsTab = CanvasMatrix(
+        self.wages_matrix_widget: GraphModelDetailsTab = CanvasMatrix(
             parent=self.tab_view.tab('Wages Matrix'), matrix=graph.get_wages())
         self.wages_matrix_widget.pack(fill='both', expand=True)
         self.wages_matrix_widget.draw()
         # Dictionary
-        self.dictionary_widget: GraphDetailsTab = CanvasDictionary(
+        self.dictionary_widget: GraphModelDetailsTab = CanvasDictionary(
             parent=self.tab_view.tab('Dictionary'), matrix=graph.get_matrix())
         self.dictionary_widget.pack(fill='both', expand=True)
 
@@ -75,7 +75,7 @@ class GraphDeatails(TopLevelWindow):
             y = self.root.winfo_height() / 2
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
-    def update_graph(self, graph: Graph):
+    def update_graph(self, graph: GraphModel):
         self.graph = graph
         self.on_tab_change_event()
 

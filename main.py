@@ -1,7 +1,7 @@
 import customtkinter as ctk
-from src.graph.Graph import Graph
+from src.graph.GraphModel import GraphModel
 from src.GraphFile import GraphFile
-from src.ui.Menu import Menu
+from src.ui.Menu.TabMenu import TabMenu
 from src.ui.GraphCanvas import GraphCanvas
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
@@ -14,14 +14,15 @@ import src.constance as const
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.graph: Graph = Graph(file_manager=GraphFile(filename="graph.txt"))
+        self.graph: GraphModel = GraphModel(file_manager=GraphFile(filename="graph.txt"))
         self.frame = ctk.CTkFrame(self)
-        self.menu = Menu(parent=self, width=const.SCREEN_WIDTH / 5, graph=self.graph)
+        self.tab_menu = TabMenu(parent=self, width=const.SCREEN_WIDTH / 5, graph=self.graph)
         self.toolbar = ToolBar(self.frame, self.graph)
         self.draw_graph_config: DrawGraphConfig = DrawGraphConfig()
         self.graph_view = GraphCanvas(self, self.graph, self.draw_graph_config)
-        self.controller = GraphController(self.graph, self.graph_view, self.toolbar, GraphFile(filename="graph.txt"))
+        self.controller = GraphController(self.graph, self.graph_view, self.toolbar, GraphFile(filename="graph.txt"), self.tab_menu.current_tab)
 
+        self.bind("<Delete>", lambda ev: self.toolbar.delete_tool())
         self.setup_window()
 
     def on_search_path(self):
@@ -33,14 +34,15 @@ class App(ctk.CTk):
         self.title("Grafy lalala")
         self.geometry('%dx%d+%d+%d' % (const.SCREEN_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # bind events
-        self.menu.on_search_path(self.on_search_path)
-        self.menu.on_generate_graph(self.controller.create)
+        self.tab_menu.on_search_path(self.on_search_path)
+        self.tab_menu.on_generate_graph(self.controller.create)
+        self.tab_menu.on_tab_change(self.controller.change_mode)
         # add observers
         graph_config_state.subscribe(self.controller.update)
         graph_state.subscribe(self.graph.file_manager.save)
         # pack widgets
-        self.menu.pack(anchor="nw",  fill="y", side="left")
-        self.menu.pack_propagate(False)
+        self.tab_menu.pack(anchor="nw", fill="y", side="left")
+        self.tab_menu.pack_propagate(False)
 
         self.graph_view.pack(anchor="s", fill="both", expand=True, side="bottom")
         self.toolbar.pack(anchor="n", side="top", fill="x")

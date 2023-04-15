@@ -1,5 +1,5 @@
 from src.ui.Matrix import GraphDetailsTab
-from src.graph.Graph import GraphMatrix
+from src.graph.GraphModel import GraphMatrix
 import customtkinter as ctk
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from src.graph.Graph import Graph
+from src.graph.GraphModel import GraphModel
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class Draggable(ABC):
 
 
 class DragCanvas(Draggable):
-    def __init__(self, canvas: GraphCanvas, draw_config: DrawGraphConfig, graph: Graph):
+    def __init__(self, canvas: GraphModelCanvas, draw_config: DrawGraphConfig, graph: GraphModel):
         self.draging_node = None
         self.x = 0
         self.y = 0

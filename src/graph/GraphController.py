@@ -3,7 +3,7 @@ from src.ui.GraphCanvas import GraphCanvas
 from src.GraphFile import GraphFile
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.ui.Toolbar import ToolBar, Tools
-from src.graph.drag.DragCanvas import DragCanvas
+from src.graph.drag.dragCanvas import DragCanvas
 from src.graph.helpers.ToolbarHelper import ToolbarHelper
 from src.graph.helpers.CanvasHelper import CanvasHelper
 from src.utils.Vector import Vector

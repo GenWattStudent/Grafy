@@ -75,8 +75,8 @@ class GraphController:
             element = self.canvas_helper.find_elemment_under_cursor(event, self.model.get_graph_elements())
             if element:
                 self.toolbar.select(element)
-                self.view.draw_graph()
                 graph_state.set(self.model)
+                self.view.draw_graph()
 
     def delete(self, elements: list):
         if len(elements) == 0:
@@ -120,8 +120,10 @@ class GraphController:
 
     def create(self, config: GraphConfig):
         if self.mode == "Graph":
+            self.toolbar.deselect_all_tool()
             self.model.graph.update(self.view, config)
             self.model.graph.create(self.view)
+            print("graph created")
         elif self.mode == "Tree":
             # self.model.tree.update(self.view, config)
             self.model.tree.create(self.view)
@@ -130,6 +132,7 @@ class GraphController:
         graph_state.set(self.model)
 
     def update(self, config: GraphConfig):
+        self.toolbar.deselect_all_tool()
         self.view.is_intersection = config.is_show_intersections
         self.model.update(config, self.view)
         self.view.draw_graph()

@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from src.graph.GraphModel import GraphModel
 from enum import Enum
 from src.utils.Event import Event
+from src.state.GraphState import graph_state
 
 
 class Tools(Enum):
@@ -107,6 +108,7 @@ class ToolBar(ctk.CTkFrame):
         if element.is_selected:
             element.is_selected = False
             self.graph.selected_elements.remove(element)
+            graph_state.set(self.graph)
             return
         element.is_selected = True
         self.graph.selected_elements.append(element)

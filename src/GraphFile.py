@@ -1,5 +1,4 @@
 from __future__ import annotations
-import numpy as np
 
 import datetime
 from io import TextIOWrapper
@@ -37,24 +36,23 @@ class GraphFile(FileManager):
             txt_file.write("Grupa 2a, Informatyka dzienne" + "\n")
             txt_file.write("Macierz:" + "\n")
             txt_file.write(str(graph.get_matrix()) + "\n")
-            for row in graph.get_matrix():
-                np
             txt_file.write("Słownik sąsiedztwa:" + "\n\n")
 
             dict = graph.get_graph_dictionary()
             self.write_dict(txt_file, dict)
             txt_file.write("\n")
             selected_nodes = graph.get_nodes_from_list(graph.selected_elements)
+            print(len(selected_nodes))
             if len(selected_nodes) > 0 and len(
                     selected_nodes) == algorithm_state.get_search_algorithm().min_selected_nodes:
                 txt_file.write("BFS: " + "\n\n")
                 search_algorithms = SearchAlgorithms()
+                print(selected_nodes[0].index)
                 bfs_dict = search_algorithms.bfs(dict, selected_nodes[0])
                 bfs_layers = search_algorithms.get_layers_from_bfs_output(bfs_dict, selected_nodes[0].index - 1)
                 for layer, vertices in bfs_layers:
                     txt_file.write("Layer {}: {}".format(layer + 1, vertices) + "\n")
 
-            countDegree = len(graph.edges)
             sumCountDegree = len(graph.edges) * 2
             txt_file.write(f"\nSuma stopni: {sumCountDegree}")
             txt_file.write(f"\nLiczba krawedzi grafow: {int(0.5 * sumCountDegree)}")

@@ -19,10 +19,14 @@ class GraphHelper:
         # save matrix in a file
         matrix_string = ""
         for row in matrix:
+            v = 0
             matrix_string += "| "
             for col in row:
+                if col == 1:
+                    v += 1
                 matrix_string += str(col) + " "
-            matrix_string += "|\n"
+            matrix_string += f"|, {v}\n"
+            v = 0
 
         return matrix_string
 

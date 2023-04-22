@@ -14,7 +14,7 @@ import threading
 
 
 class GraphCanvas(tk.Canvas):
-    def __init__(self, master, graph: GraphModel, draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
+    def __init__(self, master, graph: GraphModel = GraphModel(), draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
         self.is_intersection: bool = False
@@ -51,9 +51,6 @@ class GraphCanvas(tk.Canvas):
         self.configure(cursor='fleur')
 
     def reset_graph(self):
-        self.graph.nodes.clear()
-        self.graph.edges.clear()
-        self.graph.intersections.clear()
         self.graph.generator.reset_edges_path(self.graph.edges)
         self.delete("all")
 

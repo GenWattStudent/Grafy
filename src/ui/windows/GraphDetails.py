@@ -22,17 +22,15 @@ class GraphDeatails(TopLevelWindow):
         self.tab_view.set(self.start_tab)
 
         # Graph matrix
-        self.matrix_widget: GraphModelDetailsTab = CanvasMatrix(self.tab_view.tab('Matrix'), matrix=graph.get_matrix())
+        self.matrix_widget: GraphDetailsTab = CanvasMatrix(self.tab_view.tab('Matrix'), matrix=graph.get_matrix())
         self.matrix_widget.pack(fill='both', expand=True)
         self.matrix_widget.draw()
         # Wages matrix
-        self.wages_matrix_widget: GraphModelDetailsTab = CanvasMatrix(
-            parent=self.tab_view.tab('Wages Matrix'), matrix=graph.get_wages())
+        self.wages_matrix_widget: GraphDetailsTab = CanvasMatrix(parent=self.tab_view.tab('Wages Matrix'), matrix=graph.get_wages())
         self.wages_matrix_widget.pack(fill='both', expand=True)
         self.wages_matrix_widget.draw()
         # Dictionary
-        self.dictionary_widget: GraphModelDetailsTab = CanvasDictionary(
-            parent=self.tab_view.tab('Dictionary'), matrix=graph.get_matrix())
+        self.dictionary_widget: GraphDetailsTab = CanvasDictionary(parent=self.tab_view.tab('Dictionary'), matrix=graph.get_matrix())
         self.dictionary_widget.pack(fill='both', expand=True)
 
         self.tab_view.pack(fill='both', expand=True, anchor='w')

@@ -96,8 +96,6 @@ class DrawHelper:
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
-                    graph.wages[i][j] = distance
-                    graph.wages[j][i] = distance
                     edge = Edge(nodes[i], nodes[j], distance, Theme.get("edge_color"))
                     edges.append(edge)
 

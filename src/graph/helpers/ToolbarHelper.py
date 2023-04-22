@@ -50,6 +50,7 @@ class ToolbarHelper:
     def show_edge_preview(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_EDGE:
             selected_nodes = self.graph.get_nodes_from_list(self.graph.selected_elements)
+            print(selected_nodes)
             if len(selected_nodes) == 1:
                 self.edge_preview = self.canvas.draw_edge_preview(event, selected_nodes[0])
 

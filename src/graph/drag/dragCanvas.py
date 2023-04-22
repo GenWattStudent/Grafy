@@ -25,13 +25,14 @@ class Draggable(ABC):
 
 
 class DragCanvas(Draggable):
-    def __init__(self, canvas: GraphModelCanvas, draw_config: DrawGraphConfig, graph: GraphModel):
+    def __init__(self, canvas: GraphCanvas, draw_config: DrawGraphConfig, graph: GraphModel):
         self.draging_node = None
         self.x = 0
         self.y = 0
         self.canvas = canvas
         self.draw_config = draw_config
         self.graph = graph
+        self.is_drag_node = True
         self.canvas_helper =  CanvasHelper(canvas)
 
     def motion(self, event):
@@ -63,8 +64,10 @@ class DragCanvas(Draggable):
             self.canvas.scan_mark(event.x, event.y)
 
     def click(self, event):
-        self.drag_node(event)
-        self.drag_canvas(event)
+        if self.is_drag_node:
+            self.drag_node(event)
+        if not self.draging_node:
+            self.drag_canvas(event)
 
     def end_drag(self, event):
         if self.draging_node:

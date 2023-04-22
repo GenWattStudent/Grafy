@@ -1,6 +1,5 @@
 import customtkinter as ctk
 import src.constance as const
-from src.Theme import Theme
 from src.state.AlgorithmState import algorithm_state
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
@@ -39,7 +38,7 @@ class GraphMenu(Menu):
 
     def create_matrix(self, graph: GraphModel):
         # generate toplevel window
-        self.matrix_window = GraphDeatails(self, graph=graph)
+        self.matrix_window = GraphDeatails(self, graph=graph_state.get())
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
         # set on close event
@@ -81,7 +80,7 @@ class GraphMenu(Menu):
         return value.replace(",", ".")
 
     def update_graph_info(self, graph_model: GraphModel):
-        self.density_label.configure(text=f"Density: {round(graph_model.graph.density, 2)}")
+        self.density_label.configure(text=f"Density: {round(graph_model.density, 2)}")
         if self.graph_model.config.is_show_intersections:
             self.intersection_label.configure(text=f"Inersections: {len(graph_model.intersections)}")
         else:
@@ -116,7 +115,7 @@ class GraphMenu(Menu):
         self.info_frame = ctk.CTkFrame(self)
         self.info_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
-        self.density_label = Typography(self.info_frame, text=f"Density: {round(self.graph_model.graph.density, 2)}")
+        self.density_label = Typography(self.info_frame, text=f"Density: {round(self.graph_model.density, 2)}")
         self.density_label.pack(anchor="w")
 
         self.intersection_label = Typography(self.info_frame, text=f"Inersections: {len(self.graph_model.intersections)}")

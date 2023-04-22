@@ -24,10 +24,11 @@ class ToolState(State):
 
 
 class ToolBar(ctk.CTkFrame):
-    def __init__(self, master: ctk.CTkFrame, graph: GraphModel, **kw):
+    def __init__(self, master: ctk.CTkFrame, root, graph: GraphModel, **kw):
         super().__init__(master, **kw)
         self.master = master
         self.graph = graph
+        self.root = root
         self.border_width = 2
 
         self.selected_tool: State = ToolState()
@@ -36,6 +37,7 @@ class ToolBar(ctk.CTkFrame):
 
         self.delete_event = Event()
         self.undo_event = Event()
+        self.redo_event = Event()
 
         self.border = ctk.CTkLabel(self, text="", fg_color=Theme.get("text_color"))
 
@@ -47,20 +49,29 @@ class ToolBar(ctk.CTkFrame):
         self.delete_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_edge_button = SwitchButton(self, text="Add Edge")
         self.add_edge_button.pack(anchor="w", side="left", padx=10, pady=10)
-        self.undo_button = SwitchButton(self, text="Undo")
+        self.undo_button = SwitchButton(self, text="Undo", state = "disabled")
         self.undo_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.redo_button = SwitchButton(self, text="Redo", state = "disabled")
+        self.redo_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
         self.delete_button.configure(command=self.delete_tool)
         self.undo_button.configure(command=self.undo)
+        self.redo_button.configure(command=self.redo)
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
 
         self.bind("<Configure>", self.on_resize)
-        self.bind("<Delete>", lambda event: self.delete_tool())
+        self.root.bind("<Delete>", lambda event: self.delete_tool())
+        self.root.bind("<Control-z>", lambda event: self.undo())
+        self.root.bind("<Control-y>", lambda event: self.redo())
+        self.root.bind("<Escape>", lambda event: self.change_tool(Tools.EMPTY))
 
     def undo(self):
         self.undo_event()
+
+    def redo(self):
+        self.redo_event()
 
     def on_delete(self, cb):
         self.delete_event += cb
@@ -74,11 +85,29 @@ class ToolBar(ctk.CTkFrame):
     def off_undo(self, cb):
         self.undo_event -= cb
 
+    def on_redo(self, cb):
+        self.redo_event += cb
+    
+    def off_redo(self, cb):
+        self.redo_event -= cb
+
     def change_delete_button_style(self, selected_elements: int):
         if selected_elements == 0:
             self.delete_button.configure(state = "disabled")
         else:
             self.delete_button.configure(state = "normal")
+
+    def change_redo_button_style(self, can_redo: bool):
+        if can_redo:
+            self.redo_button.configure(state = "normal")
+        else:
+            self.redo_button.configure(state = "disabled")
+
+    def change_undo_button_style(self, can_undo: bool):
+        if can_undo:
+            self.undo_button.configure(state = "normal")
+        else:
+            self.undo_button.configure(state = "disabled")
 
     def delete_tool(self):
         if len(self.graph.selected_elements) == 0:

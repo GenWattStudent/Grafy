@@ -154,8 +154,8 @@ class GraphModel:
         pass
 
 class Graph(GraphModel):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.layout = Kwaii(self)
 
     def reset_graph(self, matrix: GraphMatrix):
@@ -180,7 +180,6 @@ class Graph(GraphModel):
         self.layout.run()
         self.edges = self.generator.generate_edges(self.nodes, self)
         self.wages = self.generator.generate_wages(self, self.nodes)
-        print(self.wages[0])
         self.density = self.calculate_density()
 
         return self.matrix

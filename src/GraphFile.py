@@ -15,11 +15,11 @@ from src.state.AlgorithmState import algorithm_state
 
 class FileManager(ABC):
     @abstractmethod
-    def save(self, graph: GraphModel):
+    def save(self, graph: GraphModel, path: str):
         pass
 
     @abstractmethod
-    def load(self) -> GraphMatrix:
+    def load(self, path: str) -> GraphModel:
         pass
 
 
@@ -29,7 +29,7 @@ class GraphFile(FileManager):
         self.filename = filename
         self.rowToSkip: int = 3
 
-    def save(self, graph: GraphModel):
+    def save(self, graph: GraphModel, path: str):
         # save graph and students info in a file
         with open(self.path + "/" + self.filename, "w", encoding="utf-8") as txt_file:
             txt_file.write("Autorzy: Raszka Adrian, Jurzak Jakub, Lasota Kubuś" + "\n")
@@ -69,22 +69,5 @@ class GraphFile(FileManager):
             else:
                 txt_file.write((line + ",\n").replace(" ", ""))
 
-    def load(self) -> GraphMatrix:
-        # load graph and students info from a file
-        with open(self.path + "/" + self.filename, "r") as txt_file:
-            lines = txt_file.readlines()
-            graph = GraphHelper().generate_empty_graph(len(lines) - self.rowToSkip)
-
-            for i, line in enumerate(lines):
-                if i <= self.rowToSkip - 1:
-                    continue
-                # take only numbers from line
-                count = 0
-                for number in enumerate(line):
-                    if number[1].isdigit():
-                        graph[i - self.rowToSkip][count] = int(number[1])
-                        count += 1
-
-            matrix = GraphMatrix(len(lines) - self.rowToSkip)
-            matrix.set_matrix(graph)
-            return matrix
+    def load(self, path: str) -> GraphModel:
+        return GraphModel()

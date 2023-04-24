@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from src.graph.GraphModel import Graph
+from src.graph.GraphModel import Graph, GraphModel
 from src.graph.elements.Node import Node
 from src.graph.elements.Edge import Edge
 from src.graph.elements.CanvasElement import CanvasElement
@@ -111,8 +111,8 @@ class DeleteElementCommand(Command):
         self.controller.view.draw_graph()
 
 class CreateGraphCommand(Command):
-    def __init__(self, controller: GraphController, config: GraphConfig):
-        self.graph_model = Graph()
+    def __init__(self, controller: GraphController, config: GraphConfig, graph_model: GraphModel = Graph()):
+        self.graph_model = graph_model
         self.config = config
         self.controller = controller
 
@@ -136,3 +136,26 @@ class CreateGraphCommand(Command):
         self.controller.toolbar.deselect_all_tool()
         self.controller.current_graph.set(self.graph_model)
         self.controller.view.draw_graph()
+
+class LoadGraphCommand(Command): 
+    def __init__(self, controller: GraphController, graph_model: GraphModel):
+        self.graph_model = graph_model
+        self.controller = controller
+
+    def execute(self):
+        self.controller.toolbar.deselect_all_tool()
+        self.controller.current_graph.set(self.graph_model)
+        self.controller.view.draw_graph()
+    
+    def undo(self):
+        self.controller.toolbar.deselect_all_tool()
+        #loop through the undo stack and find the last LoadGraphCommand
+        for i in range(len(self.controller.command_history.undo_stack) - 1, -1, -1):
+            if isinstance(self.controller.command_history.undo_stack[i], LoadGraphCommand) or isinstance(self.controller.command_history.undo_stack[i], CreateGraphCommand):
+                prev_graph_model = self.controller.command_history.undo_stack[i].graph_model
+                self.controller.current_graph.set(prev_graph_model)
+                self.controller.view.draw_graph()
+                break
+
+    def redo(self):
+        self.execute()

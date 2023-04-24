@@ -1,6 +1,6 @@
 from src.graph.GraphModel import GraphModel
 from src.ui.GraphCanvas import GraphCanvas
-from src.GraphFile import GraphFile
+from src.GraphFile import FileManager
 from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.ui.Toolbar import ToolBar, Tools
 from src.graph.drag.DragCanvas import DragCanvas
@@ -11,13 +11,14 @@ from src.graph.elements.Edge import Edge
 from src.graph.elements.Node import Node
 from src.graph.elements.CanvasElement import CanvasElement
 from src.state.GraphState import graph_state, GraphState
-from src.graph.commands.Command import AddNodeCommand, AddEdgeCommand, DeleteElementCommand, CreateGraphCommand, CommandHistory
+from src.graph.commands.Command import AddNodeCommand, AddEdgeCommand, DeleteElementCommand, CreateGraphCommand, CommandHistory, LoadGraphCommand
 import src.constance as const
 from src.graph.GraphConfig import GraphConfig
-
+from src.graph.helpers.GraphStrategy import GraphSelector
+from src.GraphFile import GraphFile
 
 class GraphController:
-    def __init__(self, view: GraphCanvas, toolbar: ToolBar, file_manager: GraphFile, current_mode: str):
+    def __init__(self, view: GraphCanvas, toolbar: ToolBar, file_manager: FileManager, current_mode: str):
         self.current_graph: GraphState = GraphState(GraphModel())
         self.view = view
         self.toolbar = toolbar
@@ -27,6 +28,8 @@ class GraphController:
         self.canvas_helper = CanvasHelper(view)
         self.toolbar_helper = ToolbarHelper(toolbar, self.current_graph.get(), view, self.draw_config)
         self.command_history: CommandHistory = CommandHistory()
+        self.graph_selector = GraphSelector()
+        self.useless_graph_file = GraphFile(filename="graph.txt")
         self.mode = current_mode
 
         self.current_graph.subscribe(self.on_current_graph_change)
@@ -35,6 +38,8 @@ class GraphController:
         self.toolbar.on_delete(self.delete)
         self.toolbar.on_undo(self.undo)
         self.toolbar.on_redo(self.redo)
+        self.toolbar.on_load(self.load_graph)
+        self.toolbar.on_save(self.save_graph)
         self.toolbar.selected_tool.subscribe(self.on_tool_change)
 
         self.view.bind("<Button-1>", self.on_click)
@@ -59,6 +64,14 @@ class GraphController:
         self.toolbar_helper.graph = graph_model
         self.drag.graph = graph_model
         self.view.draw_graph()
+
+    def load_graph(self, path: str):
+        graph = self.file_manager.load(path)
+        self.command_history.execute_command(LoadGraphCommand(self, graph))
+        graph_state.set(self.current_graph.get())
+
+    def save_graph(self, path: str):
+        self.file_manager.save(self.current_graph.get(), path)
 
     def add_node(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_NODE and self.toolbar_helper.node_preview and const.MAX_NODE_COUNT > len(self.current_graph.get().nodes):
@@ -140,13 +153,9 @@ class GraphController:
         self.toolbar_helper.show_edge_preview(event)
 
     def create(self, config: GraphConfig):
-        if self.mode == "Graph":
-            self.command_history.execute_command(CreateGraphCommand(self, config))
-        elif self.mode == "Tree":
-            # self.current_graph.get().tree.update(self.view, config)
-            self.current_graph.get().create(self.view)
+        self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.mode)))
         self.view.is_intersection = config.is_show_intersections
-        self.file_manager.save(self.current_graph.get())
+        self.useless_graph_file.save(self.current_graph.get(), "")
         graph_state.set(self.current_graph.get())
 
     def update(self, config: GraphConfig):
@@ -154,5 +163,5 @@ class GraphController:
         self.view.is_intersection = config.is_show_intersections
         self.current_graph.get().update(self.view, config)
         self.view.draw_graph()
-        self.file_manager.save(self.current_graph.get())
+        self.useless_graph_file.save(self.current_graph.get(), "")
         graph_state.set(self.current_graph.get())

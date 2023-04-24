@@ -9,6 +9,7 @@ class SwitchButton(ctk.CTkButton):
         self.configure(
             fg_color = fg_color,
             hover_color = hover_color,
+            width = 85,
             border_spacing=0, corner_radius=0)
 
     def select(self):

@@ -104,7 +104,7 @@ class DrawHelper:
     def generate_wages(self, graph: GraphModel, nodes: list[Node]) -> GraphMatrix:
         wages = GraphMatrix(graph.matrix.number_of_nodes, float_type=True)
         GraphHelper.fill_matrix_with_infinity(wages)
-
+        print(graph.matrix.number_of_nodes)
         for i in range(graph.matrix.number_of_nodes - 1):
             for j in range(i + 1, graph.matrix.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:

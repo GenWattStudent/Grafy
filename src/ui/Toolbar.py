@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 from enum import Enum
 from src.utils.Event import Event
 from src.state.GraphState import graph_state
-
+from tkinter import filedialog
 
 class Tools(Enum):
     EMPTY = "EMPTY"
@@ -38,6 +38,8 @@ class ToolBar(ctk.CTkFrame):
         self.delete_event = Event()
         self.undo_event = Event()
         self.redo_event = Event()
+        self.load_event = Event()
+        self.save_event = Event()
 
         self.border = ctk.CTkLabel(self, text="", fg_color=Theme.get("text_color"))
 
@@ -53,6 +55,10 @@ class ToolBar(ctk.CTkFrame):
         self.undo_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.redo_button = SwitchButton(self, text="Redo", state = "disabled")
         self.redo_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.save_button = SwitchButton(self, text="Save")
+        self.save_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.load_button = SwitchButton(self, text="Load")
+        self.load_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
@@ -60,6 +66,8 @@ class ToolBar(ctk.CTkFrame):
         self.undo_button.configure(command=self.undo)
         self.redo_button.configure(command=self.redo)
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
+        self.load_button.configure(command=self.load)
+        self.save_button.configure(command=self.save)
 
         self.bind("<Configure>", self.on_resize)
         self.root.bind("<Delete>", lambda event: self.delete_tool())
@@ -90,6 +98,28 @@ class ToolBar(ctk.CTkFrame):
     
     def off_redo(self, cb):
         self.redo_event -= cb
+
+    def on_load(self, cb):
+        self.load_event += cb
+    
+    def off_load(self, cb):
+        self.load_event -= cb
+
+    def on_save(self, cb):
+        self.save_event += cb
+    
+    def off_save(self, cb):
+        self.save_event -= cb
+
+    def load(self):
+        file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            self.load_event(file_path)
+
+    def save(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            self.save_event(file_path)
 
     def change_delete_button_style(self, selected_elements: int):
         if selected_elements == 0:

@@ -1,14 +1,14 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
 from src.utils.Event import Event
 from abc import abstractmethod
-from src.graph.GraphModel import GraphModel
+from src.graph.GraphController import GraphController
 
-
-class Menu(ctk.CTkFrame):
-    def __init__(self, parent, graph_model: GraphModel, **kwargs):
+class Menu(ttk.Frame):
+    def __init__(self, parent, controller: GraphController, **kwargs):
         super().__init__(parent, **kwargs)
         self.root = parent
-        self.graph_model = graph_model
+        self.controller = controller
+        self.graph_model = controller.current_graph.get()
 
         self.search_path_event = Event()
         self.generate_graph_event = Event()
@@ -24,6 +24,9 @@ class Menu(ctk.CTkFrame):
     
     def off_generate_graph(self, cb):
         self.generate_graph_event -= cb
+
+    def init(self):
+        pass
 
     @abstractmethod
     def create_widgets(self):

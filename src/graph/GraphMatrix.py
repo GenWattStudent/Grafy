@@ -61,6 +61,11 @@ class GraphMatrix:
                 if self.matrix[i][j] == 1:
                     dict[i].append(j)
         return dict
+    
+    def zeros(self):
+        for i in range(self.number_of_nodes):
+            for j in range(self.number_of_nodes):
+                self.matrix[i][j] = 0
 
     def generate_matrix_depends_on_type(self, number_of_nodes: int):
         if self.float_type:

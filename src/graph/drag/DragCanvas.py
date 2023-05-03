@@ -7,8 +7,8 @@ if TYPE_CHECKING:
     from src.ui.GraphCanvas import GraphCanvas
 from src.utils.Vector import Vector
 from src.graph.helpers.CanvasHelper import CanvasHelper
-from src.state.GraphState import graph_state
-
+from src.utils.Event import Event
+from copy import copy
 
 class Draggable(ABC):
     @abstractmethod
@@ -23,17 +23,31 @@ class Draggable(ABC):
     def end_drag(self, event):
         pass
 
-
 class DragCanvas(Draggable):
     def __init__(self, canvas: GraphCanvas, draw_config: DrawGraphConfig, graph: GraphModel):
         self.draging_node = None
         self.x = 0
         self.y = 0
+        self.node_old_position: Vector | None = None
         self.canvas = canvas
         self.draw_config = draw_config
         self.graph = graph
         self.is_drag_node = True
         self.canvas_helper =  CanvasHelper(canvas)
+        self.on_element_move_end_event = Event()
+        self.on_element_move_start_event = Event()
+
+    def on_element_move(self, callback):
+        self.on_element_move_end_event += callback
+    
+    def off_element_move(self, callback):
+        self.on_element_move_end_event -= callback
+
+    def on_element_move_start(self, callback):
+        self.on_element_move_start_event += callback
+    
+    def off_element_move_start(self, callback):
+        self.on_element_move_start_event -= callback
 
     def motion(self, event):
         self.canvas.change_cursor(event)
@@ -56,6 +70,8 @@ class DragCanvas(Draggable):
         for node in self.graph.nodes:
             if node.is_under_cursor(Vector(x, y)):
                 self.draging_node = node
+                self.node_old_position = copy(node.position)
+                self.on_element_move_start_event(self.draging_node, Vector(x, y))
                 self.draging_node.radius = self.draw_config.dragged_node_radius
                 self.graph.generator.set_dragged_edges(self.graph.edges, node)
 
@@ -71,13 +87,12 @@ class DragCanvas(Draggable):
 
     def end_drag(self, event):
         if self.draging_node:
+            x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
             self.draging_node.is_dragged = False
             self.draging_node.radius = self.draw_config.node_radius
-
             self.graph.generator.set_dragged_edges(self.graph.edges, self.draging_node, False)
+            self.on_element_move_end_event(self.draging_node, Vector(x, y), self.node_old_position)
             self.draging_node = None
-            self.canvas.draw_graph()
-            graph_state.set(self.graph)
             return
 
         self.canvas.scan_dragto(event.x, event.y, gain=1)

@@ -11,8 +11,7 @@ from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.graph.GraphMatrix import GraphMatrix
 from src.algorithms.Intersection import FindIntersection
 from src.state.AlgorithmState import SearchAlgorithmType, algorithm_state
-from src.Theme import Theme
-
+from src.Theme import theme
 
 class DrawHelper:
     def __init__(self):
@@ -71,9 +70,10 @@ class DrawHelper:
         vector: Vector = Vector().random(min_x, max_x, min_y+self.y_margin, max_y)
 
         return Node(
-            vector, node_id, radius, Theme.get("node_color"),
-            Theme.get("node_selected_color"),
-            Theme.get("text_color"))
+            vector, node_id, radius, 
+            theme.get("primary"),
+            theme.get("info"),
+            theme.get("light"))
 
     def generate_nodes(self, graph: GraphModel, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []
@@ -96,7 +96,7 @@ class DrawHelper:
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
-                    edge = Edge(nodes[i], nodes[j], distance, Theme.get("edge_color"))
+                    edge = Edge(nodes[i], nodes[j], distance, theme.get("light"))
                     edges.append(edge)
 
         return edges
@@ -104,7 +104,6 @@ class DrawHelper:
     def generate_wages(self, graph: GraphModel, nodes: list[Node]) -> GraphMatrix:
         wages = GraphMatrix(graph.matrix.number_of_nodes, float_type=True)
         GraphHelper.fill_matrix_with_infinity(wages)
-        print(graph.matrix.number_of_nodes)
         for i in range(graph.matrix.number_of_nodes - 1):
             for j in range(i + 1, graph.matrix.number_of_nodes):
                 if graph.get_matrix()[i][j] == 1:

@@ -1,4 +1,4 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
 
 
 class Tabs(ctk.CTkFrame):

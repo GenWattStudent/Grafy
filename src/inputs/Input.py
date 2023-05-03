@@ -1,20 +1,20 @@
-import customtkinter as ctk
-from src.ui.Typography import Typography, TextType, TextVariant
+import ttkbootstrap as ttk
+from src.ui.Typography import Typography
 from src.utils.Event import Event
 
 
-class Input(ctk.CTkEntry):
+class Input(ttk.Entry):
     def __init__(self, master, label_text="", default_value="", rules={}, filtr=None, **kwargs):
         self.rules = rules
         self.last_correct_value = default_value
         self.filtr = filtr
-        self.text_var = ctk.StringVar()
+        self.text_var = ttk.StringVar()
         self.text_var.trace("w", lambda name, index, mode, sv=self.text_var: self.handle_change(sv))
 
-        self.frame = ctk.CTkFrame(master, fg_color="transparent")
+        self.frame = ttk.Frame(master)
         self.frame.pack(fill="x", anchor="w")
 
-        self.error_labels: list[ctk.CTkLabel] = []
+        self.error_labels: list[ttk.Label] = []
 
         super().__init__(master=self.frame, textvariable=self.text_var,  **kwargs)
 
@@ -25,7 +25,13 @@ class Input(ctk.CTkEntry):
 
         self.insert(0, default_value)
         self.bind("<FocusOut>", lambda event: self.hide_error())
+        self.bind("<Configure>", self.resize)
         self.pack(anchor="w", padx=10, fill="x")
+    
+    def resize(self, event):
+        print(self.winfo_width())
+        for label in self.error_labels:
+            label.configure(wraplength=self.winfo_width() - 20)
 
     def set_input_value(self, value: str):
         self.delete(0, "end")
@@ -57,7 +63,7 @@ class Input(ctk.CTkEntry):
 
         for rule in self.rules:
             if not self.rules[rule](value):
-                label = Typography(self.frame, text=self.rules[rule].error_message + ",", type=TextType.body, variant=TextVariant.error)
+                label = Typography(self.frame, text=self.rules[rule].error_message + ",", style = "DANGER.TLabel", wraplength=self.winfo_width() - 20)
                 label.pack(anchor="w", padx=10)
                 self.error_labels.append(label)
 

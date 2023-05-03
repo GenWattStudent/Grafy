@@ -8,12 +8,14 @@ from src.graph.GraphConfig import GraphConfig
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.graph.GraphController import GraphController
+from src.utils.Vector import Vector
 from copy import copy
 
 
 class Command(ABC):
     def __init__(self, controller: GraphController):
         self.controller = controller
+        self.graph_model: GraphModel = copy(controller.current_graph.get())
 
     @abstractmethod
     def execute(self):
@@ -23,9 +25,8 @@ class Command(ABC):
     def undo(self):
         pass
 
-    @abstractmethod
     def redo(self):
-        pass
+        self.execute()
 
 class CommandHistory:
     def __init__(self):
@@ -60,11 +61,15 @@ class CommandHistory:
 
 class AddNodeCommand(Command):
     def __init__(self, controller: GraphController, node: Node):
-        self.controller = controller
+        super().__init__(controller)
         self.node = node
 
     def execute(self):
+        if self.controller.toolbar_helper.node_preview is not None:
+            self.controller.toolbar_helper.node_preview.delete(self.controller.view)
+            self.controller.toolbar_helper.node_preview = None
         self.controller.current_graph.get().add_node(self.node)
+        self.controller.view.draw_graph()
 
     def undo(self):
         self.controller.current_graph.get().delete_node(self.node)
@@ -76,7 +81,7 @@ class AddNodeCommand(Command):
 
 class AddEdgeCommand(Command):
     def __init__(self, controller: GraphController, edge: Edge):
-        self.controller = controller
+        super().__init__(controller)
         self.edge = edge
 
     def execute(self):
@@ -93,7 +98,7 @@ class AddEdgeCommand(Command):
 
 class DeleteElementCommand(Command):
     def __init__(self, controller: GraphController, elements: list[CanvasElement]):
-        self.controller = controller
+        super().__init__(controller)
         self.elements = copy(elements)
 
     def execute(self):
@@ -112,25 +117,21 @@ class DeleteElementCommand(Command):
 
 class CreateGraphCommand(Command):
     def __init__(self, controller: GraphController, config: GraphConfig, graph_model: GraphModel = Graph()):
+        super().__init__(controller)
         self.graph_model = graph_model
         self.config = config
-        self.controller = controller
 
     def execute(self):
         self.controller.toolbar.deselect_all_tool()
-        self.graph_model.update(self.controller.view, self.config)
-        self.graph_model.create(self.controller.view)
+        self.graph_model.create(self.controller.view, self.config)
         self.controller.current_graph.set(self.graph_model)
 
     def undo(self):
         self.controller.toolbar.deselect_all_tool()
-        #loop through the undo stack and find the last CreateGraphCommand
-        for i in range(len(self.controller.command_history.undo_stack) - 1, -1, -1):
-            if isinstance(self.controller.command_history.undo_stack[i], CreateGraphCommand):
-                prev_graph_model = self.controller.command_history.undo_stack[i].graph_model
-                self.controller.current_graph.set(prev_graph_model)
-                self.controller.view.draw_graph()
-                break
+        commandHistory = self.controller.command_history
+        prev_graph_model = commandHistory.undo_stack[len(commandHistory.undo_stack) - 1].graph_model
+        self.controller.current_graph.set(prev_graph_model)
+        self.controller.view.draw_graph()     
 
     def redo(self):
         self.controller.toolbar.deselect_all_tool()
@@ -139,8 +140,8 @@ class CreateGraphCommand(Command):
 
 class LoadGraphCommand(Command): 
     def __init__(self, controller: GraphController, graph_model: GraphModel):
+        super().__init__(controller)
         self.graph_model = graph_model
-        self.controller = controller
 
     def execute(self):
         self.controller.toolbar.deselect_all_tool()
@@ -149,13 +150,41 @@ class LoadGraphCommand(Command):
     
     def undo(self):
         self.controller.toolbar.deselect_all_tool()
-        #loop through the undo stack and find the last LoadGraphCommand
-        for i in range(len(self.controller.command_history.undo_stack) - 1, -1, -1):
-            if isinstance(self.controller.command_history.undo_stack[i], LoadGraphCommand) or isinstance(self.controller.command_history.undo_stack[i], CreateGraphCommand):
-                prev_graph_model = self.controller.command_history.undo_stack[i].graph_model
-                self.controller.current_graph.set(prev_graph_model)
-                self.controller.view.draw_graph()
-                break
+        commandHistory = self.controller.command_history
+        prev_graph_model = commandHistory.undo_stack[len(commandHistory.undo_stack) - 1].graph_model
+        self.controller.current_graph.set(prev_graph_model)
+        self.controller.view.draw_graph()
 
-    def redo(self):
-        self.execute()
+class UpdateGraphCommand(Command):
+    def __init__(self, controller: GraphController, config: GraphConfig):
+        super().__init__(controller)
+        self.config = config
+    
+    def execute(self):
+        self.controller.toolbar.deselect_all_tool()
+        self.controller.view.is_intersection = self.config.is_show_intersections
+        self.controller.current_graph.set(self.graph_model)
+        self.controller.current_graph.get().update(self.controller.view, self.config)
+        self.controller.view.draw_graph()
+    
+    def undo(self):
+        self.controller.toolbar.deselect_all_tool()
+        commandHistory = self.controller.command_history
+        prev_graph_model = commandHistory.undo_stack[len(commandHistory.undo_stack) - 1].graph_model
+        self.controller.current_graph.set(prev_graph_model)
+        self.controller.view.draw_graph()
+
+class MoveElementCommand(Command):
+    def __init__(self, controller: GraphController, element: CanvasElement, new_position: Vector, old_position: Vector):
+        super().__init__(controller)
+        self.element = element
+        self.new_position = new_position
+        self.old_position = old_position
+
+    def execute(self):
+        self.element.position = self.new_position
+        self.controller.view.draw_graph()
+
+    def undo(self):
+        self.element.position = self.old_position
+        self.controller.view.draw_graph()

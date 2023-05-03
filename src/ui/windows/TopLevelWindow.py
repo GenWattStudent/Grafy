@@ -1,7 +1,7 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
 
 
-class TopLevelWindow(ctk.CTkToplevel):
+class TopLevelWindow(ttk.Toplevel):
     def __init__(self, parent, title: str, **kwargs):
-        ctk.CTkToplevel.__init__(self, parent, **kwargs)
+        ttk.Toplevel.__init__(self, parent, **kwargs)
         self.title(title)

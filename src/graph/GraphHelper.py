@@ -1,6 +1,6 @@
 import numpy as np
 from src.graph.elements.Node import Node
-import customtkinter as ctk
+import ttkbootstrap as ttk
 
 
 class GraphHelper:
@@ -41,7 +41,7 @@ class GraphHelper:
         return False
 
     @staticmethod
-    def is_circle_out_of_bounds(element: ctk.CTkCanvas, x: float, y: float, radius: int) -> bool:
+    def is_circle_out_of_bounds(element: ttk.Canvas, x: float, y: float, radius: int) -> bool:
         return x - radius < 0 or x + radius > element.winfo_width() or y - radius < 0 or y + radius > element.winfo_height()
 
     @staticmethod

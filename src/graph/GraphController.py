@@ -11,14 +11,15 @@ from src.graph.elements.Edge import Edge
 from src.graph.elements.Node import Node
 from src.graph.elements.CanvasElement import CanvasElement
 from src.state.GraphState import graph_state, GraphState
-from src.graph.commands.Command import AddNodeCommand, AddEdgeCommand, DeleteElementCommand, CreateGraphCommand, CommandHistory, LoadGraphCommand
+from src.graph.commands.Command import AddNodeCommand, AddEdgeCommand, DeleteElementCommand, CreateGraphCommand, CommandHistory, LoadGraphCommand, MoveElementCommand
 import src.constance as const
 from src.graph.GraphConfig import GraphConfig
 from src.graph.helpers.GraphStrategy import GraphSelector
 from src.GraphFile import GraphFile
 
+
 class GraphController:
-    def __init__(self, view: GraphCanvas, toolbar: ToolBar, file_manager: FileManager, current_mode: str):
+    def __init__(self, root, view: GraphCanvas, toolbar: ToolBar, file_manager: FileManager):
         self.current_graph: GraphState = GraphState(GraphModel())
         self.view = view
         self.toolbar = toolbar
@@ -30,7 +31,7 @@ class GraphController:
         self.command_history: CommandHistory = CommandHistory()
         self.graph_selector = GraphSelector()
         self.useless_graph_file = GraphFile(filename="graph.txt")
-        self.mode = current_mode
+        self.tab_menu = None
 
         self.current_graph.subscribe(self.on_current_graph_change)
         graph_state.subscribe(self.on_graph_change)
@@ -40,6 +41,7 @@ class GraphController:
         self.toolbar.on_redo(self.redo)
         self.toolbar.on_load(self.load_graph)
         self.toolbar.on_save(self.save_graph)
+        self.drag.on_element_move(self.on_move_element)
         self.toolbar.selected_tool.subscribe(self.on_tool_change)
 
         self.view.bind("<Button-1>", self.on_click)
@@ -65,6 +67,10 @@ class GraphController:
         self.drag.graph = graph_model
         self.view.draw_graph()
 
+    def on_move_element(self, element: CanvasElement, position: Vector, old_position: Vector):
+        self.command_history.execute_command(MoveElementCommand(self, element, position, old_position))
+        graph_state.set(self.current_graph.get())
+
     def load_graph(self, path: str):
         graph = self.file_manager.load(path)
         self.command_history.execute_command(LoadGraphCommand(self, graph))
@@ -76,10 +82,7 @@ class GraphController:
     def add_node(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_NODE and self.toolbar_helper.node_preview and const.MAX_NODE_COUNT > len(self.current_graph.get().nodes):
             self.command_history.execute_command(AddNodeCommand(self, self.toolbar_helper.node_preview))
-            self.toolbar_helper.node_preview.delete(self.view)
-            self.toolbar_helper.node_preview = None
             graph_state.set(self.current_graph.get())   
-            self.view.draw_graph()
 
     def add_edge(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_EDGE:
@@ -153,15 +156,15 @@ class GraphController:
         self.toolbar_helper.show_edge_preview(event)
 
     def create(self, config: GraphConfig):
-        self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.mode)))
         self.view.is_intersection = config.is_show_intersections
+        self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.tab_menu.current_tab))) # type: ignore
         self.useless_graph_file.save(self.current_graph.get(), "")
         graph_state.set(self.current_graph.get())
 
     def update(self, config: GraphConfig):
-        self.toolbar.deselect_all_tool()
         self.view.is_intersection = config.is_show_intersections
-        self.current_graph.get().update(self.view, config)
-        self.view.draw_graph()
+        model = self.current_graph.get()
+        model.config = config
+        self.current_graph.set(model)
         self.useless_graph_file.save(self.current_graph.get(), "")
         graph_state.set(self.current_graph.get())

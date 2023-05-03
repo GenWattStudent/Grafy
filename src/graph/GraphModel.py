@@ -1,5 +1,4 @@
 import tkinter as tk
-from copy import copy
 from src.graph.GraphMatrix import GraphMatrix
 from src.graph.elements.CanvasElement import CanvasElement
 from src.graph.elements.Node import Node
@@ -12,6 +11,7 @@ from src.graph.elements.Intersection import Intersection
 from src.utils.Vector import Vector
 from abc import abstractmethod
 import random
+import numpy as np
 
 class GraphModel:
     def __init__(self, config: GraphConfig = GraphConfig()):
@@ -24,6 +24,7 @@ class GraphModel:
         self.selected_elements: list[CanvasElement] = []
         self.generator = DrawHelper()
         self.density = 0
+        self.name: str = ""
 
         self.config = config
         self.prev_config: GraphConfig | None = None
@@ -146,7 +147,7 @@ class GraphModel:
         return 2 * len(self.edges) / ((number_of_nodes * (number_of_nodes - 1)) + 0.0001)
     
     @abstractmethod
-    def create(self, canvas: tk.Canvas):
+    def create(self, canvas: tk.Canvas, config: GraphConfig) -> GraphMatrix:
         pass
     
     @abstractmethod
@@ -157,6 +158,7 @@ class Graph(GraphModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.layout = Kwaii(self)
+        self.name = "Graph"
 
     def reset_graph(self, matrix: GraphMatrix):
         for i in range(matrix.number_of_nodes):
@@ -173,7 +175,10 @@ class Graph(GraphModel):
 
         return self.matrix
     
-    def create(self, canvas: tk.Canvas):
+    def create(self, canvas: tk.Canvas, config: GraphConfig):
+        self.set_probability(config.probability)
+        self.set_number_of_nodes(config.number_of_nodes)
+        self.config = config
         self.generate_graph_matrix()
         self.generator.selected_nodes.clear()
         self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
@@ -184,40 +189,54 @@ class Graph(GraphModel):
 
         return self.matrix
     
-    def update(self, canvas: tk.Canvas, config: GraphConfig):
-        if self.prev_config is None or self.matrix.number_of_nodes != config.number_of_nodes:
-            self.set_number_of_nodes(config.number_of_nodes)
-            self.create(canvas)
-        if self.prev_config is None or self.prev_config.probability != config.probability:
-            self.generate_graph_matrix()
-            self.wages = self.generator.generate_wages(self, self.nodes)
-            self.edges = self.generator.generate_edges(self.nodes, self)
-            self.density = self.calculate_density()
-
-        self.prev_config = copy(self.config)
-        self.config = config
-        self.graph_change_event(self)
-        return self.matrix
-    
 class Tree(GraphModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.name = "Tree"
 
     def reset_graph(self, matrix: GraphMatrix):
         for i in range(matrix.number_of_nodes):
             for j in range(matrix.number_of_nodes):
-                matrix[i][j] = 0
+                matrix[i][j] = 0            
 
     def generate_tree_matrix(self) -> GraphMatrix:
         self.reset_graph(self.matrix)
 
         # Generate edges for tree structure
         for i in range(1, self.matrix.number_of_nodes):
-            parent = (i - 1) // 2
+            parent = random.randint(0, i - 1)
             self.matrix[parent, i] = 1
+            self.matrix[i, parent] = 1
 
         return self.matrix
-    
+
+    def find_leaf(self, degree):
+        for i in range(len(degree)):
+            if degree[i] == 1:
+                return i
+        return -1
+
+    def remove_connection(self, matrix, x, y):
+        matrix[x][y] = 0
+        matrix[y][x] = 0
+        return matrix
+
+    def get_pruffer_code(self, m):
+        matrix = np.array(m)
+        n = len(matrix)
+        degree = np.sum(matrix, axis=0)
+        code = [0] * (n - 2)
+        for i in range(n - 2):
+            leaf = self.find_leaf(degree)
+            indices = np.where(matrix[leaf] == 1)[0]
+            if len(indices) == 0:
+                continue
+            code[i] = np.min(indices)
+            degree[leaf] = 0
+            matrix = self.remove_connection(matrix, leaf, code[i])
+            degree -= matrix[:, code[i]]
+        return code
+            
     def generate_node_positions(self, matrix: GraphMatrix) -> list[Node]:
         nodes: list[Node] = []
         pos = {}
@@ -230,10 +249,12 @@ class Tree(GraphModel):
                    pos[j] = (pos[i][0] + 20, pos[i][1] + 20)
                    nodes.append(Node(Vector(pos[i][0] + 20, pos[i][1] + 20),i, 15))
                     
-
         return nodes
 
-    def create(self, canvas: tk.Canvas):
+    def create(self, canvas: tk.Canvas, config: GraphConfig):
+        self.set_number_of_nodes(config.number_of_nodes)
+        self.config = config
+
         self.generate_tree_matrix()
         self.nodes = self.generate_node_positions(self.matrix)
         self.generator.selected_nodes.clear()
@@ -243,8 +264,8 @@ class Tree(GraphModel):
 
         return self.matrix
 
-
-
+    def update(self, canvas: tk.Canvas, config: GraphConfig):
+        pass
 
 
 

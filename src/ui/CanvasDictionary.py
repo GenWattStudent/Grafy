@@ -1,11 +1,12 @@
 from src.ui.Matrix import GraphDetailsTab
 from src.graph.GraphModel import GraphMatrix
-import customtkinter as ctk
+from tkinter.font import Font
+from src.Theme import theme
 
 
 class CanvasDictionary(GraphDetailsTab):
     def __init__(self, parent, matrix: GraphMatrix, margin_x=10, margin_y=20,  *args, **kwargs):
-        self.font = ctk.CTkFont(size=16)
+        self.font = Font(size=16)
         self.dictionary = matrix.get_graph_dictionary()
         self.margin_x = margin_x
         self.margin_y = margin_y
@@ -39,9 +40,9 @@ class CanvasDictionary(GraphDetailsTab):
         for i, key in enumerate(self.dictionary):
             key_width = self.font.measure(str(key))
             self.create_text(self.margin_x, i * self.margin_y,
-                             text=f"{key}", anchor='nw', font=self.font, fill='yellow')
+                             text=f"{key}", anchor='nw', font=self.font, fill=theme.get('primary'))
             self.create_text(key_width + self.margin_x + 2, i * self.margin_y,
-                             text=f"= {self.dictionary[key]}", anchor='nw', font=self.font, fill='white')
+                             text=f"= {self.dictionary[key]}", anchor='nw', font=self.font, fill=theme.get('light'))
 
     def draw(self):
         self.draw_dictionary()

@@ -1,7 +1,7 @@
 from src.graph.elements.Edge import Edge
 from src.graph.elements.Intersection import Intersection
 from src.utils.Vector import Vector
-from src.Theme import Theme
+from src.Theme import theme
 
 
 class FindIntersection:
@@ -16,7 +16,7 @@ class FindIntersection:
         x = ((x1*y2 - y1*x2)*(x3-x4) - (x1-x2)*(x3*y4 - y3*x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
         y = ((x1*y2 - y1*x2)*(y3-y4) - (y1-y2)*(x3*y4 - y3*x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
 
-        return Intersection(Vector(x, y), Theme.get("intersection_color"))
+        return Intersection(Vector(x, y), theme.get("warning"))
 
     def intersect(self, edge1: Edge, edge2: Edge, threshold: float = 1e-6) -> bool:
         x1, y1, x2, y2 = self.get_edge_node_positions(edge1)

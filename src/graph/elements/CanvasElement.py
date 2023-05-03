@@ -5,6 +5,7 @@ import uuid
 
 class CanvasElement(ABC):
     def __init__(self, color: str):
+        self.position: Vector = Vector(0, 0)
         self.color = color
         self.canvas_id: tk._CanvasItemId | None = None
         self.id = uuid.uuid4()  

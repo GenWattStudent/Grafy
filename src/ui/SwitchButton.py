@@ -1,24 +1,21 @@
-import customtkinter as ctk
-from src.Theme import Theme
+import ttkbootstrap as ttk
 
-class SwitchButton(ctk.CTkButton):
-    def __init__(self, master, fg_color: str = Theme.get("canvas_bg_color"), hover_color: str = Theme.get("distinction_color"), **kw):
+class SwitchButton(ttk.Button):
+    def __init__(self, master, danger: bool = False, **kw):
         super().__init__(master, **kw)
         self.master = master
         self.selected = False
-        self.configure(
-            fg_color = fg_color,
-            hover_color = hover_color,
-            width = 85,
-            border_spacing=0, corner_radius=0)
-
+        self.configure(cursor="hand2")
+        if danger:
+            self.configure(style="danger.TButton")
+    
     def select(self):
         self.selected = True
-        self.configure(fg_color=Theme.get("secondary_color"))
+        self.configure(style="light.TButton")
 
     def deselect(self):
         self.selected = False
-        self.configure(fg_color=Theme.get("canvas_bg_color"))
+        self.configure(style="primary.TButton")
 
     def is_selected(self) -> bool:
         return self.selected

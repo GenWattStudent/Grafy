@@ -1,6 +1,5 @@
 from __future__ import annotations
-import customtkinter as ctk
-from src.Theme import Theme
+import ttkbootstrap as ttk
 from src.state.State import State
 from src.ui.SwitchButton import SwitchButton
 from typing import TYPE_CHECKING
@@ -23,8 +22,8 @@ class ToolState(State):
         super().__init__(initial_state=initial_state)
 
 
-class ToolBar(ctk.CTkFrame):
-    def __init__(self, master: ctk.CTkFrame, root, graph: GraphModel, **kw):
+class ToolBar(ttk.Frame):
+    def __init__(self, master: ttk.Frame, root, graph: GraphModel, **kw):
         super().__init__(master, **kw)
         self.master = master
         self.graph = graph
@@ -41,16 +40,16 @@ class ToolBar(ctk.CTkFrame):
         self.load_event = Event()
         self.save_event = Event()
 
-        self.border = ctk.CTkLabel(self, text="", fg_color=Theme.get("text_color"))
+        self.border = ttk.Label(self, text="", style="PRIMARY.TButton")
 
         self.select_button = SwitchButton(self, text="Select")
         self.select_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_node_button = SwitchButton(self, text="Add Node")
         self.add_node_button.pack(anchor="w", side="left", padx=10, pady=10)
-        self.delete_button = SwitchButton(self, text="Delete", fg_color=Theme.get("error_color"), hover_color=Theme.get("error_hover_color"), state="disabled")
-        self.delete_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.add_edge_button = SwitchButton(self, text="Add Edge")
         self.add_edge_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.delete_button = SwitchButton(self, text="Delete", danger=True, state="disabled")
+        self.delete_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.undo_button = SwitchButton(self, text="Undo", state = "disabled")
         self.undo_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.redo_button = SwitchButton(self, text="Redo", state = "disabled")
@@ -74,6 +73,12 @@ class ToolBar(ctk.CTkFrame):
         self.root.bind("<Control-z>", lambda event: self.undo())
         self.root.bind("<Control-y>", lambda event: self.redo())
         self.root.bind("<Escape>", lambda event: self.change_tool(Tools.EMPTY))
+        self.root.bind("<Control-s>", lambda event: self.save())
+        self.root.bind("<Control-o>", lambda event: self.load())
+        # after "1" key is pressed choose select tool
+        self.root.bind("s", lambda event: self.change_tool(Tools.SELECT, self.select_button))
+        self.root.bind("n", lambda event: self.change_tool(Tools.ADD_NODE, self.add_node_button))
+        self.root.bind("e", lambda event: self.change_tool(Tools.ADD_EDGE, self.add_edge_button))
 
     def undo(self):
         self.undo_event()
@@ -199,8 +204,7 @@ class ToolBar(ctk.CTkFrame):
         self.selected_tool.set(tool)
 
     def on_resize(self, event):
-        self.border.configure(width=event.width)
-        self.border.place(x=0, y=self.winfo_height() - self.border_width)
+        self.border.place(x=0, rely=1, relwidth=1, height=self.border_width, y=-2)
 
     def get_selected_tool(self) -> Tools:
         return self.selected_tool.get()

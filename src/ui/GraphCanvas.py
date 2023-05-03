@@ -8,7 +8,7 @@ from src.graph.DrawGraphConfig import DrawGraphConfig
 from src.state.AlgorithmState import algorithm_state
 from src.state.GraphState import graph_state
 from src.graph.helpers.CanvasHelper import CanvasHelper
-from src.Theme import Theme
+from src.Theme import theme
 import math as math
 import threading
 
@@ -18,13 +18,12 @@ class GraphCanvas(tk.Canvas):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
         self.is_intersection: bool = False
-        self.draging_node = None
-        self.canvas_elements = []
+        self.draging_node: Node | None = None
 
         self.graph: GraphModel = graph
         self.canvas_helper = CanvasHelper(self)
 
-        self.configure(bg=Theme.get("canvas_bg_color"))
+        self.configure(bg=theme.get("bg"))
         self.configure(highlightthickness=0)
         self.config(scrollregion=self.bbox(tk.ALL))
 
@@ -46,7 +45,7 @@ class GraphCanvas(tk.Canvas):
         x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
         for element in self.graph.get_graph_elements():
             if element.is_under_cursor(Vector(x, y)):
-                return self.configure(cursor='hand1')
+                return self.configure(cursor='hand2')
 
         self.configure(cursor='fleur')
 
@@ -122,4 +121,4 @@ class GraphCanvas(tk.Canvas):
     def draw_edge_preview(self, event, node: Node):
         self.delete("edge_preview")
         x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
-        return self.create_line(node.position.x, node.position.y, x, y, fill=Theme.get("edge_color"), width=2, tags="edge_preview")
+        return self.create_line(node.position.x, node.position.y, x, y, fill=theme.get("light"), width=2, tags="edge_preview")

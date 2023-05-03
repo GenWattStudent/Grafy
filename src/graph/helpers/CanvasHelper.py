@@ -8,7 +8,7 @@ from src.graph.elements.Edge import Edge
 from src.graph.elements.Intersection import Intersection
 
 class CanvasHelper:
-    def __init__(self, canvas: GraphModelCanvas):
+    def __init__(self, canvas: GraphCanvas):
         self.canvas = canvas
 
     def canvas_to_graph_coords(self, canvas_x, canvas_y):

@@ -1,6 +1,6 @@
 from src.utils.Vector import Vector
 import tkinter as tk
-from src.Theme import Theme
+from src.Theme import theme
 from src.graph.elements.CanvasElement import CanvasElement 
 
 
@@ -14,7 +14,7 @@ class Node(CanvasElement):
         self.radius: int = radius
         self.selected_color: str = selected_color
         self.border_color: str = border_color
-        self.dragged_color: str = Theme.get("node_dragged_color")
+        self.dragged_color: str = theme.get("success")
         self.text: tk._CanvasItemId | None = None
 
     def delete(self, canvas: tk.Canvas):

@@ -3,7 +3,7 @@ from src.graph.GraphModel import GraphModel
 from src.ui.Matrix import CanvasMatrix, GraphDetailsTab
 from src.ui.CanvasDictionary import CanvasDictionary
 from src.utils.Event import Event
-import customtkinter as ctk
+import ttkbootstrap as ttk
 
 
 class GraphDeatails(TopLevelWindow):
@@ -14,28 +14,26 @@ class GraphDeatails(TopLevelWindow):
         self.height = height
         self.graph = graph
         self.tab_change_event = Event()
-        self.tab_view = ctk.CTkTabview(self)
+        self.tab_view = ttk.Notebook(self)
         self.start_tab = start_tab
-        self.tab_view.add('Matrix')
-        self.tab_view.add('Wages Matrix')
-        self.tab_view.add('Dictionary')
-        self.tab_view.set(self.start_tab)
-
+        
         # Graph matrix
-        self.matrix_widget: GraphDetailsTab = CanvasMatrix(self.tab_view.tab('Matrix'), matrix=graph.get_matrix())
+        self.matrix_widget: GraphDetailsTab = CanvasMatrix(self.tab_view, self.root, matrix=graph.get_matrix())
         self.matrix_widget.pack(fill='both', expand=True)
         self.matrix_widget.draw()
+        self.tab_view.add(self.matrix_widget, text='Matrix')
         # Wages matrix
-        self.wages_matrix_widget: GraphDetailsTab = CanvasMatrix(parent=self.tab_view.tab('Wages Matrix'), matrix=graph.get_wages())
+        self.wages_matrix_widget: GraphDetailsTab = CanvasMatrix(self.tab_view, self.root, matrix=graph.get_wages())
         self.wages_matrix_widget.pack(fill='both', expand=True)
         self.wages_matrix_widget.draw()
+        self.tab_view.add(self.wages_matrix_widget, text='Wages Matrix')
         # Dictionary
-        self.dictionary_widget: GraphDetailsTab = CanvasDictionary(parent=self.tab_view.tab('Dictionary'), matrix=graph.get_matrix())
+        self.dictionary_widget: GraphDetailsTab = CanvasDictionary(parent=self.tab_view, matrix=graph.get_matrix())
         self.dictionary_widget.pack(fill='both', expand=True)
+        self.tab_view.add(self.dictionary_widget, text='Dictionary')
 
         self.tab_view.pack(fill='both', expand=True, anchor='w')
-        self.tab_view.configure(command=self.on_tab_change_event)
-        self.on_tab_change_event()
+        self.tab_view.bind("<<NotebookTabChanged>>", lambda e: self.on_tab_change_event())
         self.set_window_size(self.width, self.height)
 
     def on_tab_change(self, cb):
@@ -45,6 +43,7 @@ class GraphDeatails(TopLevelWindow):
         self.tab_change_event -= cb
 
     def update_matrix_widegt(self):
+        print(self.graph.get_matrix())
         self.matrix_widget.update_wideget(self.graph.get_matrix())
         self.matrix_widget.draw()
 
@@ -57,7 +56,7 @@ class GraphDeatails(TopLevelWindow):
         self.dictionary_widget.draw()
 
     def on_tab_change_event(self):
-        current_active_tab: str = self.tab_view.get()
+        current_active_tab: str = self.tab_view.tab(self.tab_view.select(), "text")
 
         if current_active_tab == 'Matrix':
             self.update_matrix_widegt()

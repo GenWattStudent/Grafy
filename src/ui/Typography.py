@@ -1,6 +1,5 @@
 from enum import Enum
-import customtkinter as ctk
-from src.Theme import Theme
+import ttkbootstrap as ttk
 
 
 class TextType(Enum):
@@ -18,7 +17,7 @@ class TextVariant(Enum):
     info = "info"
 
 
-class Typography(ctk.CTkLabel):
+class Typography(ttk.Label):
     def __init__(
             self, master, text="", type: TextType = TextType.body, variant: TextVariant = TextVariant.normal, **kwargs):
         super().__init__(master, text=text, **kwargs)
@@ -37,13 +36,4 @@ class Typography(ctk.CTkLabel):
             self.configure(font=(None, 10))
 
     def set_variant(self, variant: TextVariant):
-        if variant == TextVariant.normal:
-            self.configure(text_color=Theme.get("text_color"))
-        elif variant == TextVariant.error:
-            self.configure(text_color=Theme.get("error_hover_color"))
-        elif variant == TextVariant.success:
-            self.configure(text_color="green")
-        elif variant == TextVariant.warning:
-            self.configure(text_color="yellow")
-        elif variant == TextVariant.info:
-            self.configure(text_color="blue")
+        pass

@@ -4,7 +4,7 @@ from src.graph.elements.Node import Node
 from src.ui.GraphCanvas import GraphCanvas
 from src.ui.Toolbar import ToolBar, Tools
 from src.graph.DrawGraphConfig import DrawGraphConfig
-from src.Theme import Theme
+from src.Theme import theme
 from src.utils.Vector import Vector
 
 class ToolbarHelper:
@@ -44,7 +44,7 @@ class ToolbarHelper:
             index = 1
             if len(self.graph.nodes) > 0:
                 index = len(self.graph.nodes) + 1
-            self.node_preview = Node(pos, index, self.draw_config.node_radius, Theme.get("node_color"), Theme.get("node_selected_color"))
+            self.node_preview = Node(pos, index, self.draw_config.node_radius, theme.get("primary"), theme.get("info"))
             self.node_preview.draw(self.canvas)
     
     def show_edge_preview(self, event):

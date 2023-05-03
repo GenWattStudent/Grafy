@@ -1,6 +1,6 @@
 from src.graph.elements.Node import Node
 import tkinter as tk
-from src.Theme import Theme
+from src.Theme import theme
 from src.utils.Vector import Vector
 from src.graph.elements.CanvasElement import CanvasElement
 
@@ -12,9 +12,9 @@ class Edge(CanvasElement):
         self.node2 = node2
         self.is_path: bool = False
         self.distance = distance
-        self.path_color = Theme.get("edge_path_color")
-        self.dragged_color = Theme.get("edge_dragged_color")
-        self.selected_color = Theme.get("edge_selected_color")
+        self.path_color = theme.get("danger")
+        self.dragged_color = theme.get("info")
+        self.selected_color = theme.get("info")
         self.id = f"{node1.id}-{node2.id}"
 
     def is_under_cursor(self, cursor_position: Vector, threshold: float = 5) -> bool:

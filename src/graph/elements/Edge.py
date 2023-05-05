@@ -13,8 +13,8 @@ class Edge(CanvasElement):
         self.is_path: bool = False
         self.distance = distance
         self.path_color = theme.get("danger")
-        self.dragged_color = theme.get("info")
-        self.selected_color = theme.get("info")
+        self.dragged_color = theme.get("success")
+        self.selected_color = theme.get("selectbg")
         self.id = f"{node1.id}-{node2.id}"
 
     def is_under_cursor(self, cursor_position: Vector, threshold: float = 5) -> bool:

@@ -140,14 +140,14 @@ class GraphMenu(Menu):
         self.option_info = Typography(self, text=self.get_node_count_message())
         self.option_info.pack(anchor="w", padx=10)
 
-        self.button = tkk.Button(self, text="Show Graph Details", command=self.show_matrix)
+        self.button = tkk.Button(self, text="Show Graph Details", command=self.show_matrix, cursor="hand2")
         self.button.pack(padx=10, pady=10, fill="x")
 
-        self.search_path_button = tkk.Button(self, text="Search path", command=self.search_path)
+        self.search_path_button = tkk.Button(self, text="Search path", command=self.search_path, cursor="hand2")
         self.search_path_button.pack(padx=10, fill="x")
 
         self.generate_graph_button = tkk.Button(
-            self, text="Generate graph", command=lambda e=graph_config_state.get(): self.generate_graph_event(e))
+            self, text="Generate graph", command=lambda e=graph_config_state.get(): self.generate_graph_event(e), cursor="hand2")
         self.generate_graph_button.pack(padx=10, pady=10, fill="x")
 
         graph_state.subscribe(self.update_matrix_window)

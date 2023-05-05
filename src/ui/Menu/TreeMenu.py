@@ -4,7 +4,7 @@ from src.ui.Menu.Menu import Menu
 from src.graph.GraphModel import GraphModel
 from src.inputs.Input import Input
 from src.utils.validate.rules import Is_number, Min, Max, Is_positive
-from src.ui.Typography import Typography, TextType
+# from src.ui.Typography import Typography, TextType
 from src.state.GraphConfigState import graph_config_state
 from src.state.GraphState import graph_state
 import src.constance as const
@@ -60,7 +60,7 @@ class TreeMenu(Menu):
         # self.button.pack(padx=10, pady=10, fill="x")
 
         self.generate_graph_button = ttk.Button(
-            self, text="Generate tree", command=lambda e=graph_config_state.get(): self.generate_graph_event(e))
+            self, text="Generate tree", command=lambda e=graph_config_state.get(): self.generate_graph_event(e), cursor="hand2")
         self.generate_graph_button.pack(padx=10, pady=10, fill="x")
 
         graph_state.subscribe(self.on_graph_state_change)    

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from src.graph.GraphModel import GraphModel
 from src.ui.GraphCanvas import GraphCanvas
 from src.GraphFile import FileManager
@@ -16,24 +17,30 @@ import src.constance as const
 from src.graph.GraphConfig import GraphConfig
 from src.graph.helpers.GraphStrategy import GraphSelector
 from src.GraphFile import GraphFile
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.ui.GraphSheets import GraphSheets
 
 
 class GraphController:
     def __init__(self, root, view: GraphCanvas, toolbar: ToolBar, file_manager: FileManager):
         self.current_graph: GraphState = GraphState(GraphModel())
         self.view = view
+        self.root = root
         self.toolbar = toolbar
         self.file_manager = file_manager
         self.draw_config = DrawGraphConfig()
         self.drag = DragCanvas(view, self.draw_config, self.current_graph.get())
         self.canvas_helper = CanvasHelper(view)
         self.toolbar_helper = ToolbarHelper(toolbar, self.current_graph.get(), view, self.draw_config)
-        self.command_history: CommandHistory = CommandHistory()
+        self.command_history: CommandHistory = CommandHistory(self)
         self.graph_selector = GraphSelector()
         self.useless_graph_file = GraphFile(filename="graph.txt")
         self.tab_menu = None
+        self.graph_sheets: GraphSheets | None = None
 
         self.current_graph.subscribe(self.on_current_graph_change)
+        self.current_graph.subscribe(self.on_graph_change)
         graph_state.subscribe(self.on_graph_change)
 
         self.toolbar.on_delete(self.delete)
@@ -48,6 +55,10 @@ class GraphController:
         self.view.bind("<B1-Motion>", self.on_drag)
         self.view.bind("<Motion>", self.motion)
         self.view.bind("<ButtonRelease-1>", self.on_release)
+
+    def set_model(self, model: GraphModel):
+        self.current_graph.set(model)
+        self.view.draw_graph()
 
     def on_tool_change(self, tool: Tools):
         self.toolbar_helper.on_tool_change(tool)
@@ -158,6 +169,8 @@ class GraphController:
     def create(self, config: GraphConfig):
         self.view.is_intersection = config.is_show_intersections
         self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.tab_menu.current_tab))) # type: ignore
+        if self.graph_sheets is not None and len(self.graph_sheets) == 0:
+            self.graph_sheets.add_graph_sheet(self.current_graph.get(), "New graph", True)
         self.useless_graph_file.save(self.current_graph.get(), "")
         graph_state.set(self.current_graph.get())
 

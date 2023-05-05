@@ -1,4 +1,4 @@
-import tkinter as tk
+import ttkbootstrap as ttk
 from src.graph.GraphModel import GraphModel
 from src.utils.Vector import Vector
 from src.graph.elements.Node import Node
@@ -9,11 +9,12 @@ from src.state.AlgorithmState import algorithm_state
 from src.state.GraphState import graph_state
 from src.graph.helpers.CanvasHelper import CanvasHelper
 from src.Theme import theme
+from ttkbootstrap.toast import ToastNotification
 import math as math
 import threading
 
 
-class GraphCanvas(tk.Canvas):
+class GraphCanvas(ttk.Canvas):
     def __init__(self, master, graph: GraphModel = GraphModel(), draw_config: DrawGraphConfig = DrawGraphConfig(), **kwargs):
         super().__init__(master, **kwargs)
         self.draw_config = draw_config
@@ -25,7 +26,7 @@ class GraphCanvas(tk.Canvas):
 
         self.configure(bg=theme.get("bg"))
         self.configure(highlightthickness=0)
-        self.config(scrollregion=self.bbox(tk.ALL))
+        self.configure(scrollregion=self.bbox(ttk.ALL))
 
     def toggle_intersection(self):
         self.is_intersection = not self.is_intersection
@@ -84,6 +85,9 @@ class GraphCanvas(tk.Canvas):
             self.graph.path_distance = distance
             graph_state.set(self.graph)
             return distance, path
+        else:
+            toast = ToastNotification(title="Warning", message=f"Select at least {algorithm_state.get_search_algorithm().min_selected_nodes} nodes", duration=4000)
+            toast.show_toast()
 
     def draw_intersections(self, intersections: list[Intersection]):
         for intersection in intersections:

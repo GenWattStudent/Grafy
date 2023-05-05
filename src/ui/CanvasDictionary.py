@@ -13,7 +13,7 @@ class CanvasDictionary(GraphDetailsTab):
         self.tab_margin = 40
         width, height = self.setup_matrix_size(self.dictionary)
         super().__init__(parent, width, height, *args, **kwargs)
-        self.configure(bg='#2b2b2b')
+        self.configure(bg=theme.get('bg'))
         self.configure(highlightthickness=0)
 
     def setup_matrix_size(self, dict) -> tuple[int, int]:

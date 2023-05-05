@@ -9,6 +9,7 @@ from enum import Enum
 from src.utils.Event import Event
 from src.state.GraphState import graph_state
 from tkinter import filedialog
+from ttkbootstrap.tooltip import ToolTip
 
 class Tools(Enum):
     EMPTY = "EMPTY"
@@ -58,6 +59,15 @@ class ToolBar(ttk.Frame):
         self.save_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.load_button = SwitchButton(self, text="Load")
         self.load_button.pack(anchor="w", side="left", padx=10, pady=10)
+
+        self.select_tooltip = ToolTip(self.select_button, text="Select\nShortcut: s", bootstyle="info")
+        self.add_node_tooltip = ToolTip(self.add_node_button, text="Add Node\nShortcut: n", bootstyle="info")
+        self.add_edge_tooltip = ToolTip(self.add_edge_button, text="Add Edge\nShortcut: e", bootstyle="info")
+        self.delete_tooltip = ToolTip(self.delete_button, text="Delete\nShortcut: Delete", bootstyle="info")
+        self.undo_tooltip = ToolTip(self.undo_button, text="Undo\nShortcut: Ctrl + z", bootstyle="info")
+        self.redo_tooltip = ToolTip(self.redo_button, text="Redo\nShortcut: Ctrl + y", bootstyle="info")
+        self.save_tooltip = ToolTip(self.save_button, text="Save\nShortcut: Ctrl + s", bootstyle="info")
+        self.load_tooltip = ToolTip(self.load_button, text="Load\nShortcut: Ctrl + o", bootstyle="info")
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))

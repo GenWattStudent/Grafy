@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from src.graph.GraphController import GraphController
 from src.utils.Vector import Vector
 from copy import copy
+import uuid
 
 
 class Command(ABC):
@@ -29,35 +30,58 @@ class Command(ABC):
         self.execute()
 
 class CommandHistory:
-    def __init__(self):
+    def __init__(self, controller: GraphController):
         self.undo_stack: list[Command] = []
         self.redo_stack: list[Command] = []
+        self.controller = controller
 
     def get_undo_command_by_index(self, index: int) -> Command:
         return self.undo_stack[index]
 
     def can_undo(self) -> bool:
-        return len(self.undo_stack) > 1
+        # can undo if there is command that belongs to current tab id
+        current_tab_undo_stack = [command for command in self.undo_stack if command.graph_model.tab_id == self.controller.current_graph.get().tab_id]
+        return len(current_tab_undo_stack) > 1
     
     def can_redo(self) -> bool:
-        return len(self.redo_stack) > 0
+        # can redo if there is command that belongs to current tab id
+        current_tab_redo_stack = [command for command in self.redo_stack if command.graph_model.tab_id == self.controller.current_graph.get().tab_id]
+        return len(current_tab_redo_stack) > 0
 
     def execute_command(self, command: Command):
         command.execute()
         self.undo_stack.append(command)
         self.redo_stack.clear()
 
+    def remove_graphs_with_tab_id(self, tab_id: uuid.UUID):
+        self.undo_stack = [command for command in self.undo_stack if command.graph_model.tab_id != tab_id]
+        self.redo_stack = [command for command in self.redo_stack if command.graph_model.tab_id != tab_id]
+
     def undo(self):
         if len(self.undo_stack) > 1:
-            command = self.undo_stack.pop()
-            command.undo()
-            self.redo_stack.append(command)
+            # pop last command that belongs to current tab id 
+            command = None
+            for i in range(len(self.undo_stack) - 1, -1, -1):
+                if self.controller.current_graph.get().tab_id  == self.undo_stack[i].graph_model.tab_id:
+                    command = self.undo_stack.pop(i)
+                    break
+
+            if command is not None:
+                command.undo()
+                self.redo_stack.append(command)
 
     def redo(self):
         if self.redo_stack:
-            command = self.redo_stack.pop()
-            command.redo()
-            self.undo_stack.append(command)
+            # pop last command that belongs to current tab id 
+            command = None
+            for i in range(len(self.redo_stack) - 1, -1, -1):
+                if self.controller.current_graph.get().tab_id  == self.redo_stack[i].graph_model.tab_id:
+                    command = self.redo_stack.pop(i)
+                    break
+
+            if command is not None:
+                command.redo()
+                self.undo_stack.append(command)
 
 class AddNodeCommand(Command):
     def __init__(self, controller: GraphController, node: Node):
@@ -123,6 +147,7 @@ class CreateGraphCommand(Command):
 
     def execute(self):
         self.controller.toolbar.deselect_all_tool()
+        self.graph_model.tab_id = self.controller.current_graph.get().tab_id
         self.graph_model.create(self.controller.view, self.config)
         self.controller.current_graph.set(self.graph_model)
 
@@ -145,6 +170,7 @@ class LoadGraphCommand(Command):
 
     def execute(self):
         self.controller.toolbar.deselect_all_tool()
+        self.graph_model.tab_id = self.controller.current_graph.get().tab_id
         self.controller.current_graph.set(self.graph_model)
         self.controller.view.draw_graph()
     

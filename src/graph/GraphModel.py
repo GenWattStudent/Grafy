@@ -12,7 +12,7 @@ from src.utils.Vector import Vector
 from abc import abstractmethod
 import random
 import numpy as np
-
+import uuid
 class GraphModel:
     def __init__(self, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
@@ -23,6 +23,7 @@ class GraphModel:
         self.intersections: list[Intersection] = []
         self.selected_elements: list[CanvasElement] = []
         self.generator = DrawHelper()
+        self.tab_id = uuid.uuid4()
         self.density = 0
         self.name: str = ""
 

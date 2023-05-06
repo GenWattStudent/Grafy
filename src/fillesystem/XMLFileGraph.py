@@ -5,7 +5,6 @@ from src.graph.elements.Node import Node
 from src.graph.elements.Edge import Edge
 from src.graph.GraphConfig import GraphConfig
 from src.utils.Vector import Vector
-from src.Theme import Theme
 import uuid
 
 class XMLFileGraph(FileManager):
@@ -42,7 +41,7 @@ class XMLFileGraph(FileManager):
             if node is None:
                 continue
             vector = Vector(float(node.get('x')), float(node.get('y')))
-            node_el = Node(vector, int(node.get('index')), 15, Theme.get("node_color"), Theme.get("node_selected_color"))
+            node_el = Node(vector, int(node.get('index')), 15)
             node_el.id = uuid.UUID(node.get('id'))
             graph.add_node(node_el)
         for edge in root.findall('edge'):

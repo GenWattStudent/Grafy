@@ -3,17 +3,14 @@ import tkinter as tk
 from src.Theme import theme
 from src.graph.elements.CanvasElement import CanvasElement 
 
-
 class Node(CanvasElement):
-    def __init__(
-            self, position: Vector, index: int, radius: int = 15, color: str = 'red', selected_color: str = 'blue',
-            border_color: str = 'white'):
-        super().__init__(color)
+    def __init__(self, position: Vector, index: int, radius: int = 15):
+        super().__init__(theme.get("primary"))
         self.index: int = index
         self.position: Vector = position
         self.radius: int = radius
-        self.selected_color: str = selected_color
-        self.border_color: str = border_color
+        self.selected_color: str = theme.get("secondary")
+        self.border_color: str = theme.get("border")
         self.dragged_color: str = theme.get("success")
         self.text: tk._CanvasItemId | None = None
 
@@ -42,7 +39,7 @@ class Node(CanvasElement):
             self.position.x - self.radius, self.position.y - self.radius, self.position.x + self.radius, self.position.y +
             self.radius, fill=color, outline=self.border_color, width=2, tags=("node", str(self.index)))
         self.text = canvas.create_text(
-            self.position.x, self.position.y, text=str(self.index), fill="white", tags="node")
+            self.position.x, self.position.y, text=str(self.index), fill=theme.get('fg'), tags="node")
 
     def get_index(self) -> int:
         return self.index - 1

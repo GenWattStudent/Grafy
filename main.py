@@ -20,13 +20,14 @@ class App(ttk.Window):
         for i in range(len(string)):
            if i % 2 == 0:
                 theme.set(string[i], string[i + 1])
-
+        # print(string)
         self.graph_model = GraphModel()
         self.frame = ttk.Frame(self)
         self.draw_graph_config: DrawGraphConfig = DrawGraphConfig()
         self.graph_view = GraphCanvas(self.frame, draw_config = self.draw_graph_config)
-        self.toolbar = ToolBar(self.frame, self, self.graph_model)
-        self.controller = GraphController(self, self.graph_view, self.toolbar, XMLFileGraph())
+        self.toolbar = ToolBar(self.frame, self)
+        # self.canvas_frame =
+        self.controller = GraphController(self.frame, self.graph_view, self.toolbar, XMLFileGraph())
         self.tab_menu = TabMenu(parent=self, width=const.SCREEN_WIDTH / 5, controller = self.controller)
         self.controller.tab_menu = self.tab_menu # type: ignore
         self.graph_sheets = GraphSheets(self.frame, self.controller)

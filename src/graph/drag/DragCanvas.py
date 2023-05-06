@@ -33,7 +33,7 @@ class DragCanvas(Draggable):
         self.draw_config = draw_config
         self.graph = graph
         self.is_drag_node = True
-        self.canvas_helper =  CanvasHelper(canvas)
+        self.canvas_helper =  CanvasHelper(self.canvas)
         self.on_element_move_end_event = Event()
         self.on_element_move_start_event = Event()
 
@@ -53,6 +53,7 @@ class DragCanvas(Draggable):
         self.canvas.change_cursor(event)
 
     def drag(self, event):
+        print(self.draging_node)
         if self.draging_node:
             x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
             self.draging_node.position.x = x
@@ -67,6 +68,7 @@ class DragCanvas(Draggable):
 
     def drag_node(self, event):
         x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
+       
         for node in self.graph.nodes:
             if node.is_under_cursor(Vector(x, y)):
                 self.draging_node = node

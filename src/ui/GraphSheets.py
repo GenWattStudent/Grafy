@@ -1,5 +1,8 @@
+from __future__ import annotations
 import uuid 
-from src.graph.GraphController import GraphController
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.graph.GraphController import GraphController
 from src.graph.GraphModel import GraphModel
 from src.ui.OptionMenu import OptionMenu, OptionMenuValue
 from ttkbootstrap import ttk
@@ -25,6 +28,12 @@ class GraphSheets(ttk.Frame):
 
     def __len__(self):
         return len(self.graph_sheets)
+
+    def get_graph_by_id(self, id: uuid.UUID) -> GraphModel | None:
+        for sheet in self.graph_sheets:
+            if sheet.tab_id == id:
+                return sheet
+        return None
     
     def set_current_graph_sheet(self, model: GraphModel):
         self.current_graph_sheet = model
@@ -33,7 +42,7 @@ class GraphSheets(ttk.Frame):
                 self.graph_sheets[i] = model
                 break
 
-    def find_button_by_id(self, id: uuid.UUID):
+    def find_button_by_id(self, id: uuid.UUID) -> SwitchButton | None:
         for button in self.tab_buttons:
             if button.id == id:
                 return button.button

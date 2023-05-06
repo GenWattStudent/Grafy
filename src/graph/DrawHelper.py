@@ -69,11 +69,7 @@ class DrawHelper:
         min_y: float = radius
         vector: Vector = Vector().random(min_x, max_x, min_y+self.y_margin, max_y)
 
-        return Node(
-            vector, node_id, radius, 
-            theme.get("primary"),
-            theme.get("selectbg"),
-            theme.get("border"))
+        return Node(vector, node_id, radius)
 
     def generate_nodes(self, graph: GraphModel, radius: int, max_width: float, max_height: float) -> list[Node]:
         nodes: list[Node] = []

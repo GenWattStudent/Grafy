@@ -4,12 +4,14 @@ from src.state.State import State
 from src.ui.SwitchButton import SwitchButton
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from src.graph.GraphController import GraphController
     from src.graph.GraphModel import GraphModel
 from enum import Enum
 from src.utils.Event import Event
 from src.state.GraphState import graph_state
 from tkinter import filedialog
 from ttkbootstrap.tooltip import ToolTip
+from src.ui.windows.ChooseGraph import ChooseGraph
 
 class Tools(Enum):
     EMPTY = "EMPTY"
@@ -24,10 +26,11 @@ class ToolState(State):
 
 
 class ToolBar(ttk.Frame):
-    def __init__(self, master: ttk.Frame, root, graph: GraphModel, **kw):
+    def __init__(self, master: ttk.Frame, root, **kw):
         super().__init__(master, **kw)
         self.master = master
-        self.graph = graph
+        self.controller: GraphController | None = None
+        self.graph: GraphModel | None = None
         self.root = root
         self.border_width = 2
 
@@ -59,6 +62,8 @@ class ToolBar(ttk.Frame):
         self.save_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.load_button = SwitchButton(self, text="Load")
         self.load_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.compare_button = SwitchButton(self, text="Compare")
+        self.compare_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_tooltip = ToolTip(self.select_button, text="Select\nShortcut: s", bootstyle="info")
         self.add_node_tooltip = ToolTip(self.add_node_button, text="Add Node\nShortcut: n", bootstyle="info")
@@ -68,6 +73,7 @@ class ToolBar(ttk.Frame):
         self.redo_tooltip = ToolTip(self.redo_button, text="Redo\nShortcut: Ctrl + y", bootstyle="info")
         self.save_tooltip = ToolTip(self.save_button, text="Save\nShortcut: Ctrl + s", bootstyle="info")
         self.load_tooltip = ToolTip(self.load_button, text="Load\nShortcut: Ctrl + o", bootstyle="info")
+        self.compare_tooltip = ToolTip(self.compare_button, text="Compare", bootstyle="info")
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
@@ -77,6 +83,7 @@ class ToolBar(ttk.Frame):
         self.add_edge_button.configure(command=lambda el=self.add_edge_button: self.change_tool(Tools.ADD_EDGE, el))
         self.load_button.configure(command=self.load)
         self.save_button.configure(command=self.save)
+        self.compare_button.configure(command=self.compare)
 
         self.bind("<Configure>", self.on_resize)
         self.root.bind("<Delete>", lambda event: self.delete_tool())
@@ -85,7 +92,6 @@ class ToolBar(ttk.Frame):
         self.root.bind("<Escape>", lambda event: self.change_tool(Tools.EMPTY))
         self.root.bind("<Control-s>", lambda event: self.save())
         self.root.bind("<Control-o>", lambda event: self.load())
-        # after "1" key is pressed choose select tool
         self.root.bind("s", lambda event: self.change_tool(Tools.SELECT, self.select_button))
         self.root.bind("n", lambda event: self.change_tool(Tools.ADD_NODE, self.add_node_button))
         self.root.bind("e", lambda event: self.change_tool(Tools.ADD_EDGE, self.add_edge_button))
@@ -153,11 +159,16 @@ class ToolBar(ttk.Frame):
             self.undo_button.configure(state = "normal")
         else:
             self.undo_button.configure(state = "disabled")
+    
+    def compare(self):
+        # self.compare_select_window = ChooseGraph(self.root, "Choose graph to compare", self.controller.graph_sheets)
+        # self.compare_select_window.on_close(self.controller.compare_graphs)
+        # self.compare_select_window.mainloop()
+        pass
 
     def delete_tool(self):
         if len(self.graph.selected_elements) == 0:
             return
-
         # get node and edges to delete
         nodes_to_delete = self.graph.get_nodes_from_list(self.graph.selected_elements)
         edges_to_delete = self.graph.get_edges_from_list(self.graph.selected_elements)

@@ -28,6 +28,8 @@ class GraphController:
         self.view = view
         self.root = root
         self.toolbar = toolbar
+        self.toolbar.controller = self
+        self.toolbar.graph = self.current_graph.get()
         self.file_manager = file_manager
         self.draw_config = DrawGraphConfig()
         self.drag = DragCanvas(view, self.draw_config, self.current_graph.get())
@@ -57,6 +59,7 @@ class GraphController:
         self.view.bind("<ButtonRelease-1>", self.on_release)
 
     def set_model(self, model: GraphModel):
+        self.toolbar.deselect_all_tool()
         self.current_graph.set(model)
         self.view.draw_graph()
 

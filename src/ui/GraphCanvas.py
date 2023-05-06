@@ -12,6 +12,7 @@ from src.Theme import theme
 from ttkbootstrap.toast import ToastNotification
 import math as math
 import threading
+import uuid
 
 
 class GraphCanvas(ttk.Canvas):
@@ -20,6 +21,7 @@ class GraphCanvas(ttk.Canvas):
         self.draw_config = draw_config
         self.is_intersection: bool = False
         self.draging_node: Node | None = None
+        self.tab_id = uuid.uuid4()
 
         self.graph: GraphModel = graph
         self.canvas_helper = CanvasHelper(self)

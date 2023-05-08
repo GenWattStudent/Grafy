@@ -12,6 +12,27 @@ class Menu(ttk.Frame):
 
         self.search_path_event = Event()
         self.generate_graph_event = Event()
+        self.isomorphic_var = ttk.StringVar(value="Isomorphic: off")
+    
+    def get_isomorphic_string(self, graphs: list[str]) -> str:
+        string = ''
+        for  graph in graphs:
+            string += f"{graph}, "
+        
+        return string[:-2]
+
+    def set_isomorphic_var(self, graphs: list[str], is_isomorphic: bool | None):
+        if  is_isomorphic is None:
+            self.isomorphic_var.set("Isomorphic: off")
+            return
+        if is_isomorphic:
+            string = self.get_isomorphic_string(graphs)
+            string += " are isomorphic"
+            self.isomorphic_var.set(string)
+        else:
+            string = self.get_isomorphic_string(graphs)
+            string += " are not isomorphic"
+            self.isomorphic_var.set(string)
 
     def on_search_path(self, cb):
         self.search_path_event += cb

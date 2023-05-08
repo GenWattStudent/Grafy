@@ -20,12 +20,17 @@ from src.GraphFile import GraphFile
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.ui.GraphSheets import GraphSheets
-
+    from src.ui.Menu.TabMenu import TabMenu
+import uuid
 
 class GraphController:
     def __init__(self, root, view: GraphCanvas, toolbar: ToolBar, file_manager: FileManager):
         self.current_graph: GraphState = GraphState(GraphModel())
+        self.canvas_list: list[GraphCanvas] = []
+        self.canvas_list.append(view)
+        self.graphs: list[GraphModel] = [self.current_graph.get()]
         self.view = view
+        self.view.pack(side='left', fill='both', expand=True)
         self.root = root
         self.toolbar = toolbar
         self.toolbar.controller = self
@@ -38,7 +43,7 @@ class GraphController:
         self.command_history: CommandHistory = CommandHistory(self)
         self.graph_selector = GraphSelector()
         self.useless_graph_file = GraphFile(filename="graph.txt")
-        self.tab_menu = None
+        self.tab_menu: TabMenu | None = None
         self.graph_sheets: GraphSheets | None = None
 
         self.current_graph.subscribe(self.on_current_graph_change)
@@ -53,15 +58,66 @@ class GraphController:
         self.drag.on_element_move(self.on_move_element)
         self.toolbar.selected_tool.subscribe(self.on_tool_change)
 
-        self.view.bind("<Button-1>", self.on_click)
-        self.view.bind("<B1-Motion>", self.on_drag)
-        self.view.bind("<Motion>", self.motion)
-        self.view.bind("<ButtonRelease-1>", self.on_release)
+        self.bind_canvas_events(view)
 
+    def bind_canvas_events(self, canvas: GraphCanvas):
+        canvas.bind("<Button-1>", self.on_click)
+        canvas.bind("<B1-Motion>", self.on_drag)
+        canvas.bind("<Motion>", self.motion)
+        canvas.bind("<ButtonRelease-1>", self.on_release)
+    
+    def destroy_canvases(self):
+        for canvas in self.canvas_list:
+            canvas.destroy()
+        self.canvas_list.clear()
+    
+    def change_current_canvas(self, canvas_id: uuid.UUID, is_click: bool = False):
+        if (canvas_id != self.view.id and self.toolbar.selected_tool.get() != Tools.SELECT) or (is_click and canvas_id != self.view.id):
+            for canvas in self.canvas_list:
+                if canvas.id == canvas_id:
+                    graph = self.graph_sheets.get_graph_by_id(canvas.tab_id)
+                    
+                    if graph:
+                        if self.view.winfo_exists():
+                            self.toolbar.deselect_all_tool()
+                            self.view.set_active(False)
+                            self.graph_sheets.select(graph.tab_id)
+                            self.view.draw_graph()
+                        
+                        self.on_current_canvas_change(canvas)
+                        self.current_graph.set(graph)
+                        canvas.draw_graph()
+                    return
+
+    def turn_off_compare_mode(self):
+        self.graphs.clear()
+        self.destroy_canvases()
+        canvas = self.create_canvas(self.current_graph.get())
+        self.on_current_canvas_change(canvas)
+    
+    def check_isomorphic(self):
+        if len(self.graphs) >= 2:
+            self.tab_menu.current_tab_component.set_isomorphic_var([self.graph_sheets.find_button_by_id(self.graphs[0].tab_id).cget('text'), self.graph_sheets.find_button_by_id(self.graphs[1].tab_id).cget('text')], self.graphs[0] == self.graphs[1])
+    
+    def compare_graphs(self, graphs_ids: list[uuid.UUID]):
+        if len(graphs_ids) >= 2:
+            self.graphs.clear()
+            self.destroy_canvases()
+            for id in graphs_ids:
+                graph = self.graph_sheets.get_graph_by_id(id)
+                if graph:
+                    canvas = self.create_canvas(graph)
+                    self.on_current_canvas_change(canvas)
+                    graph.canvas_id = canvas.id
+                    self.graphs.append(graph)
+
+            self.check_isomorphic()
+            
     def set_model(self, model: GraphModel):
         self.toolbar.deselect_all_tool()
+        model.canvas_id = self.view.id
+        self.view.tab_id = model.tab_id
         self.current_graph.set(model)
-        self.view.draw_graph()
 
     def on_tool_change(self, tool: Tools):
         self.toolbar_helper.on_tool_change(tool)
@@ -73,12 +129,28 @@ class GraphController:
     def on_graph_change(self, graph_model: GraphModel):
         self.toolbar.change_undo_button_style(self.command_history.can_undo())
         self.toolbar.change_redo_button_style(self.command_history.can_redo())
+        self.toolbar.change_compare_button_style(len(self.graph_sheets.graph_sheets) >= 2)
+
+    def on_current_canvas_change(self, canvas: GraphCanvas):
+        self.view = canvas
+        self.view.set_active(True)
+        self.view.canvas_helper.canvas = canvas
+        self.toolbar_helper.canvas = canvas
+        self.toolbar_helper.canvas_helper.canvas = canvas
+        self.drag.canvas = canvas
+        self.drag.canvas_helper.canvas = canvas
+        self.canvas_helper.canvas = canvas
     
     def on_current_graph_change(self, graph_model: GraphModel):
         self.view.graph = graph_model
         self.toolbar.graph = graph_model
         self.toolbar_helper.graph = graph_model
         self.drag.graph = graph_model
+        for i, sheet in enumerate(self.graph_sheets.graph_sheets):
+            if sheet.canvas_id == self.view.graph.canvas_id and sheet.tab_id == self.view.graph.tab_id:
+                self.graph_sheets.graph_sheets[i] = graph_model
+                break
+        self.check_isomorphic()
         self.view.draw_graph()
 
     def on_move_element(self, element: CanvasElement, position: Vector, old_position: Vector):
@@ -147,6 +219,7 @@ class GraphController:
         graph_state.set(self.current_graph.get())
 
     def on_click(self, event):
+        self.change_current_canvas(event.widget.id, True)
         self.drag.click(event)
         self.add_node(event)
         self.add_edge(event)
@@ -154,17 +227,28 @@ class GraphController:
 
     def change_mode(self, mode: str):
         self.mode = mode
+    
+    def create_canvas(self, model: GraphModel) -> GraphCanvas:
+        canvas = GraphCanvas(self.root, model)
+        canvas.tab_id = model.tab_id
+        self.bind_canvas_events(canvas)
+        self.canvas_list.append(canvas)
+        canvas.pack(side='left', fill='both', expand=True)
+        canvas.draw_graph()
+        return canvas
 
     def on_drag(self, event):
         self.drag.drag(event)
 
     def on_release(self, event):
-       self.drag.end_drag(event)
-       self.current_graph.get().wages = self.current_graph.get().generator.generate_wages(self.current_graph.get(), self.current_graph.get().nodes)
-       self.current_graph.set(self.current_graph.get())
-       graph_state.set(self.current_graph.get())
+        self.drag.end_drag(event)
+        if self.current_graph.get().nodes:
+            self.current_graph.get().wages = self.current_graph.get().generator.generate_wages(self.current_graph.get(), self.current_graph.get().nodes)
+            self.current_graph.set(self.current_graph.get())
+        graph_state.set(self.current_graph.get())
 
     def motion(self, event):
+        self.change_current_canvas(event.widget.id)
         self.view.change_cursor(event)
         self.toolbar_helper.show_node_preview(event)
         self.toolbar_helper.show_edge_preview(event)

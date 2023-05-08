@@ -13,6 +13,7 @@ from abc import abstractmethod
 import random
 import numpy as np
 import uuid
+from src.algorithms.UllmannAlgorithm import UllmannAlgorithm
 class GraphModel:
     def __init__(self, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
@@ -24,6 +25,7 @@ class GraphModel:
         self.selected_elements: list[CanvasElement] = []
         self.generator = DrawHelper()
         self.tab_id = uuid.uuid4()
+        self.canvas_id = uuid.uuid4()
         self.density = 0
         self.name: str = ""
 
@@ -146,6 +148,14 @@ class GraphModel:
     def calculate_density(self) -> float:
         number_of_nodes = self.matrix.number_of_nodes
         return 2 * len(self.edges) / ((number_of_nodes * (number_of_nodes - 1)) + 0.0001)
+
+    def __eq__(self, other: 'GraphModel'):
+        ullmann = UllmannAlgorithm(self, other)
+        return ullmann.is_isomorphic()
+    
+    # not equal
+    def __ne__(self, other: 'GraphModel'):
+        return not self.__eq__(other)
     
     @abstractmethod
     def create(self, canvas: tk.Canvas, config: GraphConfig) -> GraphMatrix:

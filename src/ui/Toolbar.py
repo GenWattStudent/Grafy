@@ -12,6 +12,7 @@ from src.state.GraphState import graph_state
 from tkinter import filedialog
 from ttkbootstrap.tooltip import ToolTip
 from src.ui.windows.ChooseGraph import ChooseGraph
+import uuid
 
 class Tools(Enum):
     EMPTY = "EMPTY"
@@ -33,6 +34,7 @@ class ToolBar(ttk.Frame):
         self.graph: GraphModel | None = None
         self.root = root
         self.border_width = 2
+        self.compare_select_window: ChooseGraph | None = None
 
         self.selected_tool: State = ToolState()
         self.prev_tool: State = ToolState()
@@ -95,6 +97,7 @@ class ToolBar(ttk.Frame):
         self.root.bind("s", lambda event: self.change_tool(Tools.SELECT, self.select_button))
         self.root.bind("n", lambda event: self.change_tool(Tools.ADD_NODE, self.add_node_button))
         self.root.bind("e", lambda event: self.change_tool(Tools.ADD_EDGE, self.add_edge_button))
+        self.root.bind('c', lambda event: self.compare())
 
     def undo(self):
         self.undo_event()
@@ -160,11 +163,29 @@ class ToolBar(ttk.Frame):
         else:
             self.undo_button.configure(state = "disabled")
     
+    def change_compare_button_style(self, can_compare: bool):
+        if can_compare:
+            self.compare_button.configure(state = "normal")
+        else:
+            self.compare_button.configure(state = "disabled")
+
+    def turn_off_compare_mode(self):
+        self.compare_button.configure(state = "normal", text="Compare", command=self.compare)
+        self.controller.turn_off_compare_mode()
+    
+    def change_to_turn_off_compare_mode(self, result: uuid.UUID):
+        self.compare_select_window = None
+        self.compare_button.configure(state = "normal", text="Turn off compare", command=self.turn_off_compare_mode)
+        self.controller.compare_graphs(result)
+    
     def compare(self):
-        # self.compare_select_window = ChooseGraph(self.root, "Choose graph to compare", self.controller.graph_sheets)
-        # self.compare_select_window.on_close(self.controller.compare_graphs)
-        # self.compare_select_window.mainloop()
-        pass
+        if self.compare_select_window is None:
+            self.compare_select_window = ChooseGraph(self.root, "Choose graph to compare", self.controller.graph_sheets)
+            self.compare_select_window.on_close(self.change_to_turn_off_compare_mode)
+            self.compare_select_window.mainloop()
+        else:
+            self.compare_select_window.destroy()
+            self.compare_select_window = None
 
     def delete_tool(self):
         if len(self.graph.selected_elements) == 0:
@@ -182,7 +203,6 @@ class ToolBar(ttk.Frame):
         self.graph.delete_edges(edges_to_delete)
         self.graph.delete_nodes(nodes_to_delete)
         self.delete_event(nodes_to_delete + edges_to_delete)
-        self.change_tool(Tools.DELETE)
 
     def deselect_all(self):
         self.select_button.deselect()

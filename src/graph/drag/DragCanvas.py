@@ -53,7 +53,6 @@ class DragCanvas(Draggable):
         self.canvas.change_cursor(event)
 
     def drag(self, event):
-        print(self.draging_node)
         if self.draging_node:
             x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
             self.draging_node.position.x = x

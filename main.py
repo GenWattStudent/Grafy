@@ -24,10 +24,10 @@ class App(ttk.Window):
         self.graph_model = GraphModel()
         self.frame = ttk.Frame(self)
         self.draw_graph_config: DrawGraphConfig = DrawGraphConfig()
-        self.graph_view = GraphCanvas(self.frame, draw_config = self.draw_graph_config)
+        self.canvas_frame = ttk.Frame(self.frame)
+        self.graph_view = GraphCanvas(self.canvas_frame, draw_config = self.draw_graph_config)
         self.toolbar = ToolBar(self.frame, self)
-        # self.canvas_frame =
-        self.controller = GraphController(self.frame, self.graph_view, self.toolbar, XMLFileGraph())
+        self.controller = GraphController(self.canvas_frame, self.graph_view, self.toolbar, XMLFileGraph())
         self.tab_menu = TabMenu(parent=self, width=const.SCREEN_WIDTH / 5, controller = self.controller)
         self.controller.tab_menu = self.tab_menu # type: ignore
         self.graph_sheets = GraphSheets(self.frame, self.controller)
@@ -59,7 +59,8 @@ class App(ttk.Window):
         self.frame.pack(fill="both", expand=True)
  
         self.toolbar.pack(fill='x')
-        self.graph_view.pack(fill='both', expand=True)
+        self.canvas_frame.pack(fill='both', expand=True)
+        # self.graph_view.pack(fill='both', expand=True)
         self.graph_sheets.pack(fill='x')
 
         self.update()
@@ -67,5 +68,5 @@ class App(ttk.Window):
         self.controller.create(graph_config_state.get())
         self.mainloop()
 
-
-App()
+if __name__ == "__main__":
+    App()

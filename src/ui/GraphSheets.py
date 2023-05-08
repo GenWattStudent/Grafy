@@ -21,10 +21,17 @@ class GraphSheets(ttk.Frame):
         self.controller = controller
         self.graph_sheets: list[GraphModel] = []
         self.tab_buttons: list[TabButtonInfo] = []
+        self.border_width = 2
+        self.border = ttk.LabelFrame(self, text="", style="primary.Tbutton")
         self.current_graph_sheet = None
         # Add button that will add new graph sheet
-        self.add_button = ttk.Button(self, text="+", cursor="hand2", command=lambda: self.add_graph_sheet(GraphModel(), f"Graph {len(self.graph_sheets) + 1}"))
+        self.add_button = ttk.Button(self, text="+", cursor="hand2", command=lambda: self.add_graph_sheet(GraphModel(), f"Graph {len(self.graph_sheets) + 1}", True))
         self.add_button.pack(side="left")
+
+        self.bind("<Configure>", self.on_resize)
+
+    def on_resize(self, event):
+        self.border.place(x=0, y=0, relwidth = 1, height=self.border_width)
 
     def __len__(self):
         return len(self.graph_sheets)
@@ -32,6 +39,12 @@ class GraphSheets(ttk.Frame):
     def get_graph_by_id(self, id: uuid.UUID) -> GraphModel | None:
         for sheet in self.graph_sheets:
             if sheet.tab_id == id:
+                return sheet
+        return None
+
+    def get_graph_by_canvas_id(self, id: uuid.UUID) -> GraphModel | None:
+        for sheet in self.graph_sheets:
+            if sheet.canvas_id == id:
                 return sheet
         return None
     
@@ -95,14 +108,18 @@ class GraphSheets(ttk.Frame):
         button = SwitchButton(self, text=title, cursor="hand2", command=lambda: self.on_sheet_change(model.tab_id))
         button.bind("<Button-3>", lambda e: OptionMenu(self.root, [OptionMenuValue("Edit name", lambda: self.edit_sheet_name(model.tab_id)), OptionMenuValue("Delete", lambda: self.delete_sheet(model.tab_id))]).show(e))
         button.pack(side="left")
+        self.tab_buttons.append(TabButtonInfo(button, model.tab_id))
 
         if select:
             button.select()
+            self.on_sheet_change(model.tab_id)
 
-        self.tab_buttons.append(TabButtonInfo(button, model.tab_id))
         self.update_add_button_position()
     
-    def on_sheet_change(self, id: uuid.UUID):
+    def select(self, id: uuid.UUID) -> GraphModel | None:
+        if self.current_graph_sheet is not None and self.current_graph_sheet.tab_id == id:
+            return self.current_graph_sheet
+        selected_sheet = None
         for i, sheet in enumerate(self.graph_sheets):
             if sheet.tab_id == id:
                 if self.current_graph_sheet is not None:
@@ -111,5 +128,14 @@ class GraphSheets(ttk.Frame):
                         current_button.deselect()
                 self.current_graph_sheet = sheet
                 self.tab_buttons[i].button.select()
-                self.controller.set_model(sheet)
+                selected_sheet = sheet
                 break
+        return selected_sheet
+    
+    def on_sheet_change(self, id: uuid.UUID):
+        if self.current_graph_sheet is not None and self.current_graph_sheet.tab_id == id:
+            return
+        sheet = self.select(id)
+        if sheet is not None:
+            self.controller.set_model(sheet)
+

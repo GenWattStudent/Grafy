@@ -9,7 +9,7 @@ class ChooseGraph(TopLevelWindow):
     def __init__(self, parent, title: str, graph_sheets: GraphSheets, **kwargs):
         super().__init__(parent, title, **kwargs)
         self.graph_sheets = graph_sheets
-        self.result = []
+        self.result: list[uuid.UUID] = []
         self.tab_buttons_info = []
         self.select_limit = 2
         self.on_close_event = Event()
@@ -38,6 +38,12 @@ class ChooseGraph(TopLevelWindow):
         for tab_button_info in self.tab_buttons_info:
             if tab_button_info.id == id:
                 tab_button_info.button.select()
+    
+    def update_ok_button_state(self):
+        if len(self.result) == self.select_limit:
+            self.ok_button.config(state="normal")
+        else:
+            self.ok_button.config(state="disabled")
 
     def select(self, id: uuid.UUID):
         if len(self.result) == self.select_limit and id not in self.result:
@@ -51,6 +57,8 @@ class ChooseGraph(TopLevelWindow):
         else: 
             self.result.remove(id)
             self.deselect_button_by_id(id)
+        
+        self.update_ok_button_state()
     
     def close(self):
         self.on_close_event(self.result)
@@ -67,5 +75,11 @@ class ChooseGraph(TopLevelWindow):
             button.pack(side="left", padx=10)
             self.tab_buttons_info.append(TabButtonInfo(button, info_button.id))
         
-        ok_button = ttk.Button(self, text="OK", command=self.close, cursor="hand2")
-        ok_button.pack(padx=10, pady=10)
+        button_frame = ttk.Frame(self)
+        button_frame.pack(padx=10, pady=10)
+
+        self.ok_button = ttk.Button(button_frame, text="OK", command=self.close, cursor="hand2", state = 'disabled')
+        self.ok_button.pack(side="left", padx=10)
+
+        cancel_button = ttk.Button(button_frame, text="Cancel", command=self.destroy, cursor="hand2", style="danger.TButton")
+        cancel_button.pack(side="left", padx=10)

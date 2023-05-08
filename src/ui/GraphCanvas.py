@@ -22,13 +22,36 @@ class GraphCanvas(ttk.Canvas):
         self.is_intersection: bool = False
         self.draging_node: Node | None = None
         self.tab_id = uuid.uuid4()
+        self.id = uuid.uuid4()
+        self.active = False
+        self._min_zoom = 1
+        self._max_zoom = 10
+        self.zoom_factor = 1
 
         self.graph: GraphModel = graph
         self.canvas_helper = CanvasHelper(self)
 
         self.configure(bg=theme.get("bg"))
-        self.configure(highlightthickness=0)
         self.configure(scrollregion=self.bbox(ttk.ALL))
+        self.bind("<MouseWheel>", self.zoom)
+    
+    def zoom(self, event):
+        if event.delta > 0:
+            if self.zoom_factor < self._max_zoom:
+                self.scale("all", event.x, event.y, 1.1, 1.1)
+                self.zoom_factor *= 1.1
+        elif event.delta < 0:
+            if self.zoom_factor > self._min_zoom:
+                self.scale("all", event.x, event.y, 0.9, 0.9)
+                self.zoom_factor *= 0.9
+    
+    def set_active(self, active: bool):
+        self.active = active
+
+        if active:
+            self.configure(highlightthickness=3, highlightbackground=theme.get("primary"))
+        else:
+            self.configure(highlightthickness=0)
 
     def toggle_intersection(self):
         self.is_intersection = not self.is_intersection
@@ -99,9 +122,10 @@ class GraphCanvas(ttk.Canvas):
         self.graph.intersections = self.graph.generator.intersection.find_intersections(self.graph.edges)
 
     def draw_graph(self):
-        self.delete("all")
-        self.draw_nodes_and_edges()
-        self.show_intersections()
+        if self:
+            self.delete("all")
+            self.draw_nodes_and_edges()
+            self.show_intersections()
 
     def show_intersections(self):
         if self.is_intersection:

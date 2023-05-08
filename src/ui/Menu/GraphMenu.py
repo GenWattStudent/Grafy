@@ -38,6 +38,7 @@ class GraphMenu(Menu):
 
     def on_resize(self, event):
         self.option_info.configure(wraplength=self.winfo_width() - 10)
+        self.isomophic_label.configure(wraplength=self.winfo_width() - 10)
 
     def update_matrix_window(self, graph: GraphModel):
         if hasattr(self, "matrix_window") and self.matrix_window is not None:
@@ -131,6 +132,9 @@ class GraphMenu(Menu):
 
         self.path_distance_label = Typography(self.info_frame)
         self.path_distance_label.pack(anchor="w")
+
+        self.isomophic_label = Typography(self.info_frame, textvariable=self.isomorphic_var)
+        self.isomophic_label.pack(anchor="w", fill="x")
 
         self.option = tkk.Combobox(self, values=["BFS", "Dijkstra", "DFS"], state="readonly")
         self.option.current(0)

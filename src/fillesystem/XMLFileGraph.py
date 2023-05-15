@@ -41,7 +41,7 @@ class XMLFileGraph(FileManager):
             if node is None:
                 continue
             vector = Vector(float(node.get('x')), float(node.get('y')))
-            node_el = Node(vector, int(node.get('index')), 15)
+            node_el = Node(vector, int(node.get('index')), 120, 50)
             node_el.id = uuid.UUID(node.get('id'))
             graph.add_node(node_el)
         for edge in root.findall('edge'):

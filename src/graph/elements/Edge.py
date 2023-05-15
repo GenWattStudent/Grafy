@@ -3,11 +3,13 @@ import tkinter as tk
 from src.Theme import theme
 from src.utils.Vector import Vector
 from src.graph.elements.CanvasElement import CanvasElement
-
+import math
 
 class Edge(CanvasElement):
     def __init__(self, node1: Node, node2: Node, distance: float | None = None, color: str = 'white'):
         super().__init__(color)
+        self.start_point = Vector(0, 0)
+        self.end_point = Vector(0, 0)
         self.node1 = node1
         self.node2 = node2
         self.is_path: bool = False
@@ -17,14 +19,25 @@ class Edge(CanvasElement):
         self.selected_color = theme.get("selectbg")
         self.id = f"{node1.id}-{node2.id}"
 
-    def is_under_cursor(self, cursor_position: Vector, threshold: float = 5) -> bool:
-        x1, y1 = self.node1.position.x, self.node1.position.y
-        x2, y2 = self.node2.position.x, self.node2.position.y
-        cursor_x, cursor_y = cursor_position.x, cursor_position.y
+    def delete(self, canvas: tk.Canvas):
+        self.is_dragged = False
+        self.is_selected = False
+        canvas.delete(self.line_id)
+        canvas.delete(self.triangle_1_id)
+        canvas.delete(self.triangle_2_id)
 
-        distance = abs((y2 - y1) * cursor_x - (x2 - x1) * cursor_y + x2 * y1 - y2 * x1) / ((y2 - y1)
-                                                                                           ** 2 + (x2 - x1) ** 2) ** 0.5 + 0.001
-        return distance <= threshold
+    def is_under_cursor(self, cursor_position: Vector) -> bool:
+        node1_pos = self.node1.position
+        node2_pos = self.node2.position
+        d1 = cursor_position.distance(node1_pos)
+        d2 = cursor_position.distance(node2_pos)
+        lineLen = node1_pos.distance(node2_pos)
+        buffer = 0.2
+
+        if d1 + d2 >= lineLen-buffer and d1 + d2 <= lineLen+buffer:
+            return True
+        
+        return False
 
     def get_color(self) -> str:
         if self.is_selected:
@@ -35,15 +48,64 @@ class Edge(CanvasElement):
             return self.dragged_color
         else:
             return self.color
+        
+    def calculate_closest_edge_point(self, rect1_pos, rect1_width, rect1_height, rect2_pos, rect2_width, rect2_height):
+        closest_point = Vector(0, 0)
+        if rect1_pos.x + rect1_width < rect2_pos.x:
+            closest_point.x = rect1_pos.x + rect1_width
+        elif rect1_pos.x > rect2_pos.x + rect2_width:
+            closest_point.x = rect1_pos.x
+        else:
+            closest_point.x = rect1_pos.x + rect1_width * 0.5
+
+        if rect1_pos.y + rect1_height < rect2_pos.y:
+            closest_point.y = rect1_pos.y + rect1_height
+        elif rect1_pos.y > rect2_pos.y + rect2_height:
+            closest_point.y = rect1_pos.y
+        else:
+            closest_point.y = rect1_pos.y + rect1_height * 0.5
+
+        return closest_point
 
     def draw(self, canvas: tk.Canvas):
-        color = self.get_color()
+        # conncet nodes(rectangles) with line that touch thire closest edge
+        closest_point1 = self.calculate_closest_edge_point(self.node1.position, self.node1.width, self.node1.height, self.node2.position, self.node2.width, self.node2.height)
+        closest_point2 = self.calculate_closest_edge_point(self.node2.position, self.node2.width, self.node2.height, self.node1.position, self.node1.width, self.node1.height)
 
-        self.canvas_id = canvas.create_line(
-            self.node1.position.x, self.node1.position.y, self.node2.position.x, self.node2.position.y, fill=color,
-            width=2, tags="edge")
+        # Draw the arrow
+        arrow_points = self._calculate_arrow_points(closest_point1, closest_point2, 8)
+        self.triangle_1_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color())
+
+        # Draw the arrow
+        arrow_points = self._calculate_arrow_points(closest_point2, closest_point1, 8)
+        self.triangle_2_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color())
+            
+        # Draw the line
+        self.start_point.x = closest_point1.x
+        self.start_point.y = closest_point1.y
+        self.end_point.x = closest_point2.x
+        self.end_point.y = closest_point2.y
+
+        self.line_id = canvas.create_line(closest_point1.x, closest_point1.y, closest_point2.x, closest_point2.y, fill=self.get_color(), width=2)
+
+    def _calculate_arrow_points(self, start_point: Vector, end_point: Vector, arrow_length: float) -> list[float]:
+        if start_point.distance(end_point) < 40:
+            return [0, 0, 0, 0, 0, 0]
+        direction = (end_point - start_point).normalized()
+        perpendicular = Vector(-direction.y, direction.x)
+        arrow_points = [
+            end_point.x, end_point.y,
+            end_point.x - direction.x * arrow_length - perpendicular.x * arrow_length,
+            end_point.y - direction.y * arrow_length - perpendicular.y * arrow_length,
+            end_point.x - direction.x * arrow_length + perpendicular.x * arrow_length,
+            end_point.y - direction.y * arrow_length + perpendicular.y * arrow_length
+        ]
+        return arrow_points
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Edge):
             return self.id == __value.id
         return False
+
+    def __ne__(self, __value: object) -> bool:
+        return self.__ne__(__value)

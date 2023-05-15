@@ -57,3 +57,8 @@ class Vector:
             return self / length
         else:
             return Vector(0, 0)
+    
+    def angle_to(self, other_vector):
+        dx = other_vector.x - self.x
+        dy = other_vector.y - self.y
+        return math.atan2(dy, dx)

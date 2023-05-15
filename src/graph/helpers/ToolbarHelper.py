@@ -43,7 +43,7 @@ class ToolbarHelper:
             index = 1
             if len(self.graph.nodes) > 0:
                 index = len(self.graph.nodes) + 1
-            self.node_preview = Node(pos, index, self.draw_config.node_radius)
+            self.node_preview = Node(pos, index, self.draw_config.node_width, self.draw_config.node_height)
             self.node_preview.draw(self.canvas)
     
     def show_edge_preview(self, event):

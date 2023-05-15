@@ -33,10 +33,7 @@ class TreeMenu(Menu):
         self.border.place(relx=1, relheight=1, width=self.border_width, y=0)
 
     def set_input_value(self, value: str):
-            self.puffer_code_entry.configure(state="normal")
-            self.puffer_code_entry.delete(0, "end")
-            self.puffer_code_entry.insert(0, value)
-            self.puffer_code_entry.configure(state="disabled")
+        self.puffer_code_value_label.configure(text=value)
 
     def init(self):
         if not isinstance(graph_state.get(), Tree):
@@ -53,8 +50,11 @@ class TreeMenu(Menu):
             self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
         self.number_of_nodes_entry.on_change(lambda e: graph_config_state.set_number_of_nodes(int(e)))
 
-        self.puffer_code_entry = Input(self, "Puffer code", state = "disabled")
-        self.puffer_code_entry.pack(padx=10, pady=10, fill="x")
+        self.puffer_code_label = ttk.Label(self, text="Puffer code")
+        self.puffer_code_label.pack(padx=10, pady=10, fill="x")
+
+        self.puffer_code_value_label = ttk.Label(self, text="Puffer code value")
+        self.puffer_code_value_label.pack(padx=10, pady=10, fill="x")
 
         # self.button = ctk.CTkButton(self, text="Show Graph Details", command=self.show_matrix)
         # self.button.pack(padx=10, pady=10, fill="x")

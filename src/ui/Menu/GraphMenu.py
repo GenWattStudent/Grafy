@@ -10,6 +10,7 @@ from src.ui.windows.GraphDetails import GraphDeatails
 from src.inputs.Input import Input
 from src.graph.GraphController import GraphController
 from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
+from src.utils.Simulation import Simulation
 
 number_of_nodes_rules = {
     "is_positive": Is_positive(),
@@ -35,6 +36,17 @@ class GraphMenu(Menu):
         self.create_widgets()
 
         self.bind("<Configure>", self.on_resize)
+
+    def simulate(self, simulation: Simulation):
+        self.simulation_frame = tkk.Frame(self)
+        self.simulation_frame.pack(fill="both", expand=True)
+        self.prev_button = tkk.Button(self.simulation_frame, text="Prev", command=simulation.previous, cursor="hand2")
+        self.prev_button.pack(side="left", padx=10, pady=10)
+        self.next_button = tkk.Button(self.simulation_frame, text="Next", command=simulation.next, cursor="hand2")
+        self.next_button.pack(side="right", padx=10, pady=10)
+
+    def destroy_simulate(self):
+        self.simulation_frame.destroy()
 
     def on_resize(self, event):
         self.option_info.configure(wraplength=self.winfo_width() - 10)

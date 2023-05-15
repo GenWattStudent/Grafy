@@ -18,6 +18,7 @@ from src.GraphFile import GraphFile
 from src.graph.AddEdgeManager import EdgePreviewManager
 from typing import TYPE_CHECKING
 from src.graph.CanvasGroup import CanvasGroup
+from src.utils.Simulation import PathSimulation
 if TYPE_CHECKING:
     from src.ui.GraphSheets import GraphSheets
     from src.ui.Menu.TabMenu import TabMenu
@@ -46,6 +47,7 @@ class GraphController:
         self.useless_graph_file = GraphFile(filename="graph.txt")
         self.tab_menu: TabMenu | None = None
         self.graph_sheets: GraphSheets | None = None
+        self.simulation: PathSimulation = PathSimulation(self.current_graph.get(), self.view)
 
         self.current_graph.subscribe(self.on_current_graph_change)
         self.current_graph.subscribe(self.on_graph_change)
@@ -60,6 +62,16 @@ class GraphController:
         self.toolbar.selected_tool.subscribe(self.on_tool_change)
 
         self.canvas_group.bind_canvas_events(view)
+
+    def simulate(self):
+        if self.simulation.is_running:
+            self.simulation.stop()
+            self.tab_menu.current_tab_component.destroy_simulate() # type: ignore
+            return
+
+        if self.simulation.is_running == False and self.tab_menu.current_tab == 'Graph':
+            self.simulation.start()
+            self.tab_menu.current_tab_component.simulate(self.simulation) # type: ignore
 
     def turn_off_compare_mode(self):
         self.graphs.clear()
@@ -112,6 +124,7 @@ class GraphController:
             if sheet.canvas_id == self.view.graph.canvas_id and sheet.tab_id == self.view.graph.tab_id:
                 self.graph_sheets.graph_sheets[i] = graph_model
                 break
+        self.simulation.set_model(graph_model)
         self.check_isomorphic()
         self.view.draw_graph()
 
@@ -164,7 +177,6 @@ class GraphController:
 
     def on_click(self, event):
         self.canvas_group.change_current_canvas(event.widget.id, True)
-        print(self.toolbar.get_selected_tool() )
         if self.toolbar.get_selected_tool() != Tools.SELECT and self.toolbar.get_selected_tool() != Tools.ADD_EDGE:
             self.drag.drag_node(event)
         self.drag.drag_canvas(event)

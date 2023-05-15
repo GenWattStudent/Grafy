@@ -7,7 +7,7 @@ from src.Theme import theme
 class FindIntersection:
 
     def get_edge_node_positions(self, edge: Edge) -> tuple[float, float, float, float]:
-        return edge.node1.position.x, edge.node1.position.y, edge.node2.position.x, edge.node2.position.y
+        return edge.start_point.x, edge.start_point.y, edge.end_point.x, edge.end_point.y
 
     def intersection(self, edge1: Edge, edge2: Edge) -> Intersection:
         x1, y1, x2, y2 = self.get_edge_node_positions(edge1)
@@ -34,11 +34,9 @@ class FindIntersection:
         if ua < 0 or ua > 1 or ub < 0 or ub > 1:
             return False
 
-        # obliczenie pozycji punktu przecięcia
         x = x1 + ua*dx1
         y = y1 + ua*dy1
 
-        # sprawdzenie, czy przecięcie jest blisko wierzchołka krawędzi
         if (ua <= threshold or ua >= 1-threshold) and \
                 ((x-x1)**2 + (y-y1)**2 <= threshold**2 or (x-x2)**2 + (y-y2)**2 <= threshold**2):
             return False

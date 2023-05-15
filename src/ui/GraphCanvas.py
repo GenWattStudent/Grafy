@@ -10,6 +10,8 @@ from src.state.GraphState import graph_state
 from src.graph.helpers.CanvasHelper import CanvasHelper
 from src.Theme import theme
 from ttkbootstrap.toast import ToastNotification
+from src.ui.OptionMenu import OptionMenu, OptionMenuValue
+from ttkbootstrap.dialogs import QueryDialog
 import math as math
 import threading
 import uuid
@@ -33,7 +35,26 @@ class GraphCanvas(ttk.Canvas):
 
         self.configure(bg=theme.get("bg"))
         self.configure(scrollregion=self.bbox(ttk.ALL))
+        self.bind("<Button-3>", self.right_click)
         self.bind("<MouseWheel>", self.zoom)
+
+    def edit_value(self, node: Node):
+        query = QueryDialog("Enter new value",initialvalue=str(node.value), title="Edit Node value")
+        query.show()
+        if query.result is not None:
+            node.value = query.result
+            node.update_width_depends_on_value()
+        
+        self.draw_graph()
+
+    def right_click(self, event):
+        el = self.canvas_helper.find_elemment_under_cursor(event, self.graph.get_graph_elements())
+        if el is None or not isinstance(el, Node):
+            return
+        
+        schema = [OptionMenuValue("Edit value", lambda: self.edit_value(el))]
+        self.option_menu = OptionMenu(self, schema)
+        self.option_menu.show(event)   
     
     def zoom(self, event):
         if event.delta > 0:
@@ -108,6 +129,7 @@ class GraphCanvas(ttk.Canvas):
 
             self.draw_path(path)
             self.graph.path_distance = distance
+            self.graph.path = path
             graph_state.set(self.graph)
             return distance, path
         else:

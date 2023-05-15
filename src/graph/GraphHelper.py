@@ -31,12 +31,23 @@ class GraphHelper:
         return matrix_string
 
     @staticmethod
-    def check_circle_overlap(x: float, y: float, radius: int, circles: list[Node]):
+    def check_circle_overlap(x: float, y: float, radius: int, circles: list):
         for circle in circles:
             x0 = circle.position.x
             y0 = circle.position.y
             r0 = circle.radius
             if ((x - x0)**2 + (y - y0)**2)**0.5 <= radius + r0:
+                return True
+        return False
+    
+    @staticmethod
+    def check_rect_overlap(x: float, y: float, width: int, height: int, rects: list[Node]):
+        for rect in rects:
+            x0 = rect.position.x
+            y0 = rect.position.y
+            w0 = rect.width
+            h0 = rect.height
+            if x + width > x0 and x < x0 + w0 and y + height > y0 and y < y0 + h0:
                 return True
         return False
 

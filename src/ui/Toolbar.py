@@ -70,6 +70,8 @@ class ToolBar(ttk.Frame):
         self.compare_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.raport_button = SwitchButton(self, text="Raport")
         self.raport_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.simulate_button = SwitchButton(self, text="Simulate")
+        self.simulate_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_tooltip = ToolTip(self.select_button, text="Select\nShortcut: s", bootstyle="info")
         self.add_node_tooltip = ToolTip(self.add_node_button, text="Add Node\nShortcut: n", bootstyle="info")
@@ -81,6 +83,7 @@ class ToolBar(ttk.Frame):
         self.load_tooltip = ToolTip(self.load_button, text="Load\nShortcut: Ctrl + o", bootstyle="info")
         self.compare_tooltip = ToolTip(self.compare_button, text="Compare", bootstyle="info")
         self.raport_tooltip = ToolTip(self.raport_button, text="Raport PDF", bootstyle="info")
+        self.simulate_tooltip = ToolTip(self.simulate_button, text="Simulate", bootstyle="info")
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
@@ -92,6 +95,7 @@ class ToolBar(ttk.Frame):
         self.save_button.configure(command=self.save)
         self.compare_button.configure(command=self.compare)
         self.raport_button.configure(command=self.raport)
+        self.simulate_button.configure(command=self.simulate)
 
         self.bind("<Configure>", self.on_resize)
         self.root.bind("<Delete>", lambda event: self.delete_tool())
@@ -105,6 +109,7 @@ class ToolBar(ttk.Frame):
         self.root.bind("e", lambda event: self.change_tool(Tools.ADD_EDGE, self.add_edge_button))
         self.root.bind('c', lambda event: self.compare())
         self.root.bind('r', lambda event: self.raport())
+        self.root.bind('m', lambda event: self.simulate())
 
     def undo(self):
         self.undo_event()
@@ -141,6 +146,9 @@ class ToolBar(ttk.Frame):
     
     def off_save(self, cb):
         self.save_event -= cb
+    
+    def simulate(self):
+        self.controller.simulate()
 
     def destroy_raport(self):
         if self.raport_window is not None:

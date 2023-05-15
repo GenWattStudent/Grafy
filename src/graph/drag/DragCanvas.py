@@ -69,7 +69,6 @@ class DragCanvas(Draggable):
                 self.draging_node = node
                 self.node_old_position = copy(node.position)
                 self.on_element_move_start_event(self.draging_node, Vector(x, y))
-                self.draging_node.radius = self.draw_config.dragged_node_radius
                 self.graph.generator.set_dragged_edges(self.graph.edges, node)
 
     def drag_canvas(self, event):
@@ -80,7 +79,7 @@ class DragCanvas(Draggable):
         if self.draging_node:
             x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
             self.draging_node.is_dragged = False
-            self.draging_node.radius = self.draw_config.node_radius
+            self.draging_node.width = self.draw_config.node_width
             self.graph.generator.set_dragged_edges(self.graph.edges, self.draging_node, False)
             self.on_element_move_end_event(self.draging_node, Vector(x, y), self.node_old_position)
             self.draging_node = None

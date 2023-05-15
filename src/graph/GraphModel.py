@@ -20,7 +20,6 @@ class GraphModel:
         self.matrix = GraphMatrix(config.number_of_nodes)
         self.nodes: list[Node] = []
         self.edges: list[Edge] = []
-        self.path: list[int] = []
         self.intersections: list[Intersection] = []
         self.selected_elements: list[CanvasElement] = []
         self.generator = DrawHelper()
@@ -28,6 +27,7 @@ class GraphModel:
         self.canvas_id = uuid.uuid4()
         self.density = 0
         self.name: str = ""
+        self.path: dict[int, list[int]] = {}
 
         self.config = config
         self.prev_config: GraphConfig | None = None
@@ -192,7 +192,7 @@ class Graph(GraphModel):
         self.config = config
         self.generate_graph_matrix()
         self.generator.selected_nodes.clear()
-        self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
+        self.nodes = self.generator.generate_nodes(self, canvas.winfo_width(), canvas.winfo_height())
         self.layout.run()
         self.edges = self.generator.generate_edges(self.nodes, self)
         self.wages = self.generator.generate_wages(self, self.nodes)
@@ -269,7 +269,7 @@ class Tree(GraphModel):
         self.generate_tree_matrix()
         self.nodes = self.generate_node_positions(self.matrix)
         self.generator.selected_nodes.clear()
-        self.nodes = self.generator.generate_nodes(self, 15, canvas.winfo_width(), canvas.winfo_height())
+        self.nodes = self.generator.generate_nodes(self, canvas.winfo_width(), canvas.winfo_height())
         self.edges = self.generator.generate_edges(self.nodes, self)
         self.wages = self.generator.generate_wages(self, self.nodes)
 

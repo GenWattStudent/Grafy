@@ -14,6 +14,7 @@ from src.utils.Event import Event
 from src.state.AlgorithmState import algorithm_state
 from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.utils.PDFBuilder import PDFBuilder
+from src.graph.elements.Node import Node
 import ttkbootstrap as tkk
 import uuid
 
@@ -88,7 +89,7 @@ class Raport(TopLevelWindow):
         if self.is_dict.get():
             self.pdf_builder.add_header_2('Graph Dictionary')
             self.draw_dict(dict)
-            selected_nodes: list[] = model.get_nodes_from_list(model.selected_elements)
+            selected_nodes: list[Node] = model.get_nodes_from_list(model.selected_elements)
         if len(selected_nodes) > 0 and len(selected_nodes) == algorithm_state.get_search_algorithm().min_selected_nodes:
             search_algorithms = SearchAlgorithms()
             

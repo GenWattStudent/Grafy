@@ -46,7 +46,7 @@ class GraphMenu(Menu):
 
     def create_matrix(self, graph: GraphModel):
         # generate toplevel window
-        self.matrix_window = GraphDeatails(self.root, graph=graph_state.get())
+        self.matrix_window = GraphDeatails(self.root, graph=graph)
         # make window on top of all windows
         self.matrix_window.attributes("-topmost", True)
         # set on close event
@@ -68,7 +68,7 @@ class GraphMenu(Menu):
         self.button.configure(state="disabled")
         if not self.is_matrix_window_open:
             self.is_matrix_window_open = True
-            self.create_matrix(self.graph_model)
+            self.create_matrix(graph_state.get())
 
     def pack(self, **kwargs):
         super().pack(**kwargs)

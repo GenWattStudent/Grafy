@@ -12,6 +12,7 @@ from src.state.GraphState import graph_state
 from tkinter import filedialog
 from ttkbootstrap.tooltip import ToolTip
 from src.ui.windows.ChooseGraph import ChooseGraph
+from src.ui.windows.Raport import Raport
 import uuid
 
 class Tools(Enum):
@@ -35,6 +36,7 @@ class ToolBar(ttk.Frame):
         self.root = root
         self.border_width = 2
         self.compare_select_window: ChooseGraph | None = None
+        self.raport_window: Raport | None = None
 
         self.selected_tool: State = ToolState()
         self.prev_tool: State = ToolState()
@@ -66,6 +68,8 @@ class ToolBar(ttk.Frame):
         self.load_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.compare_button = SwitchButton(self, text="Compare")
         self.compare_button.pack(anchor="w", side="left", padx=10, pady=10)
+        self.raport_button = SwitchButton(self, text="Raport")
+        self.raport_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_tooltip = ToolTip(self.select_button, text="Select\nShortcut: s", bootstyle="info")
         self.add_node_tooltip = ToolTip(self.add_node_button, text="Add Node\nShortcut: n", bootstyle="info")
@@ -76,6 +80,7 @@ class ToolBar(ttk.Frame):
         self.save_tooltip = ToolTip(self.save_button, text="Save\nShortcut: Ctrl + s", bootstyle="info")
         self.load_tooltip = ToolTip(self.load_button, text="Load\nShortcut: Ctrl + o", bootstyle="info")
         self.compare_tooltip = ToolTip(self.compare_button, text="Compare", bootstyle="info")
+        self.raport_tooltip = ToolTip(self.raport_button, text="Raport PDF", bootstyle="info")
 
         self.select_button.configure(command=lambda el=self.select_button: self.change_tool(Tools.SELECT, el))
         self.add_node_button.configure(command=lambda el=self.add_node_button: self.change_tool(Tools.ADD_NODE, el))
@@ -86,6 +91,7 @@ class ToolBar(ttk.Frame):
         self.load_button.configure(command=self.load)
         self.save_button.configure(command=self.save)
         self.compare_button.configure(command=self.compare)
+        self.raport_button.configure(command=self.raport)
 
         self.bind("<Configure>", self.on_resize)
         self.root.bind("<Delete>", lambda event: self.delete_tool())
@@ -98,6 +104,7 @@ class ToolBar(ttk.Frame):
         self.root.bind("n", lambda event: self.change_tool(Tools.ADD_NODE, self.add_node_button))
         self.root.bind("e", lambda event: self.change_tool(Tools.ADD_EDGE, self.add_edge_button))
         self.root.bind('c', lambda event: self.compare())
+        self.root.bind('r', lambda event: self.raport())
 
     def undo(self):
         self.undo_event()
@@ -134,6 +141,21 @@ class ToolBar(ttk.Frame):
     
     def off_save(self, cb):
         self.save_event -= cb
+
+    def destroy_raport(self):
+        if self.raport_window is not None:
+            if self.raport_window.winfo_exists():
+                self.raport_window.destroy()
+            self.raport_window = None
+    
+    def raport(self):
+        if self.raport_window is None:
+            self.raport_window = Raport(self.root, "Raport", self.controller)
+            self.raport_window.on_destroy(self.destroy_raport)
+            self.raport_window.protocol("WM_DELETE_WINDOW", self.destroy_raport)
+            self.raport_window.mainloop()
+        else:
+            self.destroy_raport()
 
     def load(self):
         file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
@@ -178,14 +200,20 @@ class ToolBar(ttk.Frame):
         self.compare_button.configure(state = "normal", text="Turn off compare", command=self.turn_off_compare_mode)
         self.controller.compare_graphs(result)
     
+    def destroy_compare_window(self):
+        if self.compare_select_window is not None:
+            if self.compare_select_window.winfo_exists():
+                self.compare_select_window.destroy()
+            self.compare_select_window = None
+    
     def compare(self):
         if self.compare_select_window is None:
             self.compare_select_window = ChooseGraph(self.root, "Choose graph to compare", self.controller.graph_sheets)
             self.compare_select_window.on_close(self.change_to_turn_off_compare_mode)
+            self.compare_select_window.protocol("WM_DELETE_WINDOW", self.destroy_compare_window)
             self.compare_select_window.mainloop()
         else:
-            self.compare_select_window.destroy()
-            self.compare_select_window = None
+            self.destroy_compare_window()
 
     def delete_tool(self):
         if len(self.graph.selected_elements) == 0:

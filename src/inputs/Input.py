@@ -27,6 +27,9 @@ class Input(ttk.Entry):
         self.bind("<FocusOut>", lambda event: self.hide_error())
         self.bind("<Configure>", self.resize)
         self.pack(anchor="w", padx=10, fill="x")
+
+    def get(self):
+        return self.text_var.get()
     
     def resize(self, event):
         print(self.winfo_width())

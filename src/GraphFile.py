@@ -53,7 +53,7 @@ class GraphFile(FileManager):
 
             sumCountDegree = len(graph.edges) * 2
             txt_file.write(f"\nSuma stopni: {sumCountDegree}")
-            txt_file.write(f"\nLiczba krawedzi grafow: {int(0.5 * sumCountDegree)}")
+            txt_file.write(f"\nLiczba krawedzi grafu: {int(0.5 * sumCountDegree)}")
             txt_file.write(f"\nGestosc grafu: {round(graph.density, 2)}")
 
     def write_dict(self, txt_file: TextIOWrapper, dict: dict[int, list[int]]):

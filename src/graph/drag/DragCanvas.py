@@ -16,10 +16,6 @@ class Draggable(ABC):
         pass
 
     @abstractmethod
-    def click(self, event):
-        pass
-
-    @abstractmethod
     def end_drag(self, event):
         pass
 
@@ -67,7 +63,7 @@ class DragCanvas(Draggable):
 
     def drag_node(self, event):
         x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
-       
+    
         for node in self.graph.nodes:
             if node.is_under_cursor(Vector(x, y)):
                 self.draging_node = node
@@ -79,12 +75,6 @@ class DragCanvas(Draggable):
     def drag_canvas(self, event):
         if not self.draging_node:
             self.canvas.scan_mark(event.x, event.y)
-
-    def click(self, event):
-        if self.is_drag_node:
-            self.drag_node(event)
-        if not self.draging_node:
-            self.drag_canvas(event)
 
     def end_drag(self, event):
         if self.draging_node:

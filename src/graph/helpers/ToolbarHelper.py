@@ -25,7 +25,7 @@ class ToolbarHelper:
         elif self.toolbar.get_prev_tool() == Tools.ADD_EDGE:
             self.toolbar.deselect_all_tool()
             if self.edge_preview:
-                self.canvas.delete(self.edge_preview)
+                self.edge_preview.delete(self.canvas)
                 self.edge_preview = None
             self.canvas.draw_nodes(self.graph.nodes)
         elif self.toolbar.get_prev_tool() == Tools.ADD_NODE and self.node_preview:
@@ -49,8 +49,15 @@ class ToolbarHelper:
     def show_edge_preview(self, event):
         if self.toolbar.get_selected_tool() == Tools.ADD_EDGE:
             selected_nodes = self.graph.get_nodes_from_list(self.graph.selected_elements)
-
             if len(selected_nodes) == 1:
+                # if edge preview is on node add second node to edge preview
+                for node in self.graph.nodes:
+                    x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
+                    if node.is_under_cursor(Vector(x, y)):
+                        if node != selected_nodes[0]:
+                            self.edge_preview = self.canvas.draw_edge_preview(event, selected_nodes[0], node)
+                        return
+                    
                 self.edge_preview = self.canvas.draw_edge_preview(event, selected_nodes[0])
 
     def select(self, event):

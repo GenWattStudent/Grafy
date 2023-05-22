@@ -1,3 +1,4 @@
+from collections import defaultdict
 from src.graph.elements.Edge import Edge
 from src.graph.elements.Intersection import Intersection
 from src.utils.Vector import Vector
@@ -46,12 +47,38 @@ class FindIntersection:
 
         return True
 
-    def find_intersections(self, edges: list[Edge]) -> list[Intersection]:
-        intersections: list[Intersection] = []
+    def find_intersections(self, edges: list[Edge], threshold: float = 25) -> list[Intersection]:
+            intersections: list[Intersection] = []
+            intersection_groups = defaultdict(list)
 
-        for i in range(len(edges)):
-            for j in range(i + 1, len(edges)):
-                # if intersection is
-                if self.intersect(edges[i], edges[j]):
-                    intersections.append(self.intersection(edges[i], edges[j]))
-        return intersections
+            for i in range(len(edges)):
+                for j in range(i + 1, len(edges)):
+                    if self.intersect(edges[i], edges[j], threshold):
+                        intersection = self.intersection(edges[i], edges[j])
+                        intersections.append(intersection)
+
+                        # Check if the intersection is close to any existing group
+                        for group_center, group_intersections in intersection_groups.items():
+                            if self.is_close_to_group(intersection.position, group_center, threshold):
+                                group_intersections.append(intersection)
+                                break
+                        else:
+                            # If not close to any existing group, create a new group
+                            intersection_groups[intersection.position].append(intersection)
+
+            # Create a single intersection for each group
+            grouped_intersections = []
+            for group_intersections in intersection_groups.values():
+                group_center = group_intersections[0].position
+                group_size = len(group_intersections)
+                radius = 12 + group_size
+                if radius > 36:
+                    radius = 36
+                grouped_intersection = Intersection(group_center, theme.get("warning"), radius, group_size)
+                grouped_intersections.append(grouped_intersection)
+
+            return grouped_intersections
+
+    def is_close_to_group(self, position: Vector, group_center: Vector, threshold: float) -> bool:
+        squared_distance = (position.x - group_center.x) ** 2 + (position.y - group_center.y) ** 2
+        return squared_distance <= threshold ** 2

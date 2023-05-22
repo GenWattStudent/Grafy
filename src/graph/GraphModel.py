@@ -14,6 +14,8 @@ import random
 import numpy as np
 import uuid
 from src.algorithms.UllmannAlgorithm import UllmannAlgorithm
+import math
+
 class GraphModel:
     def __init__(self, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
@@ -168,7 +170,6 @@ class GraphModel:
 class Graph(GraphModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.layout = Kwaii(self)
         self.name = "Graph"
 
     def reset_graph(self, matrix: GraphMatrix):
@@ -192,7 +193,12 @@ class Graph(GraphModel):
         self.config = config
         self.generate_graph_matrix()
         self.generator.selected_nodes.clear()
-        self.nodes = self.generator.generate_nodes(self, canvas.winfo_width(), canvas.winfo_height())
+
+        max_width = canvas.winfo_width()
+        max_height = canvas.winfo_height()
+
+        self.nodes = self.generator.generate_nodes(self, max_width, max_height)
+        self.layout = Kwaii(self)
         self.layout.run()
         self.edges = self.generator.generate_edges(self.nodes, self)
         self.wages = self.generator.generate_wages(self, self.nodes)

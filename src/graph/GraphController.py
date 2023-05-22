@@ -128,6 +128,14 @@ class GraphController:
         self.check_isomorphic()
         self.view.draw_graph()
 
+    def path_search(self):
+        path = self.view.search_path()
+
+        if path:
+            self.toolbar.change_simulate_button_style(True)
+        else:
+            self.toolbar.change_simulate_button_style(False)
+
     def on_move_element(self, element: CanvasElement, position: Vector, old_position: Vector):
         self.command_history.execute_command(MoveElementCommand(self, element, position, old_position))
         graph_state.set(self.current_graph.get())

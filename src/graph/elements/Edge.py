@@ -67,18 +67,18 @@ class Edge(CanvasElement):
 
         return closest_point
 
-    def draw(self, canvas: tk.Canvas):
+    def draw(self, canvas: tk.Canvas, tag: str = "edge"):
         # conncet nodes(rectangles) with line that touch thire closest edge
         closest_point1 = self.calculate_closest_edge_point(self.node1.position, self.node1.width, self.node1.height, self.node2.position, self.node2.width, self.node2.height)
         closest_point2 = self.calculate_closest_edge_point(self.node2.position, self.node2.width, self.node2.height, self.node1.position, self.node1.width, self.node1.height)
 
         # Draw the arrow
         arrow_points = self._calculate_arrow_points(closest_point1, closest_point2, 8)
-        self.triangle_1_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color())
+        self.triangle_1_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
 
         # Draw the arrow
         arrow_points = self._calculate_arrow_points(closest_point2, closest_point1, 8)
-        self.triangle_2_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color())
+        self.triangle_2_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
             
         # Draw the line
         self.start_point.x = closest_point1.x
@@ -86,7 +86,7 @@ class Edge(CanvasElement):
         self.end_point.x = closest_point2.x
         self.end_point.y = closest_point2.y
 
-        self.line_id = canvas.create_line(closest_point1.x, closest_point1.y, closest_point2.x, closest_point2.y, fill=self.get_color(), width=2)
+        self.line_id = canvas.create_line(closest_point1.x, closest_point1.y, closest_point2.x, closest_point2.y, fill=self.get_color(), width=2, tags=tag)
 
     def _calculate_arrow_points(self, start_point: Vector, end_point: Vector, arrow_length: float) -> list[float]:
         if start_point.distance(end_point) < 40:

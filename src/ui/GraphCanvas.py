@@ -146,15 +146,14 @@ class GraphCanvas(ttk.Canvas):
     def draw_graph(self):
         if self:
             self.delete("all")
-            self.draw_nodes_and_edges()
             self.show_intersections()
+            self.draw_nodes_and_edges()
 
     def show_intersections(self):
         if self.is_intersection:
+            print(len(self.graph.intersections))
             self.setup_intersections()
-            thread = threading.Thread(target=self.draw_intersections, args=(self.graph.intersections,))
-            thread.daemon = True
-            thread.start()
+            self.draw_intersections(self.graph.intersections)
 
     def draw_nodes_and_edges(self):
         self.draw_edges(self.graph.edges)
@@ -170,7 +169,14 @@ class GraphCanvas(ttk.Canvas):
         for node in nodes:
             node.draw(self)
 
-    def draw_edge_preview(self, event, node: Node):
+    def draw_edge_preview(self, event, node: Node, node2: Node | None = None):
         self.delete("edge_preview")
         x, y = self.canvas_helper.canvas_to_graph_coords(event.x, event.y)
-        return self.create_line(node.position.x, node.position.y, x, y, fill=theme.get("light"), width=2, tags="edge_preview")
+        edge = None
+        if node2 is not None:
+            edge = Edge(node, node2)
+        else:
+            edge = Edge(node, Node(Vector(x, y), -1, 0, 0))
+        edge.draw(self, "edge_preview")
+
+        return edge

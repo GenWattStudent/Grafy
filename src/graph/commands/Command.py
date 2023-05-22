@@ -189,6 +189,7 @@ class CreateGraphCommand(CreationCommand):
         self.graph_model.tab_id = self.controller.current_graph.get().tab_id
         self.graph_model.create(self.controller.view, self.config)
         self.controller.current_graph.set(self.graph_model)
+        self.controller.view.draw_graph()
 
     def undo(self):
         self.controller.toolbar.deselect_all_tool()

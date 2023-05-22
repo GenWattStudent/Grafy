@@ -7,58 +7,48 @@ from src.layout.layout import Layout
 
 
 class Kwaii(Layout):
-    def __init__(self, graph: GraphModel):
+    def __init__(self, graph: GraphModel, area: float = 1000.0, k: float = 0.9, iterations: int = 50):
         self.graph = graph
-        self.repulsion_force_constant = 9000
-        self.attraction_force_constant = 0.3
-        self.damping_constant = 0.1
-        self.time_step = 0.1
-        self.iterations = 200
+        self.area = area
+        self.k = k
+        self.iterations = iterations
 
     def layout(self) -> GraphModel:
+        # Initialize node positions randomly
+        for node in self.graph.nodes:
+            node.position = Vector().random(0, self.area, 0, self.area)
+
+        # Perform iterations of the algorithm
         for i in range(self.iterations):
-            self.update_positions()
+            # Calculate repulsive forces between nodes
+            for node1 in self.graph.nodes:
+                node1.disp = Vector()
+                for node2 in self.graph.nodes:
+                    if node1 != node2:
+                        delta = node1.position - node2.position
+                        distance = abs(delta)
+                        if distance > 0:
+                            direction = delta.normalized()
+                            repulsive_force = self.k * self.k / distance
+                            node1.disp += direction * repulsive_force
+
+            # Calculate attractive forces between edges
+            for edge in self.graph.edges:
+                delta = edge.node1.position - edge.node2.position
+                distance = abs(delta)
+                if distance > 0:
+                    direction = delta.normalized()
+                    attractive_force = distance * distance / self.k
+                    edge.node1.disp -= direction * attractive_force
+                    edge.node2.disp += direction * attractive_force
+
+            # Limit maximum displacement per iteration
+            for node in self.graph.nodes:
+                distance = abs(node.disp)
+                if distance > 0:
+                    direction = node.disp.normalized()
+                    max_distance = min(distance, self.iterations)
+                    node.position += direction * max_distance
+
         return self.graph
 
-    def update_positions(self) -> None:
-    # Update edge distances
-        for edge in self.graph.edges:
-            edge.distance = abs(edge.node1.position - edge.node2.position)
-
-        # Calculate repulsive forces
-        repulsive_forces = [Vector() for _ in range(len(self.graph.nodes))]
-        for i, node1 in enumerate(self.graph.nodes):
-            for j, node2 in enumerate(self.graph.nodes[i + 1:], i + 1):
-                force = self.repulsive_force(node1.position, node2.position, node1.radius, node2.radius)
-                repulsive_forces[i] -= force
-                repulsive_forces[j] += force
-
-        # Calculate attractive forces
-        attractive_forces = [Vector() for _ in range(len(self.graph.nodes))]
-        for edge in self.graph.edges:
-            if edge.distance is None:
-                edge.distance = abs(edge.node1.position - edge.node2.position)
-            force = self.attraction_force(edge.node1.position, edge.node2.position, edge.distance)
-            attractive_forces[edge.node1.get_index()] += force
-            attractive_forces[edge.node2.get_index()] -= force
-
-        # Apply forces to nodes
-        for i, node in enumerate(self.graph.nodes):
-            net_force = repulsive_forces[i] + attractive_forces[i]
-            node.position += self.damping_constant * net_force * self.time_step
-
-    def repulsive_force(self, pos1: Vector, pos2: Vector, r1: int, r2: int) -> Vector:
-        delta = pos1 - pos2
-        distance = abs(delta)
-        if distance == 0:
-            return Vector()
-        direction = delta.normalized()
-        magnitude = self.repulsion_force_constant * r1 * r2 / (distance * distance)
-        return magnitude * direction
-
-    def attraction_force(self, pos1: Vector, pos2: Vector, length: float) -> Vector:
-        delta = pos2 - pos1
-        direction = delta.normalized()
-        distance = abs(delta)
-        magnitude = self.attraction_force_constant * (distance - length)
-        return magnitude * direction

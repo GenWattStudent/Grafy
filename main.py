@@ -34,9 +34,6 @@ class App(ttk.Window):
         self.controller.graph_sheets = self.graph_sheets # type: ignore
         self.controller.current_graph.subscribe(self.graph_sheets.set_current_graph_sheet)
         self.setup_window()
-
-    def on_search_path(self):
-        self.controller.view.search_path()
     
     def update_menu(self, e: GraphModel):
         self.tab_menu.set_graph(e)
@@ -45,7 +42,7 @@ class App(ttk.Window):
         self.title("Grafy lalala")
         self.geometry('%dx%d+%d+%d' % (const.SCREEN_WIDTH, const.SCREEN_HEIGHT, 0, 0))
         # bind events
-        self.tab_menu.on_search_path(self.on_search_path)
+        self.tab_menu.on_search_path(self.controller.path_search)
         self.tab_menu.on_generate_graph(self.controller.create)
         self.tab_menu.on_tab_change(self.controller.change_mode)
         # add observers

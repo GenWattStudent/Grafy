@@ -52,14 +52,14 @@ class PDFBuilder(pdf_canvas.Canvas):
     def add_page_break(self):
         self.showPage()
     
-    def add_body(self,text: str):
-        self.sequence.append(PDFText(text, self.body_font_size + 4, self.body_font_size, self.font_name_bold))
+    def add_body(self, text: str, font_color: tuple[int, int, int] = (0, 0, 0), is_centered: bool = False):
+        self.sequence.append(PDFText(text, self.body_font_size + 4, self.body_font_size, self.font_name_bold, font_color, is_centered))
     
-    def add_header_1(self, text: str):
-        self.sequence.append(PDFText(text, self.header_font_size + 12, self.header_font_size, self.font_name))
+    def add_header_1(self, text: str, font_color: tuple[int, int, int] = (0, 0, 0), is_centered: bool = False):
+        self.sequence.append(PDFText(text, self.header_font_size + 12, self.header_font_size, self.font_name, font_color, is_centered))
     
     def add_header_2(self, text: str):
-        self.sequence.append(PDFText(text, self.header_2_font_size + 8, self.header_2_font_size, self.font_name))
+        self.sequence.append(PDFText(text, self.header_2_font_size + 12, self.header_2_font_size, self.font_name))
     
     def add_caption(self, text: str):
         self.sequence.append(PDFText(text, self.caption_font_size + 3, self.caption_font_size, self.font_name))

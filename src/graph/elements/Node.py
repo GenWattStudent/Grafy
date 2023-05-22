@@ -19,6 +19,7 @@ class Node(CanvasElement):
         self.dragged_color: str = theme.get("success")
         self.text: tk._CanvasItemId | None = None
         self.font = Font(family="Arial", size=20)
+        self.disp = Vector(0, 0)
 
     def delete(self, canvas: ttk.Canvas):
         self.is_dragged = False
@@ -58,7 +59,7 @@ class Node(CanvasElement):
 
         self.update_width_depends_on_value()
 
-        self.canvas_id = canvas.create_rectangle(x1, y1, x1 + self.width, y1 + self.height, fill=color, outline=self.border_color, width=2)
+        self.canvas_id = canvas.create_rectangle(x1, y1, x1 + self.width, y1 + self.height, fill=color, outline=self.border_color, width=2, tags="node")
         self.text = canvas.create_text(x1 + self.width / 2, y1 + self.height / 2, text=self.value, fill=theme.get('fg'), font=self.font)
 
     def get_index(self) -> int:

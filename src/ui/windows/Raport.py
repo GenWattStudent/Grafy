@@ -58,7 +58,8 @@ class Raport(TopLevelWindow):
         self.pdf_builder.add_header_2('Graph Matrix')
         rows = str(matrix).split("\n")
         for row in rows:
-             self.pdf_builder.add_body(row)
+            if row == "": continue
+            self.pdf_builder.add_body(row, (0, 0, 0))
     
     def draw_graph_details(self, graph: GraphModel):
         self.pdf_builder.add_header_2('Graph Details')
@@ -77,9 +78,9 @@ class Raport(TopLevelWindow):
         self.pdf_builder.setTitle(f'Graph raport {self.file_name_var.get()}')
 
         if self.pdf_main_header_input.get() == "":
-            self.pdf_builder.add_header_1(f'Graph Raport')
+            self.pdf_builder.add_header_1(f'Graph Raport', (0, 0, 0), True)
         else:
-            self.pdf_builder.add_header_1(self.pdf_main_header_input.get())
+            self.pdf_builder.add_header_1(self.pdf_main_header_input.get(), (0, 0, 0), True)
 
         model = self.controller.current_graph.get()
         if self.is_matrix.get():

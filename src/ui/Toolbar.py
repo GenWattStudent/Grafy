@@ -70,7 +70,7 @@ class ToolBar(ttk.Frame):
         self.compare_button.pack(anchor="w", side="left", padx=10, pady=10)
         self.raport_button = SwitchButton(self, text="Raport")
         self.raport_button.pack(anchor="w", side="left", padx=10, pady=10)
-        self.simulate_button = SwitchButton(self, text="Simulate")
+        self.simulate_button = SwitchButton(self, text="Simulate", state="disabled")
         self.simulate_button.pack(anchor="w", side="left", padx=10, pady=10)
 
         self.select_tooltip = ToolTip(self.select_button, text="Select\nShortcut: s", bootstyle="info")
@@ -174,6 +174,12 @@ class ToolBar(ttk.Frame):
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if file_path:
             self.save_event(file_path)
+
+    def change_simulate_button_style(self, can_simulate: bool):
+        if can_simulate:
+            self.simulate_button.configure(state = "normal")
+        else:
+            self.simulate_button.configure(state = "disabled")
 
     def change_delete_button_style(self, selected_elements: int):
         if selected_elements == 0:

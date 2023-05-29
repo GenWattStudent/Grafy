@@ -32,7 +32,7 @@ class SearchAlgorithms:
     def get_layers_from_bfs_output(self, bfs_output, starting_vertex: int):
         layers = defaultdict(list)
         layers[0] = [starting_vertex]
-        visited = set([starting_vertex]) # Keep track of visited vertices
+        visited = set([starting_vertex])
         queue: list[tuple[int, int]] = [(starting_vertex, 0)] 
 
         while queue:
@@ -47,18 +47,40 @@ class SearchAlgorithms:
         return sorted(layers.items())
 
     def dfs(self, matrix: dict[int, list[int]], start: Node) -> dict[int, list[int]]:
-        node_id = int(start.index) - 1  # indeks wierzchołka startowego
-        visited = {node_id: []}  # słownik przechowujący informację o odwiedzonych wierzchołkach i ich przodkach
+        node_id = int(start.index) - 1 
+        visited = {node_id: []}  
 
         def dfs_visit(node, parent):
             visited[node].append(parent)
             for neighbor in matrix[node]:
                 if neighbor not in visited:
                     visited[neighbor] = []
-                    dfs_visit(neighbor, node)  # rekurencyjnie wywołaj dfs_visit dla nieodwiedzonego sąsiada
+                    dfs_visit(neighbor, node) 
 
-        dfs_visit(node_id, None)  # wywołaj dfs_visit dla startowego wierzchołka
+        dfs_visit(node_id, None)
         return visited
+    
+    def count_cycles(self, matrix: dict[int, list[int]]) -> int:
+        cycle_count = 0
+
+        def dfs(node, visited, parent):
+            nonlocal cycle_count
+
+            visited[node] = True
+
+            for neighbor in matrix[node]:
+                if not visited[neighbor]:
+                    dfs(neighbor, visited, node)
+                elif neighbor != parent:
+                    cycle_count += 1
+
+        visited = {node: False for node in matrix}
+        
+        for node in matrix:
+            if not visited[node]:
+                dfs(node, visited, None)
+
+        return cycle_count
 
     def dijkstra(self, matrix: GraphMatrix, start: Node, end: Node) -> tuple[float, list[int]]:
         n = len(matrix)

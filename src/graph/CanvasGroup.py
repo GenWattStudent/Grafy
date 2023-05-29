@@ -28,6 +28,7 @@ class CanvasGroup:
         self.controller.drag.canvas = canvas
         self.controller.drag.canvas_helper.canvas = canvas
         self.controller.canvas_helper.canvas = canvas
+        self.controller.simulation.view = canvas
         
     def destroy_canvases(self):
         for canvas in self.canvas_list:

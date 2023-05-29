@@ -92,7 +92,7 @@ class DrawHelper:
                 if graph.get_matrix()[i][j] == 1:
                     # calculate distance between nodes
                     distance: float = nodes[i].position.distance(nodes[j].position)
-                    edge = Edge(nodes[i], nodes[j], distance, theme.get("fg"))
+                    edge = Edge(nodes[i], nodes[j], distance, theme.get("fg"), graph.get_matrix()[i][j], graph.get_matrix()[j][i])
                     edges.append(edge)
 
         return edges

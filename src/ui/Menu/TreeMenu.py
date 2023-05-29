@@ -54,7 +54,7 @@ class TreeMenu(Menu):
         self.puffer_code_label.pack(padx=10, pady=10, fill="x")
 
         self.puffer_code_value_label = ttk.Label(self, text="Puffer code value")
-        self.puffer_code_value_label.pack(padx=10, pady=10, fill="x")
+        self.puffer_code_value_label.pack(padx=10, fill="x")
 
         # self.button = ctk.CTkButton(self, text="Show Graph Details", command=self.show_matrix)
         # self.button.pack(padx=10, pady=10, fill="x")

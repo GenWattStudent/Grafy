@@ -45,9 +45,10 @@ class GraphController:
         self.command_history: CommandHistory = CommandHistory(self)
         self.graph_selector = GraphSelector()
         self.useless_graph_file = GraphFile(filename="graph.txt")
-        self.tab_menu: TabMenu | None = None
+        self.tab_menu: TabMenu
         self.graph_sheets: GraphSheets | None = None
         self.simulation: PathSimulation = PathSimulation(self.current_graph.get(), self.view)
+        self.is_directed = False
 
         self.current_graph.subscribe(self.on_current_graph_change)
         self.current_graph.subscribe(self.on_graph_change)
@@ -62,6 +63,9 @@ class GraphController:
         self.toolbar.selected_tool.subscribe(self.on_tool_change)
 
         self.canvas_group.bind_canvas_events(view)
+
+    def on_tab_change(self, tab: str):
+        if tab == "Tree": self.is_directed = False
 
     def simulate(self):
         if self.simulation.is_running:
@@ -114,6 +118,8 @@ class GraphController:
         self.toolbar.change_undo_button_style(self.command_history.can_undo())
         self.toolbar.change_redo_button_style(self.command_history.can_redo())
         self.toolbar.change_compare_button_style(len(self.graph_sheets.graph_sheets) >= 2)
+        self.toolbar.change_delete_button_style(len(self.current_graph.get().selected_elements))
+        self.check_isomorphic()
     
     def on_current_graph_change(self, graph_model: GraphModel):
         self.view.graph = graph_model
@@ -125,7 +131,6 @@ class GraphController:
                 self.graph_sheets.graph_sheets[i] = graph_model
                 break
         self.simulation.set_model(graph_model)
-        self.check_isomorphic()
         self.view.draw_graph()
 
     def path_search(self):
@@ -211,9 +216,12 @@ class GraphController:
         self.toolbar_helper.show_node_preview(event)
         self.toolbar_helper.show_edge_preview(event)
 
+    def directed(self, is_directed: bool):
+        self.is_directed = is_directed
+
     def create(self, config: GraphConfig):
         self.view.is_intersection = config.is_show_intersections
-        self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.tab_menu.current_tab))) # type: ignore
+        self.command_history.execute_command(CreateGraphCommand(self, config, self.graph_selector.get_graph_type(self.tab_menu.current_tab, self.is_directed))) # type: ignore
         if self.graph_sheets is not None and len(self.graph_sheets) == 0:
             self.graph_sheets.add_graph_sheet(self.current_graph.get(), "New graph", True)
         self.useless_graph_file.save(self.current_graph.get(), "")

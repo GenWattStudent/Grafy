@@ -99,7 +99,7 @@ class Raport(TopLevelWindow):
             if self.is_bfs_output.get():
                 self.pdf_builder.add_header_2('BFS Output')
                 self.draw_dict(bfs_dict)
-            # dfs layer
+
             if self.is_bfs_layers.get():
                 bfs_layers = search_algorithms.get_layers_from_bfs_output(bfs_dict, selected_nodes[0].index - 1)
                 self.pdf_builder.add_header_2('BFS Layers')

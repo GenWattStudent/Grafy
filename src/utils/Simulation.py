@@ -34,6 +34,7 @@ class PathSimulation(Simulation):
         self.model = model
 
     def get_ordered_edges(self):
+        self.ordered_edges.clear()
         if isinstance(self.model.path, dict):   
             for node1, neigbour in self.model.path.items():
                 for node2 in neigbour:

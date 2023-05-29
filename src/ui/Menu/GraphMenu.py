@@ -11,6 +11,7 @@ from src.inputs.Input import Input
 from src.graph.GraphController import GraphController
 from src.utils.validate.rules import Is_number, Min, Max, Is_float, Is_positive
 from src.utils.Simulation import Simulation
+from src.algorithms.SearchAlgorithms import SearchAlgorithms
 
 number_of_nodes_rules = {
     "is_positive": Is_positive(),
@@ -33,6 +34,11 @@ class GraphMenu(Menu):
         self.is_matrix_window_open = False
         self.border_width = border_width
         self.root = root
+        self.density_text_var = tkk.StringVar(value="Density: 0.0")
+        self.intersection_text_var = tkk.StringVar(value="Intersection: Off")
+        self.number_of_cycles_text_var = tkk.StringVar(value="Number of cycles: 0")
+        self.path_distance_text_var = tkk.StringVar(value="Path distance: None")
+        self.is_directed_checkbox_var = tkk.BooleanVar(value=False)
         self.create_widgets()
 
         self.bind("<Configure>", self.on_resize)
@@ -99,18 +105,21 @@ class GraphMenu(Menu):
     def probability_filtr(self, value: str) -> str:
         return value.replace(",", ".")
 
-    def update_graph_info(self, graph_model: GraphModel):
-        self.density_label.configure(text=f"Density: {round(graph_model.density, 2)}")
-        if graph_model.config.is_show_intersections:
+    def set_density_text(self, density: float):
+        self.density_text_var.set(f"Density: {round(density, 2)}")
 
-            self.intersection_label.configure(text=f"Inersections: {len(graph_model.intersections)}")
+    def update_graph_info(self, graph_model: GraphModel):
+        self.set_density_text(graph_model.density)
+        self.number_of_cycles_text_var.set(f"Number of cycles: {SearchAlgorithms().count_cycles(graph_model.get_graph_dictionary()) // 2}")
+        if graph_model.config.is_show_intersections:
+            self.intersection_text_var.set(f"Intersection: {len(graph_model.intersections)}")
         else:
-            self.intersection_label.configure(text=f"Inersections: off")
+            self.intersection_text_var.set(f"Intersection: off")
 
         if graph_model.path_distance is not None:
-            self.path_distance_label.configure(text=f"Path distance: {graph_model.path_distance}px")
+            self.path_distance_text_var.set(f"Path distance: {graph_model.path_distance}")
         else:
-            self.path_distance_label.configure(text=f"Path distance: None")
+            self.path_distance_text_var.set(f"Path distance: None")
 
     def destroy(self):
         self.hide_matrix()
@@ -130,19 +139,25 @@ class GraphMenu(Menu):
         self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
 
-        self.intersection_checkbox = tkk.Checkbutton(self, text="Intersection", command=self.toogle_intersection, variable=tkk.BooleanVar(value=False))
+        self.intersection_checkbox = tkk.Checkbutton(self, text="Show Intersections", command=self.toogle_intersection, variable=tkk.BooleanVar(value=False))
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
+
+        self.is_directed_checkbox = tkk.Checkbutton(self, text=f"Directed", command= lambda: self.controller.directed(self.is_directed_checkbox_var.get()), variable=self.is_directed_checkbox_var)
+        self.is_directed_checkbox.pack(anchor="w", padx=10, pady=10)
  
         self.info_frame = tkk.Frame(self)
         self.info_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
-        self.density_label = Typography(self.info_frame, text=f"Density: {round(self.graph_model.density, 2)}")
+        self.density_label = Typography(self.info_frame, textvariable=self.density_text_var)
         self.density_label.pack(anchor="w")
 
-        self.intersection_label = Typography(self.info_frame, text=f"Inersections: {len(self.graph_model.intersections)}")
+        self.number_of_cycles_label = Typography(self.info_frame, textvariable=self.number_of_cycles_text_var)
+        self.number_of_cycles_label.pack(anchor="w")
+
+        self.intersection_label = Typography(self.info_frame, textvariable=self.intersection_text_var)
         self.intersection_label.pack(anchor="w")  
 
-        self.path_distance_label = Typography(self.info_frame)
+        self.path_distance_label = Typography(self.info_frame, textvariable=self.path_distance_text_var)
         self.path_distance_label.pack(anchor="w")
 
         self.isomophic_label = Typography(self.info_frame, textvariable=self.isomorphic_var)

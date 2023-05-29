@@ -3,10 +3,9 @@ import tkinter as tk
 from src.Theme import theme
 from src.utils.Vector import Vector
 from src.graph.elements.CanvasElement import CanvasElement
-import math
 
 class Edge(CanvasElement):
-    def __init__(self, node1: Node, node2: Node, distance: float | None = None, color: str = 'white'):
+    def __init__(self, node1: Node, node2: Node, distance: float | None = None, color: str = 'white', to_node1: int = 0, to_node2: int = 0):
         super().__init__(color)
         self.start_point = Vector(0, 0)
         self.end_point = Vector(0, 0)
@@ -18,6 +17,8 @@ class Edge(CanvasElement):
         self.dragged_color = theme.get("success")
         self.selected_color = theme.get("selectbg")
         self.id = f"{node1.id}-{node2.id}"
+        self.to_node1 = to_node1
+        self.to_node2 = to_node2
 
     def delete(self, canvas: tk.Canvas):
         self.is_dragged = False
@@ -27,11 +28,9 @@ class Edge(CanvasElement):
         canvas.delete(self.triangle_2_id)
 
     def is_under_cursor(self, cursor_position: Vector) -> bool:
-        node1_pos = self.node1.position
-        node2_pos = self.node2.position
-        d1 = cursor_position.distance(node1_pos)
-        d2 = cursor_position.distance(node2_pos)
-        lineLen = node1_pos.distance(node2_pos)
+        d1 = cursor_position.distance(self.start_point)
+        d2 = cursor_position.distance(self.end_point)
+        lineLen = self.start_point.distance(self.end_point)
         buffer = 0.2
 
         if d1 + d2 >= lineLen-buffer and d1 + d2 <= lineLen+buffer:
@@ -72,13 +71,15 @@ class Edge(CanvasElement):
         closest_point1 = self.calculate_closest_edge_point(self.node1.position, self.node1.width, self.node1.height, self.node2.position, self.node2.width, self.node2.height)
         closest_point2 = self.calculate_closest_edge_point(self.node2.position, self.node2.width, self.node2.height, self.node1.position, self.node1.width, self.node1.height)
 
-        # Draw the arrow
-        arrow_points = self._calculate_arrow_points(closest_point1, closest_point2, 8)
-        self.triangle_1_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
+        # Draw the arrow to node2 
+        if self.to_node1 == 1:
+            arrow_points = self._calculate_arrow_points(closest_point1, closest_point2, 8)
+            self.triangle_1_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
 
-        # Draw the arrow
-        arrow_points = self._calculate_arrow_points(closest_point2, closest_point1, 8)
-        self.triangle_2_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
+        # Draw the arrow to node1
+        if self.to_node2 == 1:
+            arrow_points = self._calculate_arrow_points(closest_point2, closest_point1, 8)
+            self.triangle_2_id = canvas.create_polygon(arrow_points, fill=self.get_color(), outline=self.get_color(), tags=tag)
             
         # Draw the line
         self.start_point.x = closest_point1.x

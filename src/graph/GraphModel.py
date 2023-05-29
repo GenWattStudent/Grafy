@@ -14,8 +14,6 @@ import random
 import numpy as np
 import uuid
 from src.algorithms.UllmannAlgorithm import UllmannAlgorithm
-import math
-
 class GraphModel:
     def __init__(self, config: GraphConfig = GraphConfig()):
         self.wages = GraphMatrix(config.number_of_nodes, float_type=True)
@@ -192,6 +190,47 @@ class Graph(GraphModel):
         self.set_number_of_nodes(config.number_of_nodes)
         self.config = config
         self.generate_graph_matrix()
+        self.generator.selected_nodes.clear()
+
+        max_width = canvas.winfo_width()
+        max_height = canvas.winfo_height()
+
+        self.nodes = self.generator.generate_nodes(self, max_width, max_height)
+        self.layout = Kwaii(self)
+        self.layout.run()
+        self.edges = self.generator.generate_edges(self.nodes, self)
+        self.wages = self.generator.generate_wages(self, self.nodes)
+        self.density = self.calculate_density()
+
+        return self.matrix
+    
+class DirectedGraph(GraphModel):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.name = "Directed Graph"
+
+    def reset_graph(self, matrix: GraphMatrix):
+        for i in range(matrix.number_of_nodes):
+            for j in range(matrix.number_of_nodes):
+                matrix[i][j] = 0
+
+    def generate_directed_graph_matrix(self) -> GraphMatrix:
+        self.reset_graph(self.matrix)
+        for i in range(self.matrix.number_of_nodes - 1):
+            for j in range(i + 1, self.matrix.number_of_nodes):
+                if random.random() < self.config.probability:
+                    self.matrix[i][j] = 1
+                if random.random() < self.config.probability:
+                    self.matrix[j][i] = 1
+
+        return self.matrix
+
+    def create(self, canvas: tk.Canvas, config: GraphConfig):
+        self.set_probability(config.probability)
+        self.set_number_of_nodes(config.number_of_nodes)
+        self.config = config
+        self.generate_directed_graph_matrix()
+        print(self.matrix)
         self.generator.selected_nodes.clear()
 
         max_width = canvas.winfo_width()

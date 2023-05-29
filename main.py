@@ -30,6 +30,7 @@ class App(ttk.Window):
         self.controller = GraphController(self.canvas_frame, self.graph_view, self.toolbar, XMLFileGraph())
         self.tab_menu = TabMenu(parent=self, width=const.SCREEN_WIDTH / 5, controller = self.controller)
         self.controller.tab_menu = self.tab_menu # type: ignore
+        self.tab_menu.on_tab_change(self.controller.on_tab_change)
         self.graph_sheets = GraphSheets(self.frame, self.controller)
         self.controller.graph_sheets = self.graph_sheets # type: ignore
         self.controller.current_graph.subscribe(self.graph_sheets.set_current_graph_sheet)

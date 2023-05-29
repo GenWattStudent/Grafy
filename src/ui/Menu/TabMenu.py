@@ -69,6 +69,7 @@ class TabMenu(ttk.Frame):
 
     def handle_tab_change(self, value):
         self.current_tab = value.widget.tab(value.widget.select(), "text")
+        self.tab_change_event(self.current_tab)
 
     def on_resize(self, event):
         self.border.place(relx=0.99, relheight=1, y=0)

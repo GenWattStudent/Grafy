@@ -17,9 +17,11 @@ class TabMenu(ttk.Frame):
         self.width = width
         self.border_width = 2
         self.current_tab = "Graph"
+        print("tab menu init")
         self.tab_view = ttk.Notebook(self)
 
         self.graph_menu_tab = GraphMenu(self.tab_view, parent, controller)
+        print("graph menu tab")
         self.tree_menu_tab = TreeMenu(self.tab_view, parent, controller)
         self.current_tab_component: Menu  = self.get_component(self.current_tab)
 

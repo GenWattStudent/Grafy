@@ -16,6 +16,7 @@ from src.algorithms.SearchAlgorithms import SearchAlgorithms
 from src.utils.PDFBuilder import PDFBuilder
 from src.graph.elements.Node import Node
 import ttkbootstrap as tkk
+import tkinter as tk
 import uuid
 
 class Raport(TopLevelWindow):
@@ -157,25 +158,25 @@ class Raport(TopLevelWindow):
         self.pdf_main_header_input = Input(self.form_frame, default_value="Graph Raport", label_text="Main header")
         self.pdf_main_header_input.pack(pady=5)
 
-        self.image_checkbox = tkk.Checkbutton(self.form_frame, text="Graph Image", variable=self.is_graph_image, cursor="hand2")
+        self.image_checkbox = tk.Checkbutton(self.form_frame, text="Graph Image", variable=self.is_graph_image, cursor="hand2")
         self.image_checkbox.pack(side="left", pady=5, padx=10)
 
-        self.matrix_checkbox = tkk.Checkbutton(self.form_frame, text="Graph Matrix", variable=self.is_matrix, cursor="hand2")
+        self.matrix_checkbox = tk.Checkbutton(self.form_frame, text="Graph Matrix", variable=self.is_matrix, cursor="hand2")
         self.matrix_checkbox.pack(side="left", pady=5, padx=10)
 
-        self.dict_checkbox = tkk.Checkbutton(self.form_frame, text="Graph Dictionary", variable=self.is_dict, cursor="hand2")
+        self.dict_checkbox = tk.Checkbutton(self.form_frame, text="Graph Dictionary", variable=self.is_dict, cursor="hand2")
         self.dict_checkbox.pack(side="left", pady=5, padx=10)
 
         self.form_frame2 = tkk.Frame(self)
         self.form_frame2.pack(pady=10, expand=True, fill='x')
 
-        self.bfs_output_checkbox = tkk.Checkbutton(self.form_frame2, text="BFS Output", variable=self.is_bfs_output, cursor="hand2")
+        self.bfs_output_checkbox = tk.Checkbutton(self.form_frame2, text="BFS Output", variable=self.is_bfs_output, cursor="hand2")
         self.bfs_output_checkbox.pack(side='left', pady=5, padx=10)
 
-        self.bfs_layers_checkbox = tkk.Checkbutton(self.form_frame2, text="BFS Layers", variable=self.is_bfs_layers, cursor="hand2")
+        self.bfs_layers_checkbox = tk.Checkbutton(self.form_frame2, text="BFS Layers", variable=self.is_bfs_layers, cursor="hand2")
         self.bfs_layers_checkbox.pack(side='left', pady=5, padx=10)
 
-        self.graph_details_checkbox = tkk.Checkbutton(self.form_frame2, text="Graph Details", variable=self.is_graph_details, cursor="hand2")
+        self.graph_details_checkbox = tk.Checkbutton(self.form_frame2, text="Graph Details", variable=self.is_graph_details, cursor="hand2")
         self.graph_details_checkbox.pack(side='left', pady=5, padx=10)
 
         self.action_button_frame = tkk.Frame(self)

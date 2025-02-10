@@ -15,6 +15,7 @@ import src.constance as const
 class App(ttk.Window):
     def __init__(self):
         super().__init__(themename="superhero")
+        print(self.style.colors)
         string = str(self.style.colors)
         string = string.replace("(", "").replace(")", "").replace("'", "").replace(" ", "").split(",")
         for i in range(len(string)):
@@ -22,18 +23,25 @@ class App(ttk.Window):
                 theme.set(string[i], string[i + 1])
         # print(string)
         self.graph_model = GraphModel()
+        print("app")
         self.frame = ttk.Frame(self)
         self.draw_graph_config: DrawGraphConfig = DrawGraphConfig()
         self.canvas_frame = ttk.Frame(self.frame)
         self.graph_view = GraphCanvas(self.canvas_frame, draw_config = self.draw_graph_config)
+        print("graph view")
         self.toolbar = ToolBar(self.frame, self)
+        print("toolbar")
         self.controller = GraphController(self.canvas_frame, self.graph_view, self.toolbar, XMLFileGraph())
+        print("controller")
         self.tab_menu = TabMenu(parent=self, width=const.SCREEN_WIDTH / 5, controller = self.controller)
+        print("tab menu1")
         self.controller.tab_menu = self.tab_menu # type: ignore
         self.tab_menu.on_tab_change(self.controller.on_tab_change)
+        print("tab menu")
         self.graph_sheets = GraphSheets(self.frame, self.controller)
         self.controller.graph_sheets = self.graph_sheets # type: ignore
         self.controller.current_graph.subscribe(self.graph_sheets.set_current_graph_sheet)
+        print("init")
         self.setup_window()
     
     def update_menu(self, e: GraphModel):
@@ -62,11 +70,13 @@ class App(ttk.Window):
         self.graph_sheets.pack(fill='x')
 
         self.update()
+        print("setup window")
         # create array of nodes and draw graph
         self.controller.create(graph_config_state.get())
-        self.mainloop()
+        # self.mainloop()
 
 if __name__ == "__main__":
-    App()
+    app = App()
+    app.mainloop()
 
 

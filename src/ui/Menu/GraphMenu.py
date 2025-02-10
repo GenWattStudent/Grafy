@@ -1,4 +1,5 @@
 import ttkbootstrap as tkk
+import tkinter as tk
 import src.constance as const
 from src.state.AlgorithmState import algorithm_state
 from src.state.GraphConfigState import graph_config_state
@@ -39,6 +40,7 @@ class GraphMenu(Menu):
         self.number_of_cycles_text_var = tkk.StringVar(value="Number of cycles: 0")
         self.path_distance_text_var = tkk.StringVar(value="Path distance: None")
         self.is_directed_checkbox_var = tkk.BooleanVar(value=False)
+        print("graph menu init")
         self.create_widgets()
 
         self.bind("<Configure>", self.on_resize)
@@ -132,19 +134,17 @@ class GraphMenu(Menu):
         self.number_of_nodes_entry = Input(
             self, "Number of nodes", str(const.DEFAULT_NUMBER_OF_NODES), rules=number_of_nodes_rules)
         self.number_of_nodes_entry.on_change(lambda e: graph_config_state.set_number_of_nodes(int(e)))
-
-        self.probability_entry = Input(
-            self, "Probability", str(const.DEFAULT_PROBABILITY),
-            rules=probability_rules, filtr=self.probability_filtr)
+        print("graph menu widgets")
+        self.probability_entry = Input(self, "Probability", str(const.DEFAULT_PROBABILITY), rules=probability_rules, filtr=self.probability_filtr)
         self.probability_entry.on_change(lambda e: graph_config_state.set_probability(float(e)))
         self.probability_entry.pack(anchor="w", padx=10, fill="x")
-
-        self.intersection_checkbox = tkk.Checkbutton(self, text="Show Intersections", command=self.toogle_intersection, variable=tkk.BooleanVar(value=False))
+        print("graph menu widgets2")
+        self.intersection_checkbox = tk.Checkbutton(self, text="Show Intersections", command=self.toogle_intersection, variable=tkk.BooleanVar(value=False))
         self.intersection_checkbox.pack(anchor="w", padx=10, pady=10)
-
-        self.is_directed_checkbox = tkk.Checkbutton(self, text=f"Directed", command= lambda: self.controller.directed(self.is_directed_checkbox_var.get()), variable=self.is_directed_checkbox_var)
+        print("graph menu widgets3")
+        self.is_directed_checkbox = tk.Checkbutton(self, text=f"Directed", command= lambda: self.controller.directed(self.is_directed_checkbox_var.get()), variable=self.is_directed_checkbox_var)
         self.is_directed_checkbox.pack(anchor="w", padx=10, pady=10)
- 
+        print("graph menu widgets4")
         self.info_frame = tkk.Frame(self)
         self.info_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
